@@ -220,10 +220,6 @@ namespace TEA {
   internal void ExpressionParameterReset(VRCExpressionsMenu.Control control) {
    if(!string.IsNullOrEmpty(control.parameter.name))
     SetExpressionParameter(control.parameter.name, 0);
-
-   for(int i = 0; i<control.subParameters.Length; i++) {
-    SetExpressionParameter(control.subParameters[i].name, 0);
-   }
   }
 
   public void SetExpressionParameter(string name, float value) {
