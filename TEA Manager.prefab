@@ -4281,8 +4281,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6473900170231668682}
-  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 0.00000009778887, y: 1.3548937, z: 1.0385246}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6473900170782321183}
@@ -6714,8 +6714,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6473900171552075049}
   m_HandleRect: {fileID: 6473900171552075050}
   m_Direction: 3
-  m_Value: 0
-  m_Size: 0.99999994
+  m_Value: 1
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6978,12 +6978,9 @@ MonoBehaviour:
   AvatarMaskNone: {fileID: 31900000, guid: 4a5a8f29df7bc5f4cab028fe70db011c, type: 2}
   AvatarMaskAll: {fileID: 31900000, guid: 5aa85865ad405504a8934c019683261d, type: 2}
   AvatarMaskArms: {fileID: 31900000, guid: 00bdaf01dfd00e747be8dd15f258a02a, type: 2}
-  Controllers:
-  - {fileID: 9100000, guid: fea1157e34979b946b202d03f4b1d717, type: 2}
-  LayerInfo:
-  - {fileID: 11400000, guid: 26ff8a75c06582b41b5505222a7a380e, type: 2}
-  Avatars:
-  - Leslie Avatar by Yukina
+  Controllers: []
+  LayerInfo: []
+  Avatars: []
   TEA_AnimationClips: {fileID: 2550288027074782628}
   VRC_Base: {fileID: 9100000, guid: 4e4e1a372a526074884b7311d6fc686b, type: 2}
   VRC_Additive: {fileID: 0}
@@ -10253,8 +10250,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6473900171445381199}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.87740487, z: 0.028762579}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6473900171311578757}
@@ -10270,7 +10267,7 @@ ParentConstraint:
   m_GameObject: {fileID: 6473900171445381199}
   m_Enabled: 1
   m_Weight: 1
-  m_TranslationAtRest: {x: 0, y: 0, z: 0}
+  m_TranslationAtRest: {x: 0, y: 1, z: 0}
   m_RotationAtRest: {x: 0, y: 0, z: 0}
   m_TranslationOffsets:
   - {x: 0, y: 0, z: 0}
@@ -10282,7 +10279,7 @@ ParentConstraint:
   m_AffectRotationX: 0
   m_AffectRotationY: 0
   m_AffectRotationZ: 0
-  m_IsContraintActive: 1
+  m_IsContraintActive: 0
   m_IsLocked: 1
   m_Sources:
   - sourceTransform: {fileID: 0}
@@ -11323,7 +11320,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00003889312}
+  m_AnchoredPosition: {x: 0, y: -0.000025794821}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6473900171661637592
@@ -11734,7 +11731,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6473900171724435686}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.001, z: 0.028762579}
+  m_LocalPosition: {x: 0, y: 0.001, z: 0}
   m_LocalScale: {x: 0.07965955, y: 0.07965955, z: 0.07965955}
   m_Children: []
   m_Father: {fileID: 6473900170782321183}
