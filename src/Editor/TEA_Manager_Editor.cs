@@ -509,8 +509,6 @@ namespace TEA {
     state.state.writeDefaultValues=true;
     if(null!=state.state.motion) {
      AnimationClip clip = (AnimationClip)state.state.motion;
-     if(clip.humanMotion)
-      TEA_Manager.SDKError($"An animation clip [{clip.name}] in the FX layer contains humanoid motions, these will be removed by the SDK");
 
      foreach(EditorCurveBinding binding in AnimationUtility.GetCurveBindings(clip)) {
       if(null==binding)
