@@ -138,7 +138,7 @@ namespace TEA {
      if(GUILayout.Button("Compile", GUILayout.Height(30))) {
       CompileAnimators(avatars, manager);
       if(!validationIssue)
-       EditorApplication.isPlaying=EditorUtility.DisplayDialog($"{avatarKeys[avatarIndex]}", "Avatar Compiled", "Play","Continue");
+       EditorApplication.isPlaying=EditorUtility.DisplayDialog($"{avatarKeys[avatarIndex]}", "Avatar Compiled", "Play", "Continue");
      }
     }
    }
@@ -166,7 +166,7 @@ namespace TEA {
      }
     }
    }
-   if(managers.Count > 1) {
+   if(managers.Count>1) {
     string list = "";
     foreach(string c in managers) {
      list+="\n[";
@@ -174,7 +174,7 @@ namespace TEA {
      list+="]";
     }
     //EditorUtility.DisplayDialog("TEA Manager", $"Only one TEA Manager can be active {list}", "OK");
-    output = list;
+    output=list;
     return false;
    }
    output="";
@@ -203,7 +203,7 @@ namespace TEA {
 
    // --- TEA  ---
    AnimatorController teaAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(manager.TEA_Animations));
-   while(teaAnimContr.layers.Length >0) {
+   while(teaAnimContr.layers.Length>0) {
     teaAnimContr.RemoveLayer(0);
    }
    AnimatorStateMachine stateD = new AnimatorStateMachine();
@@ -213,20 +213,20 @@ namespace TEA {
     avatarMask=manager.AvatarMaskArms,
     stateMachine=stateD
    });
-   AnimatorStateMachine stateM  = new AnimatorStateMachine();
+   AnimatorStateMachine stateM = new AnimatorStateMachine();
    teaAnimContr.AddLayer(new AnimatorControllerLayer() {
-    name = AvatarController.TEA_LAYER,
-    defaultWeight = 0,
-    avatarMask = manager.AvatarMaskAll,
-    stateMachine = stateM
+    name=AvatarController.TEA_LAYER,
+    defaultWeight=0,
+    avatarMask=manager.AvatarMaskAll,
+    stateMachine=stateM
    });
    AnimationClip def_clip = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/TEA Manager/Resources/Animation/TEA Animations/Default.anim");
 
    //default
-   stateD.defaultState =stateD.AddState("Default");
+   stateD.defaultState=stateD.AddState("Default");
    AnimatorStateTransition anyToDefault = stateD.AddAnyStateTransition(stateD.defaultState);
    anyToDefault.AddCondition(AnimatorConditionMode.Equals, 0, AvatarController.TEA_ANIM_PARAM);
-   stateD.defaultState.motion = def_clip;
+   stateD.defaultState.motion=def_clip;
 
    //overriding
    stateM.defaultState=stateM.AddState("Default");
@@ -239,25 +239,25 @@ namespace TEA {
 
    // dynamic
    int count = 1;
-   foreach(string folder in AssetDatabase.GetSubFolders("Assets/TEA Manager/Resources/Animation/TEA Animations")){
+   foreach(string folder in AssetDatabase.GetSubFolders("Assets/TEA Manager/Resources/Animation/TEA Animations")) {
     string name = folder.Substring(folder.LastIndexOf('/')+1);
     Dropdown.OptionData option = new Dropdown.OptionData(name);
     options.Add(option);
-    AnimationClip start=null;
-    AnimationClip loop=null;
-    foreach (AnimationClip clip in GetSongList(folder)) { 
-      if(clip.name.Contains("intro") ||clip.name.Contains("Intro")) {
-       start = clip;
-      }else
-       loop = clip;
+    AnimationClip start = null;
+    AnimationClip loop = null;
+    foreach(AnimationClip clip in GetSongList(folder)) {
+     if(clip.name.Contains("intro")||clip.name.Contains("Intro")) {
+      start=clip;
+     } else
+      loop=clip;
     }//for
     AnimatorState state = stateM.AddState(name);
     state.motion=loop;
-    if(null !=start) {
+    if(null!=start) {
      AnimatorState startState = stateM.AddState(name+"-intro");
-     startState.motion = start;
+     startState.motion=start;
      stateM.defaultState.AddTransition(startState).AddCondition(AnimatorConditionMode.Equals, count, AvatarController.TEA_ANIM_PARAM);
-     startState.AddTransition(state).hasExitTime = true;
+     startState.AddTransition(state).hasExitTime=true;
     } else {
      stateM.defaultState.AddTransition(state).AddCondition(AnimatorConditionMode.Equals, count, AvatarController.TEA_ANIM_PARAM);
     }
@@ -387,7 +387,7 @@ namespace TEA {
      }
 
      missingParam=new List<string>();
-     ValidateExpressionParameters(avatar.Value,superAnimator);
+     ValidateExpressionParameters(avatar.Value, superAnimator);
 
      string issues = PrintValidationIssues();
      if(!string.IsNullOrEmpty(issues)) {
@@ -406,15 +406,15 @@ namespace TEA {
       if(beh is VRCPlayableLayerControl) {
        VRCPlayableLayerControl pc = (VRCPlayableLayerControl)beh;
        TEA_PlayableLayerControl tc = state.state.AddStateMachineBehaviour<TEA_PlayableLayerControl>();
-       tc.blendDuration = pc.blendDuration;
-        tc.debugString=pc.debugString;
-        tc.goalWeight=pc.goalWeight;
-        tc.layer=pc.layer;
+       tc.blendDuration=pc.blendDuration;
+       tc.debugString=pc.debugString;
+       tc.goalWeight=pc.goalWeight;
+       tc.layer=pc.layer;
        tc.state=state.state.name;
-      }else if(beh is VRCAvatarParameterDriver) {
+      } else if(beh is VRCAvatarParameterDriver) {
        VRCAvatarParameterDriver vd = (VRCAvatarParameterDriver)beh;
        TEA_AvatarParameterDriver td = state.state.AddStateMachineBehaviour<TEA_AvatarParameterDriver>();
-       td.name = vd.name;
+       td.name=vd.name;
        td.debugString=vd.debugString;
        td.localOnly=vd.localOnly;
        td.parameters=new List<VRC.SDKBase.VRC_AvatarParameterDriver.Parameter>();
@@ -507,8 +507,19 @@ namespace TEA {
   private static void SetFXDefault(AnimationClip def_clip, ChildAnimatorState[] states, GameObject gameObject) {
    foreach(ChildAnimatorState state in states) {
     state.state.writeDefaultValues=true;
-    if(null!=state.state.motion) {
-     AnimationClip clip = (AnimationClip)state.state.motion;
+    SetFXDefaultMotion(state.state.motion, def_clip, gameObject);
+   }
+  }
+
+  private static void SetFXDefaultMotion(Motion motion, AnimationClip def_clip, GameObject gameObject) {
+   if(null!=motion) {
+    if(motion is BlendTree) {
+     BlendTree bTree = (BlendTree)motion;
+     foreach(ChildMotion child in bTree.children) {
+      SetFXDefaultMotion(child.motion, def_clip, gameObject);
+     }
+    } else if(motion is AnimationClip) {
+     AnimationClip clip = (AnimationClip)motion;
 
      foreach(EditorCurveBinding binding in AnimationUtility.GetCurveBindings(clip)) {
       if(null==binding)
@@ -521,7 +532,7 @@ namespace TEA {
       def_clip.SetCurve(binding.path, binding.type, binding.propertyName, AnimationCurve.Constant(0.0f, 0.0f, value));
      }
     }
-   }
+   }//if
   }
 
   private bool HasAnimatorParameter(AnimatorController controller, string name) {
@@ -539,13 +550,13 @@ namespace TEA {
    string text = "";
 
    // missing param
-   if(missingParam.Count >0) { 
+   if(missingParam.Count>0) {
     text+="Missing Parameters";
-   foreach(string missing in missingParam) {
-    text+="\n -";
-    text+=missing;
-   }
-   text+="\n";
+    foreach(string missing in missingParam) {
+     text+="\n -";
+     text+=missing;
+    }
+    text+="\n";
    }
 
    //layer issues
