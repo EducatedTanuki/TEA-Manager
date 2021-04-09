@@ -11,7 +11,10 @@ Build and Test VRChat 3.0 Avatars in play mode
 
 - Unpack the `TEA Manager` prefab
 
-TEA Manager will automaticaly detect all avatars in the Scene. **It does not see avatars in other Scenes**.
+> The `Play Tab` has a button to add `TEA Manager` to the Scene when there are no managers
+
+TEA Manager will automaticaly detect all avatars in the Scene. **It does not see avatars in other Scenes**.  
+Only switch avatars in play mode.
 
 # Using `Tea Manager`
 To use `Tea Manager` you must enter playmode using the custome play button.  
