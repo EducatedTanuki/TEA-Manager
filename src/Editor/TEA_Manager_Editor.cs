@@ -137,6 +137,8 @@ namespace TEA {
    EditorGUILayout.EndVertical();
 
    base.OnInspectorGUI();
+
+   CleanLeanTween();
   }
 
   public static bool OneManagerLoaded(out string output) {
@@ -154,6 +156,22 @@ namespace TEA {
   }
 
   // ----- ----- Utility ----- -----
+  public static void CleanLeanTween() {
+   List<GameObject> remove = new List<GameObject>();
+   foreach(GameObject obj in SceneManager.GetActiveScene().GetRootGameObjects()){
+    if("~LeanTween"==obj.name) {
+     remove.Add(obj);
+    }
+   }
+
+   if(remove.Count>0)
+    Debug.Log($"Cleaning {remove.Count} ~LeanTween objects");
+
+   foreach(GameObject obj in remove) {
+    DestroyImmediate(obj);
+   }
+  }
+
   public static string GetManagerList(List<TEA_Manager> managers) {
    string ret = "";
    foreach(TEA_Manager c in managers) {

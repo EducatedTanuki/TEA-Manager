@@ -34,12 +34,10 @@ namespace TEA {
   private void OnEnable() {
    play = EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/play.png") as Texture2D;
    stop=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/stop.png") as Texture2D;
-   Debug.Log("1");
   }
 
 
   private void OnGUI() {
-   Debug.Log("2");
    EditorGUILayout.BeginHorizontal(new GUIStyle {
     alignment=TextAnchor.UpperLeft,
    });
@@ -47,20 +45,24 @@ namespace TEA {
 
    List<TEA_Manager> managers = TEA_Manager_Editor.GetManagers();
 
-   if(1<managers.Count) {
+   if(managers.Count>1) {
     EditorGUILayout.HelpBox($"Only one TEA Manager can be loaded at a time {TEA_Manager_Editor.GetManagerList(managers)}", MessageType.Error);
     EditorGUILayout.EndHorizontal();
     return;
    } else if(0==managers.Count) {
     EditorGUILayout.HelpBox($"No Tea Manager", MessageType.Warning);
     if(GUILayout.Button("Add To Scene", GUILayout.Height(MIN_HEIGHT))) {
-     Instantiate(PrefabUtility.LoadPrefabContents(TEA_Manager_Editor.PREFAB));
+     GameObject newManager = EditorGUIUtility.Load(TEA_Manager_Editor.PREFAB) as GameObject;
+     Instantiate(newManager);
     }
     EditorGUILayout.EndHorizontal();
     return;
    }
 
    TEA_Manager manager = managers[0];
+   if(PrefabUtility.IsAnyPrefabInstanceRoot(manager.gameObject))
+    PrefabUtility.UnpackPrefabInstance(manager.gameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+
    Dictionary<string, VRCAvatarDescriptor> newAvatars = AvatarController.GetAvatars(manager.gameObject.scene);
    if(avatars.Count!=newAvatars.Count) {
     manager.Avatar=null;
@@ -81,7 +83,7 @@ namespace TEA {
     avatarIndex=1;
     manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
    }
-   Debug.Log("3");
+   
    if(avatars.Count==0) {
     EditorGUILayout.HelpBox("No Avatars Found", MessageType.Info);
     manager.Avatar=null;
@@ -126,6 +128,8 @@ namespace TEA {
 
    //----------------
    EditorGUILayout.EndHorizontal();
+
+   TEA_Manager_Editor.CleanLeanTween();
   }
  }//class
 }//namespace
