@@ -25,7 +25,7 @@ There are play buttons in the `Tea Manager` inspector
 
 ![inspector](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/inspector.PNG)
 
-and the Play Tab, accessable through the menu `Tea Manager/Play Tab`
+and the `Play Tab`, accessable through the menu `Tea Manager/Play Tab`
 
 ![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif.gif)
 
