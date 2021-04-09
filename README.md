@@ -19,15 +19,15 @@ To use `Tea Manager` you must enter playmode using the custome play button.
 
 There are play buttons in the `Tea Manager` inspector  
 
-![inspector](/tutorial/assets/inspector.png)
+![inspector](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/inspector.PNG)
 
 and the Play Tab, accessable through the menu `Tea Manager/Play Tab`
 
-![add-play-tab](/tutorial/assets/add-play-tab.gif)
+![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif.gif)
 
 In Play mode `Tea Manager` provides a UI under the "Game" tab that lets you interact with an emulated VRChat Avatar system. 
 
-![play-example](/tutorial/assets/play-example.png)
+![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png.png)
 
 ### Game Controls
 |        Input       |          Action          |
