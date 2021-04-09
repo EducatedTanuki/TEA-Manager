@@ -200,11 +200,11 @@ namespace TEA {
 
   // ----- ----- Avatar Setup Methods ----- -----
   private static readonly string TEA_OBJECT_MENU = "TEA Functions";
-  private static string EXPRESSION_FOLDER = "Expression Menus";
-  private static string EXPRESSION_MENU = "Assets/TEA Manager/Resources/Expression Menu/ExpressionsMenu.asset";
-  private static string EXPRESSION_PARAMETER = "Assets/TEA Manager/Resources/Expression Menu/ExpressionParameters.asset";
+  private static string EXPRESSION_FOLDER = "Expressions";
+  private static string EXPRESSION_MENU = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionsMenu.asset";
+  private static string EXPRESSION_PARAMETER = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionParameters.asset";
 
-  private static string Animation_Folder = "Animation Controllers";
+  private static string PLAYABLE_LAYERS_FOLDER = "Playable Layers";
 
   private static string Base_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3LocomotionLayer.controller";
   private static string Additive_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Additive.controller";
@@ -268,9 +268,9 @@ namespace TEA {
    string parentFolder = GetParent(newAvatar.scene.path, false);
 
    // Playable Layers
-   string animation_folder = CreatePath(parentFolder, Animation_Folder);
+   string animation_folder = CreatePath(parentFolder, PLAYABLE_LAYERS_FOLDER);
    if(!AssetDatabase.IsValidFolder(animation_folder))
-    AssetDatabase.CreateFolder(parentFolder, Animation_Folder);
+    AssetDatabase.CreateFolder(parentFolder, PLAYABLE_LAYERS_FOLDER);
 
    string bLayer = CreatePath(animation_folder, "BaseLayer.controller");
    AssetDatabase.CopyAsset(Base_Layer, bLayer);
