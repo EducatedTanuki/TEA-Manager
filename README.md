@@ -42,6 +42,12 @@ In Play mode `Tea Manager` provides a UI under the "Game" tab that lets you inte
 | W, A, S, D, Arrows |  Camera/Avatar Movement  |
 |        Q, E        |      Camera Rotation     |
 
+<h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
+
+TEA Animations are utility animations added to the runtime animation controller.  
+They functction similarly to Actions and can be toggled by clicking the TEA Icon.  
+The TEA Animaiton layers are placed before the Gesture layers.  
+
 # Utilities
 `Tea Manager` provides some functions to make your development easier.
 
