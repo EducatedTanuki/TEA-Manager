@@ -1,6 +1,9 @@
-<h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="64" height="64" style="max-width:100%;"> TEA Manager</h1>
+<h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="64" height="64" style="max-width:100%;"> Tanuki's Educated Avatar Manager</h1>
 
-Build and Test VRChat 3.0 Avatars in play mode
+Build and Test VRChat 3.0 Avatars in play mode  
+
+If you think I deserve a :cookie:  
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=YYCSYXEYPMQK2&currency_code=USD)
 
 # Setup
 - import [VRC Avatar SDK 3.0](https://vrchat.com/home/download)
