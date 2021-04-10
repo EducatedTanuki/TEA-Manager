@@ -1,12 +1,12 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using VRC.SDK3.Avatars.Components;
 
 namespace TEA {
- public class TEA_Play_Tab : EditorWindow {
+ public class TEA_Control_Tab : EditorWindow {
   // ----- ----- Static ----- -----
   public static readonly string PREFAB = "Assets/TEA Manager/TEA Manager.prefab";
   // --- height ---
@@ -20,13 +20,13 @@ namespace TEA {
 
   [MenuItem("TEA Manager/Play Tab")]
   static void OpenWindow() {
-   EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Play_Tab), false, "TEA Manager", true);
-   window.minSize=new Vector2(500, MIN_HEIGHT);
+   EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Control_Tab), false, "TEA Manager", true);
+   window.minSize=new Vector2(500, MIN_HEIGHT+5);
   }
 
   [MenuItem("Window/TEA Manager/Play Tab")]
   static void AddTab() {
-   EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Play_Tab), false, "TEA Manager", true);
+   EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Control_Tab), false, "TEA Manager", true);
    window.minSize=new Vector2(500, MIN_HEIGHT);
   }
 
@@ -78,10 +78,10 @@ namespace TEA {
   bool _allLayout = true;
   bool _beforeToggles = true;
   bool _afterToggles = true;
-  bool _beforeButtons=true;
-  bool _afterButtons=true;
-  bool _beforeInfo=true;
-  bool _afterInfo=true;
+  bool _beforeButtons = true;
+  bool _afterButtons = true;
+  bool _beforeInfo = true;
+  bool _afterInfo = true;
 
   // --- styles
   GUIStyle layoutStyle;
@@ -104,7 +104,8 @@ namespace TEA {
    try {
     if(null==layoutStyle) {
      layoutStyle=new GUIStyle(EditorStyles.boldLabel) {
-      alignment=TextAnchor.MiddleCenter
+      alignment=TextAnchor.MiddleCenter,
+      fixedHeight=MIN_HEIGHT
      };
     }
     if(null==sectionStyle) {
@@ -115,21 +116,24 @@ namespace TEA {
 
     EditorGUILayout.BeginHorizontal();
     //------
-    DrawAllToggles();
-    EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
-
     if(_managers) {
      EditorGUILayout.HelpBox($"Only one TEA Manager can be loaded at a time {GetManagerList(managers)}", MessageType.Error);
      EndLayout();
      return;
-    } else if(!_avatars) {
-     GUILayout.Box(EditorGUIUtility.IconContent("Collab.Warning"), GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-     EditorGUILayout.LabelField("There are no Avatars in the active Scene", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
-     //TODO add list of potential avatar
+    }
+
+    DrawToggleParent();
+    EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
+
+    if(!_avatars) {
+     DrawButtonParent(false);
+     DrawInfoParent(DrawNoAvatars, SECTION_WIDTH*2);
+     //TODO add list of potential avatar?
      EndLayout();
      return;
     } else if(0==managers.Count) {
-     DrawButtons();
+     DrawButtonParent(true);
+     DrawInfoParent(DrawNoManagers, SECTION_WIDTH*2);
      EndLayout();
      return;
     }
@@ -146,16 +150,9 @@ namespace TEA {
     }
 
     // --- buttons
-    DrawButtons();
-    EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
+    DrawButtonParent(true);
 
-    if(_beforeInfo)
-     GUILayout.FlexibleSpace();
-    EditorGUI.BeginChangeCheck();
-    avatarIndex=EditorGUILayout.Popup("", avatarIndex, avatarKeys, EditorStyles.popup, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(SECTION_WIDTH+50), GUILayout.ExpandWidth(false));
-    if(EditorGUI.EndChangeCheck()) {
-     manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
-    }
+    DrawInfoParent(DrawSelector, SECTION_WIDTH);
 
     //----------------
     EndLayout();
@@ -167,62 +164,7 @@ namespace TEA {
    }
   }
 
-  private void LayoutControls() {
-   EditorGUILayout.Space();
-   EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-   EditorGUILayout.BeginHorizontal(new GUIStyle() {
-    alignment=TextAnchor.MiddleCenter
-   });
-
-   _allLayout=_beforeToggles&&_afterToggles&&_beforeButtons&&_afterButtons&&_beforeInfo&&_afterInfo;
-
-   EditorGUILayout.LabelField("All", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
-   EditorGUI.BeginChangeCheck();
-   _allLayout=EditorGUILayout.Toggle("", _allLayout, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-   EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
-   if(EditorGUI.EndChangeCheck()) {
-    if(_allLayout) {
-     _beforeToggles=true;
-     _beforeButtons=true;
-     _afterButtons=true;
-     _beforeInfo=true;
-     _afterInfo=true;
-     _afterToggles=true;
-    } else {
-     _afterToggles=false;
-     _beforeToggles=false;
-     _beforeButtons=false;
-     _afterButtons=false;
-     _beforeInfo=false;
-     _afterInfo=false;
-    }
-   }
-
-   _beforeToggles=EditorGUILayout.Toggle("", _beforeToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-   EditorGUILayout.LabelField("Toggles", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
-   _afterToggles=EditorGUILayout.Toggle("", _afterToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-
-   EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
-   _beforeButtons=EditorGUILayout.Toggle("", _beforeButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-   EditorGUILayout.LabelField("Buttons", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
-   _afterButtons=EditorGUILayout.Toggle("", _afterButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-   EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
-
-   _beforeInfo=EditorGUILayout.Toggle("", _beforeInfo, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-   EditorGUILayout.LabelField("Info", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
-   _afterInfo=EditorGUILayout.Toggle("", _afterInfo, GUILayout.ExpandWidth(false));
-
-   EditorGUILayout.EndHorizontal();
-  }
-
-  private void EndLayout() {
-   if(_afterInfo)
-    GUILayout.FlexibleSpace();
-   EditorGUILayout.EndHorizontal();
-   LayoutControls();
-  }
-
+  // --- --- --- Update --- --- ---
   private void AddOrDestroy(bool play) {
    if(_avatars&&managers.Count==0&&null==manager&&(play||(!play&&keep_in_scene))) {
     GameObject newManager = EditorGUIUtility.Load(PREFAB) as GameObject;
@@ -236,7 +178,6 @@ namespace TEA {
    }
   }
 
-  // --- --- --- Update --- --- ---
   private void Update() {
    // --- managers
    managers=GetManagers();
@@ -292,13 +233,82 @@ namespace TEA {
   }
 
   // --- --- --- GUI Util Methods --- --- ---
-  private void DrawButtons() {
+  // --- --- Controls
+  private void LayoutControls() {
+   EditorGUILayout.Space();
+   EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+   EditorGUILayout.BeginHorizontal(new GUIStyle() {
+    alignment=TextAnchor.MiddleCenter
+   });
+
+   _allLayout=_beforeToggles&&_afterToggles&&_beforeButtons&&_afterButtons&&_beforeInfo&&_afterInfo;
+
+   EditorGUILayout.LabelField("All", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
+   EditorGUI.BeginChangeCheck();
+   _allLayout=EditorGUILayout.Toggle("", _allLayout, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
+   if(EditorGUI.EndChangeCheck()) {
+    if(_allLayout) {
+     _beforeToggles=true;
+     _beforeButtons=true;
+     _afterButtons=true;
+     _beforeInfo=true;
+     _afterInfo=true;
+     _afterToggles=true;
+    } else {
+     _afterToggles=false;
+     _beforeToggles=false;
+     _beforeButtons=false;
+     _afterButtons=false;
+     _beforeInfo=false;
+     _afterInfo=false;
+    }
+   }
+
+   _beforeToggles=EditorGUILayout.Toggle("", _beforeToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("Toggles", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
+   _afterToggles=EditorGUILayout.Toggle("", _afterToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+
+   EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
+   _beforeButtons=EditorGUILayout.Toggle("", _beforeButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("Buttons", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
+   _afterButtons=EditorGUILayout.Toggle("", _afterButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
+
+   _beforeInfo=EditorGUILayout.Toggle("", _beforeInfo, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("Info", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
+   _afterInfo=EditorGUILayout.Toggle("", _afterInfo, GUILayout.ExpandWidth(false));
+
+   EditorGUILayout.EndHorizontal();
+  }
+
+  // --- --- End Layout
+  private void EndLayout() {
+   EditorGUILayout.EndHorizontal();
+   LayoutControls();
+  }
+
+  // --- --- Button Section
+  private void DrawButtonParent(bool render) {
    if(_beforeButtons)
     GUILayout.FlexibleSpace();
 
-   EditorGUILayout.BeginHorizontal(sectionStyle,  GUILayout.Width(SECTION_WIDTH));
+   EditorGUILayout.BeginHorizontal(sectionStyle, GUILayout.Width(BUTTON_WIDTH*3), GUILayout.Height(MIN_HEIGHT));
    GUILayout.FlexibleSpace();
 
+   if(render)
+    DrawButtons();
+
+   GUILayout.FlexibleSpace();
+   EditorGUILayout.EndHorizontal();
+
+   if(_afterButtons)
+    GUILayout.FlexibleSpace();
+   EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
+  }
+
+  private void DrawButtons() {
    if(!EditorApplication.isPlaying) {
     _play=GUILayout.Button(play, compiler.validate ? EditorStyles.miniButtonLeft : EditorStyles.miniButton, GUILayout.Height(MIN_HEIGHT), GUILayout.MaxWidth(BUTTON_WIDTH), GUILayout.ExpandWidth(false));
     if(compiler.validate)
@@ -306,14 +316,9 @@ namespace TEA {
    } else if(GUILayout.Button(stop, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(BUTTON_WIDTH), GUILayout.ExpandWidth(false))) {
     EditorApplication.isPlaying=false;
    }
-
-   GUILayout.FlexibleSpace();
-   EditorGUILayout.EndHorizontal();
-
-   if(_afterButtons)
-    GUILayout.FlexibleSpace();
   }
 
+  // --- --- Toggle Section
   private void SetToggleObjects() {
    if(null==manager) {
     mainObj=null;
@@ -330,10 +335,21 @@ namespace TEA {
    }
   }
 
-  private void DrawAllToggles() {
+  private void DrawToggleParent() {
    if(_beforeToggles)
     GUILayout.FlexibleSpace();
 
+   EditorGUILayout.BeginHorizontal(sectionStyle, GUILayout.MaxWidth(7*TOGGLE_WIDTH));
+
+   DrawAllToggles();
+
+   EditorGUILayout.EndHorizontal();
+
+   if(_afterToggles)
+    GUILayout.FlexibleSpace();
+  }
+
+  private void DrawAllToggles() {
    SetToggleObjects();
    keep_in_scene=DrawToggle(keep_in_scene, EditorGUIUtility.IconContent("d_Prefab Icon").image, "Keep the TEA Manager prefab in your Scene while not in play mode");
    _visibility=DrawObjectToggle(_visibility, mainObj, visible, "TEA Manager ON-OFF, will activate when you play");
@@ -342,9 +358,6 @@ namespace TEA {
    _audioListener=DrawObjectToggle(_audioListener, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, "Audio Listener ON-OFF");
    _light=DrawObjectToggle(_light, lightObj, EditorGUIUtility.IconContent("DirectionalLight Gizmo").image, "Directional Light ON-OFF");
    compiler.validate=DrawToggle(compiler.validate, validation, "turn off validation");
-
-   if(_afterToggles)
-    GUILayout.FlexibleSpace();
   }
 
   private bool DrawObjectToggle(bool val, GameObject obj, Texture tex, string toolTip) {
@@ -356,6 +369,45 @@ namespace TEA {
 
   private bool DrawToggle(bool val, Texture tex, string toolTip) {
    return GUILayout.Toggle(val, new GUIContent(tex, toolTip), GUILayout.Height(MIN_HEIGHT), GUILayout.MaxWidth(TOGGLE_WIDTH), GUILayout.ExpandWidth(false));
+  }
+
+  // --- --- Info Section
+  private delegate void DrawInfoContent();
+
+  private void DrawInfoParent(DrawInfoContent drawContent, int width) {
+   if(_beforeInfo)
+    GUILayout.FlexibleSpace();
+
+   EditorGUILayout.BeginHorizontal(GUILayout.Width(SECTION_WIDTH*2.5f));
+
+   EditorGUILayout.BeginHorizontal(sectionStyle, GUILayout.Width(width));
+
+   drawContent();
+
+   EditorGUILayout.EndHorizontal();
+
+   GUILayout.FlexibleSpace();
+   EditorGUILayout.EndHorizontal();
+   if(_afterInfo)
+    GUILayout.FlexibleSpace();
+  }
+
+  private void DrawNoManagers() {
+   GUILayout.Box(EditorGUIUtility.IconContent("d_Prefab Icon"), sectionStyle, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("TEA Manager will be added on Play", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
+  }
+
+  private void DrawNoAvatars() {
+   GUILayout.Box(EditorGUIUtility.IconContent("Collab.Warning"), GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("There are no Avatars in the active Scene", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
+  }
+
+  private void DrawSelector() {
+   EditorGUI.BeginChangeCheck();
+   avatarIndex=EditorGUILayout.Popup("", avatarIndex, avatarKeys, EditorStyles.popup, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(SECTION_WIDTH+50), GUILayout.ExpandWidth(false));
+   if(EditorGUI.EndChangeCheck()) {
+    manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
+   }
   }
 
   // --- --- --- Utility --- --- ---
