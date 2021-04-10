@@ -11,11 +11,11 @@ If you think I deserve a :cookie:
 - import the `TEA-Manager-<version>.unitypackage` from [releases](https://github.com/EducatedTanuki/TEA-Manager/releases)
 
 # Using `Tea Manager`
-To use `Tea Manager` you are ***required*** to enter play mode using the custome play buttons in the `Play Tab`  
+To use `Tea Manager` you are ***required*** to enter play mode using the `TEA Play` buttons in the `Play Tab`  
 `TEA Manager` has to compile your avatars playable layers for everything to work  
 - Go to the `Tea Manager` menu and select `Play Tab`  to open the `Play Tab` window  
 - Dock `Play Tab` wherever makes sense for you
-  - I recommend docking `Play Tab` at the below the Unity Toolbar
+  - I recommend docking `Play Tab` below the Unity Toolbar (see below)
 - Use the checkboxes at the bottom to control the spacing of the main controls
 - There are tooltips for most controls
 
@@ -28,15 +28,21 @@ Use the `TEA UI` in the Game tab to test your avatar
 
 ![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
 
-### Things to Note
-> TEA Manager will automaticaly detect all avatars in the Scene. **It does not see avatars in other Scenes**. 
+### TEA Manager Prefab
+The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate in play mode.
+`Play Tab` will automatically load the `TEA Manager Prefab` into the active scene when there is at least on avatar  
+If you toggle The "*Keep Prefab While Working*" option, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
 
-> For Scenes with multiple avatars, only use the avatar dropdown to switch avatars in play mode  
+### Considerations
+> `TEA Manager Prefab` does not work across **loaded** Scenes. It will **not** detect Avatars in adjacent loaded Scenes.  
+> There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
+> `Play Tab` tracks the active Scene, so multiple **loaded** Scenes can cause conflicts.  
+> I recommend you work with one Scene loaded at a time.  
 
-> Only one `TEA Manager` can be active at a time, accross all **loaded** Scenes  
-> `Play Tab` will enforce a valide setup  
+> For Scenes with multiple avatars  
+> You can switch between avatars using the avatar dropdown but only do so in **play mode**  
 
-### Play Mode Inputs
+# Inputs
 Controls are context sensative, but in general this is the Input mapping  
 
 |        Input       |          Action          |
@@ -57,9 +63,9 @@ TEA Animaiton layers are placed after **Base** and before **Additive** in the co
 # Utilities
 `Tea Manager` provides some functions to make your development easier.
 
-## GameObject Context Menu `TEA Functions`
+### GameObject Context Menu `TEA Functions`
 
-> This menu can be reached by right clicking GameObject in the heirarchy
+> This menu can be reached by right clicking a GameObject in the heirarchy
 
 ##### Make Avatar 3.0
 This sets up a GameObject as an Avatar with some defaults I defined.  
@@ -100,4 +106,4 @@ The toggle(s) are added to a `Toggles` folder in same folder as the Scene
 
 > Proxy animations in the SDK are all single frames. They are replaced by full animations when your avatar is uploaded.  
 > Do not expect your avatar to have full walking, running, or action animations in play mode unless you replace the appropriate layers and proxy animations.  
-> If your user [Make Avatar 3.0](#make-avatar-30) your actions layer will have full animations
+> If you use [Make Avatar 3.0](#make-avatar-30) your **Action** layer will have full animations
