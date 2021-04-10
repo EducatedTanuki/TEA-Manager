@@ -59,6 +59,29 @@ namespace TEA {
     avatarMask=manager.AvatarMaskArms,
     stateMachine=stateD
    });
+
+   //default
+   stateD.defaultState=stateD.AddState("Default");
+
+   manager.TEA_AnimationClips.ClearOptions();
+   List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
+
+   int count = 0;
+   List<AnimationClip> armClips = GetAnimationClips("Assets/TEA Manager/Resources/Animation/TEA Animations/TEA Hand Animations");
+   foreach(AnimationClip clip in armClips) {
+    AnimatorState state = stateD.AddState(clip.name);
+    state.motion=clip;
+    stateD.defaultState.AddTransition(state).AddCondition(AnimatorConditionMode.Equals, count, AvatarController.TEA_ANIM_PARAM);
+    state.AddExitTransition().AddCondition(AnimatorConditionMode.NotEqual, count, AvatarController.TEA_ANIM_PARAM);
+
+    Dropdown.OptionData option = new Dropdown.OptionData(clip.name);
+    options.Add(option);
+    count++;
+   }//for
+
+   manager.GetComponent<AvatarController>().TEA_HAND_LAYER_COUNT=count;
+
+   // --- Full Body Animations
    AnimatorStateMachine stateM = new AnimatorStateMachine();
    teaAnimContr.AddLayer(new AnimatorControllerLayer() {
     name=AvatarController.TEA_LAYER,
@@ -66,27 +89,14 @@ namespace TEA {
     avatarMask=manager.AvatarMaskAll,
     stateMachine=stateM
    });
-   AnimationClip def_clip = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/TEA Manager/Resources/Animation/TEA Animations/Default.anim");
 
-   //default
-   stateD.defaultState=stateD.AddState("Default");
-   AnimatorStateTransition anyToDefault = stateD.AddAnyStateTransition(stateD.defaultState);
-   anyToDefault.AddCondition(AnimatorConditionMode.Equals, 0, AvatarController.TEA_ANIM_PARAM);
-   stateD.defaultState.motion=def_clip;
-
-   //overriding
    stateM.defaultState=stateM.AddState("Default");
-   AnimatorStateTransition anyToDefault2 = stateM.AddAnyStateTransition(stateM.defaultState);
-   anyToDefault2.AddCondition(AnimatorConditionMode.Equals, 0, AvatarController.TEA_ANIM_PARAM);
-
-   manager.TEA_AnimationClips.ClearOptions();
-   List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
-   options.Add(new Dropdown.OptionData("Hands Posed"));
 
    // dynamic
-   int count = 1;
    foreach(string folder in AssetDatabase.GetSubFolders("Assets/TEA Manager/Resources/Animation/TEA Animations")) {
     string name = folder.Substring(folder.LastIndexOf('/')+1);
+    if("TEA Hand Animations"==name)
+     continue;
     Dropdown.OptionData option = new Dropdown.OptionData(name);
     options.Add(option);
     AnimationClip start = null;

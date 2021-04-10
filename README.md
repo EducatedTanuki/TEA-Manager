@@ -9,34 +9,36 @@ If you think I deserve a :cookie:
 - import [VRC Avatar SDK 3.0](https://vrchat.com/home/download)
 - import [Lean Tween](https://assetstore.unity.com/packages/tools/animation/leantween-3595)
 - import the `TEA-Manager-<version>.unitypackage` from [releases](https://github.com/EducatedTanuki/TEA-Manager/releases)
-- Drag the `TEA Manager` prefab into your scene
-
-> Only one `TEA Manager` can be active at a time, accross all loaded Scenes
-
-- Unpack the `TEA Manager` prefab
-
-> The `Play Tab` has a button to add `TEA Manager` to the Scene when there are no managers
-
-TEA Manager will automaticaly detect all avatars in the Scene. **It does not see avatars in other Scenes**.  
-Only switch avatars in play mode.
 
 # Using `Tea Manager`
-To use `Tea Manager` you must enter playmode using the custome play button.  
-`Tea Manager` will compile your playable layers and put unity in play mode.  
-
-There are play buttons in the `Tea Manager` inspector  
-
-![inspector](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/inspector.PNG)
-
-and the `Play Tab`, accessable through the menu `Tea Manager/Play Tab`
+To use `Tea Manager` you are ***required*** to enter play mode using the custome play buttons in the `Play Tab`  
+`TEA Manager` has to compile your avatars playable layers for everything to work  
+- Go to the `Tea Manager` menu and select `Play Tab`  to open the `Play Tab` window  
+- Dock `Play Tab` wherever makes sense for you
+  - I recommend docking `Play Tab` at the below the Unity Toolbar
+- Use the checkboxes at the bottom to control the spacing of the main controls
+- There are tooltips for most controls
 
 ![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif.gif)
 
-In Play mode `Tea Manager` provides a UI under the "Game" tab that lets you interact with an emulated VRChat Avatar system. 
+In play mode `Tea Manager` emulates VRChat's Avatar system  
+Use the `TEA UI` in the Game tab to test your avatar  
 
-![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png.png)
+##### TEA UI
 
-### Game Controls
+![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
+
+### Things to Note
+> TEA Manager will automaticaly detect all avatars in the Scene. **It does not see avatars in other Scenes**. 
+
+> Only switch avatars in play mode
+
+> Only one `TEA Manager` can be active at a time, accross all **loaded** Scenes  
+> `Play Tab` will enforce a valide setup  
+
+### Play Mode Inputs
+Controls are context sensative, but in general this is the Input mapping  
+
 |        Input       |          Action          |
 |:------------------:|:------------------------:|
 |     Left Mouse     |      Camera Rotation     |
@@ -48,21 +50,24 @@ In Play mode `Tea Manager` provides a UI under the "Game" tab that lets you inte
 <h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
 
 TEA Animations are utility animations added to the runtime animation controller.  
-They functction similarly to Actions and can be toggled by clicking the TEA Icon.  
-The TEA Animaiton layers are placed before the Gesture layers.  
+They functction similarly to Actions and can be toggled by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui)  
+TEA Animaiton layers are placed after **Base** and before **Additive** in the compiled animator.  
 
 # Utilities
 `Tea Manager` provides some functions to make your development easier.
 
-### Right Click GameObjects in Hierarchy
-###### Make Avatar 3.0
+## GameObject Context Menu `TEA Functions`
+
+> This menu can be reached by right clicking game objects in the heirarchy
+
+##### Make Avatar 3.0
 This setup a valid game object as an Avatar with some defaults I defined
 - Add VRCAvatarDescriptor with default values
-  - eye look positions
-  - viewport set to between eye bones
+  - Eye look positions
+  - Viewport set to between eye bones
   - Sets playable layers to copies of defaults
   - Adds default Expression menu and parameters
-  - force 6 point locamotion off
+  - Force 6 point locamotion \- off
 - Playable Layers
   - Creates `Playable Layers` folder in same folder as the Scene
   - Copies layers I created to the folder
@@ -71,12 +76,14 @@ This setup a valid game object as an Avatar with some defaults I defined
   - Copies files I created to the folder
   - Contains a SubMenu with all default acitons
 
-###### Create Toggle
-Create ON-OFF animations for a GameObjec  
+##### Create Toggle
+Create ON-OFF animations for a GameObject  
 The toggle(s) are added to a `Toggles` folder next to the Scene
 
 # Notes
-### Proxy Animations
+
+#### Proxy Animations
 
 > Proxy animations in the SDK are all single frames. They are replaced by full animations when your avatar is uploaded.  
-> Do not expect your avatar to have walking animations in play mode unless you override the Base layer and replace them.
+> Do not expect your avatar to have full walking, running, or action animations in play mode unless you replace the appropriate layers and proxy animations.  
+> If your user [Make Avatar 3.0](#make-avatar-30) your actions layer will have full animations

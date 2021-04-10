@@ -282,13 +282,14 @@ namespace TEA {
   public static readonly string TEA_LAYER = "TEA Animations";
   public static readonly string TEA_HAND_LAYER = "TEA Hand Animations";
   public static readonly string TEA_ANIM_PARAM = "TEA_Anim";
+  public int TEA_HAND_LAYER_COUNT = 0;
   private bool _tea_isActive = true;
   public bool TEA_isActive {
    get { return _tea_isActive; }
    set {
     if(value) {
      int paramValue = avatarAnim.GetInteger(TEA_ANIM_PARAM);
-     if(paramValue==0) {
+     if(paramValue<TEA_HAND_LAYER_COUNT) {
       avatarAnim.SetLayerWeight(avatarAnim.GetLayerIndex(TEA_LAYER), 0);
       avatarAnim.SetLayerWeight(avatarAnim.GetLayerIndex(TEA_HAND_LAYER), 1);
      } else {
