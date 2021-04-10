@@ -12,7 +12,7 @@ namespace TEA {
  [CustomEditor(typeof(TEA_Manager))]
  public class TEA_Manager_Editor : Editor {
   // ----- ----- TAMS Editor ----- -----
-  public static readonly string MENU_ITEM = "Tanuki's Avatar Management Suit";
+  public static readonly string MENU_ITEM = "Tanuki's Educated Avatar Manager";
 
   bool _show;
 

@@ -12,19 +12,25 @@ If you think I deserve a :cookie:
 
 # Using `Tea Manager`
 To use `Tea Manager` you are ***required*** to enter play mode using the `TEA Play` buttons in the `Play Tab`  
-`TEA Manager` has to compile your avatars playable layers for everything to work  
-- Go to the `Tea Manager` menu and select `Play Tab`  to open the `Play Tab` window  
-- Dock `Play Tab` wherever makes sense for you
-  - I recommend docking `Play Tab` below the Unity Toolbar (see below)
-- Use the checkboxes at the bottom to control the spacing of the main controls
-- There are tooltips for most controls
+`TEA Manager` has to compile your avatars playable layers before entering play mode.  
+
+Here are options for getting `Play Tab` into your workspace.
+1. Load Supplied Layout
+    - Go to *Window/Layouts/More/Load from disk...*  
+    - Select *Assets/TEA Manager/TEA_Layout.wlt*  
+2. Put `Play Tab` in your layout
+    - Go to the `Tea Manager` menu and select `Play Tab` 
+    - Dock `Play Tab` wherever makes sense for you
+      - I recommend docking `Play Tab` below the Unity Toolbar  
 
 ![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif)
 
-In play mode `Tea Manager` emulates VRChat's Avatar system  
-Use the `TEA UI` in the Game tab to test your avatar  
+Use the checkboxes at the bottom to control the spacing of the main controls.  
+There are tooltips for most controls.  
 
 ##### TEA UI
+In play mode `Tea Manager` emulates VRChat's Avatar system.  
+Use the `TEA UI` in the Game tab to test your avatar.  
 
 ![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
 
@@ -34,13 +40,14 @@ The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate
 If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
 
 ### Considerations
+###### Multi-Scene setups  
 > I recommend you work with one Scene loaded at a time.  
 > `TEA Manager Prefab` does not work across **loaded** Scenes. It will **not** detect Avatars in adjacent loaded Scenes.  
 > There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
-> `Play Tab` tracks the active Scene, so multiple **loaded** Scenes can cause conflicts.  
+> `Play Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)  
 
-> For Scenes with multiple avatars  
-> You can switch between avatars using the avatar dropdown but only do so in **play mode**  
+###### Scenes with multiple avatars  
+> You can switch between avatars using the avatar dropdown, but only do so in **play mode**  
 
 # Inputs
 Controls are context sensative, but in general this is the Input mapping  
@@ -50,6 +57,9 @@ Controls are context sensative, but in general this is the Input mapping
 |     Left Mouse     |      Camera Rotation     |
 |     Right Mouse    |  Reset Position or State |
 |    Middle Mouse    | Camera Vertical Position |
+|     Mouse Wheel    |        Camera Zoom       |
+|  Ctrl+Mouse Wheel  |     Slow Camera Zoom     |
+|  Shift+Mouse Wheel |     Fast Camera Zoom     |
 | W, A, S, D, Arrows |  Camera/Avatar Movement  |
 |        Q, E        |      Camera Rotation     |
 
@@ -107,3 +117,8 @@ The toggle(s) are added to a `Toggles` folder in same folder as the Scene
 > Proxy animations in the SDK are all single frames. They are replaced by full animations when your avatar is uploaded.  
 > Do not expect your avatar to have full walking, running, or action animations in play mode unless you replace the appropriate layers and proxy animations.  
 > If you use [Make Avatar 3.0](#make-avatar-30) your **Action** layer will have full animations
+
+# Resources
+[Game Dev Guide](https://www.youtube.com/channel/UCR35rzd4LLomtQout93gi0w)  
+[Stage](https://assetstore.unity.com/packages/2d/textures-materials/sky/farland-skies-cloudy-crown-60004)  
+[Raphtalia Model](https://www.vrcmods.com/item/7235)  

@@ -9,6 +9,7 @@ namespace TEA {
  public class TEA_Control_Tab : EditorWindow {
   // ----- ----- Static ----- -----
   public static readonly string PREFAB = "Assets/TEA Manager/TEA Manager.prefab";
+
   // --- height ---
   private static readonly int MIN_HEIGHT = 20;
   private static readonly int SEPARATOR_WIDTH = 10;
@@ -43,13 +44,14 @@ namespace TEA {
   bool _avatars = false;
   bool _play = false;
   bool _compile = false;
-  bool _managers = false;
+  bool _managerOverload = false;
   bool _startedPlaying = false;
   bool _stoppedPlaying = false;
 
-  // ----- ----- Compiler ----- -----
+  // --- Compiler
   private TEA_Compiler compiler = new TEA_Compiler();
 
+  // ----- ----- Toggles ----- -----
   // --- gui ---
   Texture2D play;
   Texture2D stop;
@@ -58,7 +60,6 @@ namespace TEA {
   Texture2D center;
   Texture2D validation;
 
-  // ----- ----- Toggles ----- -----
   // --- state
   bool keep_in_scene = true;
   bool _visibility = true;
@@ -116,7 +117,7 @@ namespace TEA {
 
     EditorGUILayout.BeginHorizontal();
     //------
-    if(_managers) {
+    if(_managerOverload) {
      EditorGUILayout.HelpBox($"Only one TEA Manager can be loaded at a time {GetManagerList(managers)}", MessageType.Error);
      EndLayout();
      return;
@@ -181,7 +182,7 @@ namespace TEA {
   private void Update() {
    // --- managers
    managers=GetManagers();
-   _managers=managers.Count>1;
+   _managerOverload=managers.Count>1;
 
    // --- avatars
    Dictionary<string, VRCAvatarDescriptor> newAvatars = AvatarController.GetAvatars(SceneManager.GetActiveScene());
@@ -406,7 +407,10 @@ namespace TEA {
    EditorGUI.BeginChangeCheck();
    avatarIndex=EditorGUILayout.Popup("", avatarIndex, avatarKeys, EditorStyles.popup, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(SECTION_WIDTH+50), GUILayout.ExpandWidth(false));
    if(EditorGUI.EndChangeCheck()) {
-    manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
+    if(EditorApplication.isPlaying)
+     manager.Initialize(avatars[avatarKeys[avatarIndex]]);
+    else
+     manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
    }
   }
 
