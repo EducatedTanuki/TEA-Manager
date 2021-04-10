@@ -19,7 +19,7 @@ To use `Tea Manager` you are ***required*** to enter play mode using the custome
 - Use the checkboxes at the bottom to control the spacing of the main controls
 - There are tooltips for most controls
 
-![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif.gif)
+![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif)
 
 In play mode `Tea Manager` emulates VRChat's Avatar system  
 Use the `TEA UI` in the Game tab to test your avatar  
