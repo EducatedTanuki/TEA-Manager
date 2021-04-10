@@ -31,7 +31,7 @@ Use the `TEA UI` in the Game tab to test your avatar
 ### Things to Note
 > TEA Manager will automaticaly detect all avatars in the Scene. **It does not see avatars in other Scenes**. 
 
-> Only switch avatars in play mode
+> For Scenes with multiple avatars, only use the avatar dropdown to switch avatars in play mode  
 
 > Only one `TEA Manager` can be active at a time, accross all **loaded** Scenes  
 > `Play Tab` will enforce a valide setup  
