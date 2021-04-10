@@ -386,6 +386,22 @@ namespace TEA {
    return avatars;
   }
 
+  public static VRCAvatarDescriptor HasAvatars(Scene scene) {
+   if(!scene.isLoaded) {
+    Debug.Log("Scene is not loaded");
+    return null;
+   }
+   GameObject[] rootObjects = scene.GetRootGameObjects();
+   foreach(GameObject root in rootObjects) {
+    VRCAvatarDescriptor avatar = root.GetComponent<VRCAvatarDescriptor>();
+    if(null!=avatar) {
+     return avatar;
+    }
+   }
+
+   return null;
+  }
+
   public static Transform GetRootBone(VRCAvatarDescriptor avatar) {
    return avatar.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
   }

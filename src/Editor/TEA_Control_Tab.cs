@@ -34,6 +34,7 @@ namespace TEA {
   // ----- ----- Instance ----- -----
   List<TEA_Manager> managers = new List<TEA_Manager>();
   TEA_Manager manager;
+  GameObject prefabObject;
 
   //--- Avatar ---
   private Dictionary<string, VRCAvatarDescriptor> avatars = new Dictionary<string, VRCAvatarDescriptor>();
@@ -91,6 +92,8 @@ namespace TEA {
 
   // ----- ----- Methods ----- -----
   private void OnEnable() {
+   prefabObject = EditorGUIUtility.Load(PREFAB) as GameObject;
+
    padding=new RectOffset(0, 0, 0, 0);
 
    play=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/play.png") as Texture2D;
@@ -118,7 +121,7 @@ namespace TEA {
     EditorGUILayout.BeginHorizontal();
     //------
     if(_managerOverload) {
-     EditorGUILayout.HelpBox($"Only one TEA Manager can be loaded at a time {GetManagerList(managers)}", MessageType.Error);
+     EditorGUILayout.HelpBox($"Only one TEA Manager can be loaded at a time, please delete one form the Active Scene", MessageType.Error);
      EndLayout();
      return;
     }
@@ -139,15 +142,9 @@ namespace TEA {
      return;
     }
 
-    manager=managers[0];
-    if(!EditorApplication.isPlaying&&PrefabUtility.IsAnyPrefabInstanceRoot(manager.gameObject)) {
+    if(null!=manager&&!EditorApplication.isPlaying&&PrefabUtility.IsAnyPrefabInstanceRoot(manager.gameObject)) {
      PrefabUtility.UnpackPrefabInstance(manager.gameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
      Debug.Log("Automatically unpacked TEA Manager");
-    }
-
-    if(avatars.Count>0&&(null==manager.Avatar||(avatarIndex>0&&avatars[avatarKeys[avatarIndex]]!=manager.Avatar))) {
-     avatarIndex=0;
-     manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
     }
 
     // --- buttons
@@ -166,23 +163,9 @@ namespace TEA {
   }
 
   // --- --- --- Update --- --- ---
-  private void AddOrDestroy(bool play) {
-   if(_avatars&&managers.Count==0&&null==manager&&(play||(!play&&keep_in_scene))) {
-    GameObject newManager = EditorGUIUtility.Load(PREFAB) as GameObject;
-    manager=Instantiate(newManager).GetComponent<TEA_Manager>();
-    manager.SetupComponents(avatars[avatarKeys[0]]);
-   }
-   if(!play&&!keep_in_scene&&null!=manager) {
-    DestroyImmediate(managers[0].gameObject);
-    managers.Clear();
-    Debug.LogWarning("Destroyed TEA Manager");
-   }
-  }
-
   private void Update() {
    // --- managers
-   managers=GetManagers();
-   _managerOverload=managers.Count>1;
+   _managerOverload=ManagerSetup(EditorApplication.isPlaying, _play, _compile);
 
    // --- avatars
    Dictionary<string, VRCAvatarDescriptor> newAvatars = AvatarController.GetAvatars(SceneManager.GetActiveScene());
@@ -212,20 +195,29 @@ namespace TEA {
    avatars=newAvatars;
    _avatars=avatars.Count!=0;
 
+   if(null!=manager&&_avatars&&(null==manager.Avatar||(avatars[avatarKeys[avatarIndex]]!=manager.Avatar))) {
+    avatarIndex=0;
+    manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
+   }
+
    // --- button presses
-   AddOrDestroy(EditorApplication.isPlaying);
    if(!EditorApplication.isPlaying) {
-    AddOrDestroy(_play||_compile);
+    bool valid = true;
     if(_play||_compile) {
      manager.gameObject.SetActive(false);
-     compiler.CompileAnimators(avatars, manager);
-     if(!_play&&!compiler.validationIssue)
-      _play=EditorUtility.DisplayDialog($"{avatarKeys[avatarIndex]}", "Avatar Compiled", "Play", "Continue");
+
+     foreach(TEA_Manager tm in managers) {
+      compiler.CompileAnimators(AvatarController.GetAvatars(tm.gameObject.scene), tm);
+      if(compiler.validationIssue)
+       valid=false;
+     }
+     if(!_play&&valid)
+      _play=EditorUtility.DisplayDialog($"{avatarKeys[avatarIndex]}", "Avatars Compiled", "Play", "Continue");
      manager.gameObject.SetActive(!(!keep_in_scene&&!_play));
      _compile=false;
     }
     if(_play) {
-     if(!compiler.validate||!compiler.validationIssue) {
+     if(!compiler.validate||valid) {
       EditorApplication.isPlaying=true;
      }
      _play=false;
@@ -441,20 +433,53 @@ namespace TEA {
    return ret;
   }
 
-  public static List<TEA_Manager> GetManagers() {
-   List<TEA_Manager> managers = new List<TEA_Manager>();
+  public bool ManagerSetup(bool play, bool _play, bool _compile) {
+   managers=new List<TEA_Manager>();
+   manager=null;
+   int activeCount = 0;
    for(int i = 0; i<SceneManager.sceneCount; i++) {
     Scene scene = SceneManager.GetSceneAt(i);
     if(!scene.isLoaded)
      continue;
+    int count = 0;
+    bool destroy=(!play||!_play||!_compile) && !keep_in_scene;
+
     foreach(GameObject obj in scene.GetRootGameObjects()) {
      Component comp = obj.GetComponentInChildren(typeof(TEA_Manager), true);
      if(null!=comp) {
-      managers.Add((TEA_Manager)comp);
+      count++;
+      TEA_Manager manager = (TEA_Manager)comp;
+
+      if(destroy||count>1) {
+       DestroyImmediate(manager.gameObject);
+      } else {
+       managers.Add(manager);
+
+       if(SceneManager.GetActiveScene()!=scene)
+        manager.gameObject.SetActive(false);
+       else {
+        if(activeCount==0)
+         this.manager=manager;
+        activeCount++;
+       }
+      }
+     }//exists
+    }//for obj
+
+    // add managers
+    VRCAvatarDescriptor firstAvatar = AvatarController.HasAvatars(scene);
+    if(null != firstAvatar && count==0 && !destroy) {
+     if(SceneManager.GetActiveScene()==scene) {
+      TEA_Manager newManager = Instantiate(prefabObject).GetComponent<TEA_Manager>();
+      this.manager=newManager;
+     } else {
+      Debug.Log($"Created manager for {scene.name} ");
+      GameObject newManagerObj = Instantiate(prefabObject);
+      SceneManager.MoveGameObjectToScene(newManagerObj, scene);
      }
     }
-   }
-   return managers;
+   }// for scene
+   return activeCount>1;
   }
  }//class
 }//namespace
