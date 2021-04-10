@@ -1,5 +1,44 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2118616302510010326
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7986102636405708183}
+  - component: {fileID: 783465614778356829}
+  m_Layer: 0
+  m_Name: Audio Listener
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7986102636405708183
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2118616302510010326}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6473900170782321183}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!81 &783465614778356829
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2118616302510010326}
+  m_Enabled: 1
 --- !u!1 &2550288025737419271
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,7 +350,7 @@ GameObject:
   - component: {fileID: 2550288026542745516}
   - component: {fileID: 2550288026542745517}
   m_Layer: 0
-  m_Name: Directional Light
+  m_Name: Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -764,7 +803,7 @@ GameObject:
   - component: {fileID: 2550288027075650076}
   - component: {fileID: 2550288027075650077}
   m_Layer: 0
-  m_Name: GroundPlane
+  m_Name: Stage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6931,7 +6970,6 @@ GameObject:
   - component: {fileID: 6473900170782321183}
   - component: {fileID: 6473900170782321176}
   - component: {fileID: 6473900170782321177}
-  - component: {fileID: 6473900170782321178}
   m_Layer: 0
   m_Name: TEA Manager
   m_TagString: Untagged
@@ -6959,6 +6997,7 @@ Transform:
   - {fileID: 6473900171376384761}
   - {fileID: 2550288026346981574}
   - {fileID: 2550288026542745516}
+  - {fileID: 7986102636405708183}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6981,12 +7020,11 @@ MonoBehaviour:
   Controllers: []
   LayerInfo: []
   Avatars: []
-  TEA_AnimationClips: {fileID: 2550288027074782628}
-  VRC_Base: {fileID: 9100000, guid: 4e4e1a372a526074884b7311d6fc686b, type: 2}
-  VRC_Additive: {fileID: 0}
-  VRC_Gesture_Male: {fileID: 9100000, guid: 404d228aeae421f4590305bc4cdaba16, type: 2}
-  VRC_Gesture_Female: {fileID: 9100000, guid: 5ecf8b95a27552840aef66909bdf588f, type: 2}
-  VRC_Action: {fileID: 9100000, guid: 3e479eeb9db24704a828bffb15406520, type: 2}
+  Base: {fileID: 9100000, guid: 4e4e1a372a526074884b7311d6fc686b, type: 2}
+  Additive: {fileID: 9100000, guid: e934e893dc619254eb102ea0fbe96b2a, type: 2}
+  Gesture_Male: {fileID: 9100000, guid: 404d228aeae421f4590305bc4cdaba16, type: 2}
+  Gesture_Female: {fileID: 9100000, guid: 5ecf8b95a27552840aef66909bdf588f, type: 2}
+  Action: {fileID: 9100000, guid: 86dc792916aef20499a9da9081d4c0dc, type: 2}
   TEA_Animations: {fileID: 9100000, guid: d136f0376545b464eba7f7563e160ae0, type: 2}
   CameraRig: {fileID: 6473900171445381197}
   ViewPort: {fileID: 6473900171860915448}
@@ -6994,6 +7032,11 @@ MonoBehaviour:
   SDKErrorUI: {fileID: 6473900171661637593}
   SDKErrorPrefab: {fileID: 7454153987243788066, guid: 763e40bf745a3cc408a3c7b69443ae52,
     type: 3}
+  Stage: {fileID: 2550288027075650078}
+  WorldCenter: {fileID: 6473900171376384762}
+  AudioListener: {fileID: 0}
+  Light: {fileID: 2550288026542745518}
+  TEA_AnimationClips: {fileID: 2550288027074782628}
 --- !u!114 &6473900170782321177
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7015,14 +7058,6 @@ MonoBehaviour:
   RunMultiplier: 3
   WalkSpeed: 1.56
   RunSpeed: 5.96
---- !u!81 &6473900170782321178
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6473900170782321179}
-  m_Enabled: 1
 --- !u!1 &6473900170785998117
 GameObject:
   m_ObjectHideFlags: 0
@@ -11320,7 +11355,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000025794821}
+  m_AnchoredPosition: {x: 0, y: -0.00003605264}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6473900171661637592

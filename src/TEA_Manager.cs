@@ -15,7 +15,6 @@ namespace TEA {
   private void Awake() {
    current=this;
    if(null==Avatar) {
-    Debug.LogError("No avatar found");
     Initialize(AvatarController.GetFirstAvatar(gameObject.scene));
    }
   }
@@ -27,31 +26,28 @@ namespace TEA {
    return current.Avatars.IndexOf(current.Avatar.name);
   }
 
-  // Masks
   [Header("Avatar Masks")]
   public AvatarMask AvatarMaskNone;
   public AvatarMask AvatarMaskAll;
   public AvatarMask AvatarMaskArms;
+
   [Header("Compiled Avatar Components")]
   public List<RuntimeAnimatorController> Controllers = new List<RuntimeAnimatorController>();
   public List<TEA_PlayableLayerData> LayerInfo = new List<TEA_PlayableLayerData>();
   public List<string> Avatars = new List<string>();
 
-  // animation controllers
-  [Header("TEA Animation List")]
-  public Dropdown TEA_AnimationClips;
 
   [Header("Default Playable Layers")]
   [SerializeField]
-  public RuntimeAnimatorController VRC_Base;
+  public RuntimeAnimatorController Base;
   [SerializeField]
-  public RuntimeAnimatorController VRC_Additive;
+  public RuntimeAnimatorController Additive;
   [SerializeField]
-  public RuntimeAnimatorController VRC_Gesture_Male;
+  public RuntimeAnimatorController Gesture_Male;
   [SerializeField]
-  public RuntimeAnimatorController VRC_Gesture_Female;
+  public RuntimeAnimatorController Gesture_Female;
   [SerializeField]
-  public RuntimeAnimatorController VRC_Action;
+  public RuntimeAnimatorController Action;
   [SerializeField]
   public RuntimeAnimatorController TEA_Animations;
 
@@ -64,6 +60,13 @@ namespace TEA {
   public HorizontalOrVerticalLayoutGroup SDKErrorUI;
   public GameObject SDKErrorPrefab;
   private static List<GameObject> sDKIssues = new List<GameObject>();
+
+  [Header("Canvas Objects")]
+  public GameObject Stage;
+  public GameObject WorldCenter;
+  public GameObject AudioListener;
+  public GameObject Light;
+  public Dropdown TEA_AnimationClips;
 
   public static void SDKError(string message) {
    Debug.LogWarning($"VRC SDK Issue [{message}]");

@@ -125,11 +125,11 @@ namespace TEA {
 
     //--- Animator ---
     AnimatorController superAnimator = new AnimatorController() { name=CONTROLLER_PREFIX+avatar.Key };
-    TEA_PlayableLayerData layerInfo = new TEA_PlayableLayerData();
+    TEA_PlayableLayerData layerInfo = TEA_PlayableLayerData.CreateInstance<TEA_PlayableLayerData>();
     layerInfo.AvatarName=avatar.Key;
     layerInfo.name=avatar.Key+"-layerData";
 
-    RuntimeAnimatorController baseRunContr = manager.VRC_Base;
+    RuntimeAnimatorController baseRunContr = manager.Base;
     if(!avatar.Value.baseAnimationLayers[0].isDefault&&avatar.Value.baseAnimationLayers[0].animatorController)
      baseRunContr=avatar.Value.baseAnimationLayers[0].animatorController;
     string baseControllerPath = folderPath+"/"+"Base.controller";
@@ -160,7 +160,7 @@ namespace TEA {
     CombineAnimator(superAnimator, teaAnimContr, null);
 
     // Gesture
-    RuntimeAnimatorController gestureRunContr = manager.VRC_Gesture_Male;
+    RuntimeAnimatorController gestureRunContr = manager.Gesture_Male;
     if(!avatar.Value.baseAnimationLayers[2].isDefault&&avatar.Value.baseAnimationLayers[2].animatorController)
      gestureRunContr=avatar.Value.baseAnimationLayers[2].animatorController;
     string gestureControllerPath = folderPath+"/"+"Gesture.controller";
@@ -172,7 +172,7 @@ namespace TEA {
     layerInfo.data[2].end=layerInfo.data[1].end+teaAnimContr.layers.Length+(gestureAnimContr.layers.Length);
 
     //Actions
-    RuntimeAnimatorController actionRunContr = manager.VRC_Action;
+    RuntimeAnimatorController actionRunContr = manager.Action;
     if(!avatar.Value.baseAnimationLayers[3].isDefault&&avatar.Value.baseAnimationLayers[3].animatorController)
      actionRunContr=avatar.Value.baseAnimationLayers[3].animatorController;
     string actionControllerPath = folderPath+"/"+"Action.controller";
@@ -287,7 +287,6 @@ namespace TEA {
    List<AnimationClip> clips = new List<AnimationClip>();
    var assets = AssetDatabase.FindAssets("t:AnimationClip", new[] { folder });
    foreach(var guid in assets) {
-    Debug.Log(guid);
     var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(AssetDatabase.GUIDToAssetPath(guid));
     clips.Add(clip);
    }
@@ -299,7 +298,7 @@ namespace TEA {
     return;
 
    foreach(AnimatorControllerParameter param in animator.parameters) {
-    if(!HasAnimatorParameter(superAnimator, param.name))
+    if(!string.IsNullOrEmpty(param.name) && !HasAnimatorParameter(superAnimator, param.name))
      superAnimator.AddParameter(param);
    }
 

@@ -13,16 +13,8 @@ namespace TEA {
  public class TEA_Manager_Editor : Editor {
   // ----- ----- TAMS Editor ----- -----
   public static readonly string MENU_ITEM = "Tanuki's Avatar Management Suit";
-  public static readonly string PREFAB = "Assets/TEA Manager/TEA Manager.prefab";
-  private static GUIStyle noElementLayout;
 
-  // ----- ----- Avatars ----- -----
-  private Dictionary<string, VRCAvatarDescriptor> avatars = new Dictionary<string, VRCAvatarDescriptor>();
-  public string[] avatarKeys;
-  public int avatarIndex = 0;
-
-  // ----- ----- Compiler ----- -----
-  private TEA_Compiler compiler = new TEA_Compiler();
+  bool _show;
 
   // --- Banner ---
   private static GUIContent bannerContent = new GUIContent {
@@ -30,173 +22,27 @@ namespace TEA {
   };
 
   public override void OnInspectorGUI() {
-   // -- Window --
-   noElementLayout=new GUIStyle() {
-    alignment=TextAnchor.MiddleCenter,
-    fixedWidth=532,
-    stretchWidth=false
-   };
-
    // -- Banner --
    var assets = AssetDatabase.FindAssets("TEA_Manager_Banner");
    if(null!=assets&&0<assets.Length)
     bannerContent.image=AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(assets[0]));
    else
-    Debug.Log("banner is not found");
+    Debug.LogError("banner is not found");
 
-   EditorGUILayout.BeginVertical(new GUIStyle {
-    padding=new RectOffset(10, 10, 5, 5),
-    fixedWidth=532,
-    alignment=TextAnchor.MiddleCenter
-   });
    //----------------
-   GUIStyle bannerSytel = new GUIStyle {
-    border=GUI.skin.box.border,
-    fixedWidth=512,
-    fixedHeight=85,
-    alignment=TextAnchor.MiddleCenter,
-   };
-   Rect bannerV = EditorGUILayout.BeginVertical(bannerSytel);
-   EditorGUILayout.LabelField(MENU_ITEM);
-   EditorGUI.DrawPreviewTexture(bannerV, bannerContent.image);
-   EditorGUILayout.EndVertical();
-
-   EditorGUILayout.Space();
-
    EditorGUILayout.BeginVertical();
-   //------
-
-   TEA_Manager manager = (TEA_Manager)target;
-   Dictionary<string, VRCAvatarDescriptor> newAvatars = AvatarController.GetAvatars(manager.gameObject.scene);
-   if(avatars.Count!=newAvatars.Count) {
-    manager.Avatar=null;
-    avatarIndex=0;
-   } else {
-    foreach(KeyValuePair<string, VRCAvatarDescriptor> key in avatars) {
-     if(!(newAvatars.TryGetValue(key.Key, out VRCAvatarDescriptor value)&&value==key.Value)) {
-      manager.Avatar=null;
-      avatarIndex=0;
-      break;
-     }
-    }
-   }
-   avatars=newAvatars;
-   avatarKeys=avatars.Keys.ToArray();
-   ArrayUtility.Insert<string>(ref avatarKeys, 0, "- none -");
-   if(avatars.Count>0&&(null==manager.Avatar||(avatarIndex>0&&avatars[avatarKeys[avatarIndex]]!=manager.Avatar))) {
-    avatarIndex=1;
-    manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
-   }
-
-   if(!OneManagerLoaded(out string managerText)) {
-    EditorGUILayout.HelpBox($"Only one TEA Manager can be loaded at a time {managerText}", MessageType.Warning);
-   } else if(avatars.Count==0) {
-    EditorGUILayout.LabelField("No Avatars Found", EditorStyles.boldLabel);
-    manager.Avatar=null;
-    //TODO add list of potential avatar
-   } else {
-    // --- Avatar Setup ---
-    EditorGUI.BeginChangeCheck();
-    avatarIndex=EditorGUILayout.Popup("Avatar", avatarIndex, avatarKeys, EditorStyles.popup);
-    if(EditorGUI.EndChangeCheck()) {
-     if(avatarIndex>0) {
-      manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
-     } else
-      manager.Avatar=null;
-    }
-
-    compiler.validate=EditorGUILayout.Toggle(new GUIContent("Validate", "Validate layers adhere to VRC 3.0 SDK"), compiler.validate, EditorStyles.toggle);
-
-    if(compiler.validate&&!EditorApplication.isPlaying) {
-     if(GUILayout.Button("Play & Compile", GUILayout.Height(30))) {
-      compiler.CompileAnimators(avatars, manager);
-      if(!compiler.validationIssue)
-       EditorApplication.isPlaying=true;
-     }
-    } else if(!compiler.validate&&!EditorApplication.isPlaying) {
-     if(GUILayout.Button("Play", GUILayout.Height(30))) {
-      EditorApplication.isPlaying=true;
-     }
-    } else if(GUILayout.Button("Stop", GUILayout.Height(30))) {
-     EditorApplication.isPlaying=false;
-    }
-    if(compiler.validate&&!EditorApplication.isPlaying) {
-     if(GUILayout.Button("Compile", GUILayout.Height(30))) {
-      compiler.CompileAnimators(avatars, manager);
-      if(!compiler.validationIssue)
-       EditorApplication.isPlaying=EditorUtility.DisplayDialog($"{avatarKeys[avatarIndex]}", "Avatar Compiled", "Play", "Continue");
-     }
-    }
-   }
-   EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-   //------
+   EditorGUILayout.LabelField(MENU_ITEM, EditorStyles.boldLabel);
+   GUILayout.Box(bannerContent.image,GUILayout.Width(2048/4), GUILayout.Height(256/3.7f));
    EditorGUILayout.EndVertical();
+   //------
+   if(GUILayout.Button("Tanukis Only"))
+    _show=!_show;
 
-   //----------------
-   EditorGUILayout.EndVertical();
-
-   base.OnInspectorGUI();
-
-   CleanLeanTween();
+   if(_show)
+    base.OnInspectorGUI();
   }
-
-  public static bool OneManagerLoaded(out string output) {
-   //Scene scene = Selection.activeGameObject.scene;
-   List<TEA_Manager> managers = GetManagers();
-   if(managers.Count>1) {
-    string list = "";
-    list=GetManagerList(managers);
-    //EditorUtility.DisplayDialog("TEA Manager", $"Only one TEA Manager can be active {list}", "OK");
-    output=list;
-    return false;
-   }
-   output="";
-   return true;
-  }
-
   // ----- ----- Utility ----- -----
-  public static void CleanLeanTween() {
-   List<GameObject> remove = new List<GameObject>();
-   foreach(GameObject obj in SceneManager.GetActiveScene().GetRootGameObjects()){
-    if("~LeanTween"==obj.name) {
-     remove.Add(obj);
-    }
-   }
-
-   if(remove.Count>0)
-    Debug.Log($"Cleaning {remove.Count} ~LeanTween objects");
-
-   foreach(GameObject obj in remove) {
-    DestroyImmediate(obj);
-   }
-  }
-
-  public static string GetManagerList(List<TEA_Manager> managers) {
-   string ret = "";
-   foreach(TEA_Manager c in managers) {
-    ret+="\n[";
-    ret+=c.gameObject.scene.name+"/"+c.gameObject.name;
-    ret+="]";
-   }
-   return ret;
-  }
-
-  public static List<TEA_Manager> GetManagers() {
-   List<TEA_Manager> managers = new List<TEA_Manager>();
-   for(int i = 0; i<SceneManager.sceneCount; i++) {
-    Scene scene = SceneManager.GetSceneAt(i);
-    if(!scene.isLoaded)
-     continue;
-    foreach(GameObject obj in scene.GetRootGameObjects()) {
-     Component comp = obj.GetComponentInChildren(typeof(TEA_Manager), true);
-     if(null!=comp) {
-      managers.Add((TEA_Manager)comp);
-     }
-    }
-   }
-   return managers;
-  }
+  
 
   // ----- ----- Avatar Setup Methods ----- -----
   private static readonly string TEA_OBJECT_MENU = "TEA Functions";
@@ -204,7 +50,7 @@ namespace TEA {
   private static string EXPRESSION_MENU = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionsMenu.asset";
   private static string EXPRESSION_PARAMETER = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionParameters.asset";
 
-  private static string PLAYABLE_LAYERS_FOLDER = "Playable Layers";
+  private static readonly string PLAYABLE_LAYERS_FOLDER = "Playable Layers";
 
   private static string Base_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3LocomotionLayer.controller";
   private static string Additive_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Additive.controller";

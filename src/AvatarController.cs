@@ -14,26 +14,40 @@ namespace TEA {
    current=this;
   }
 
-  // --- --- --- Avatar Variables --- --- ---
+  // --- --- --- Variables --- --- ---
+  bool _initialized = false;
   public VRCAvatarDescriptor Avatar;
   private Animator avatarAnim;
   public VRCExpressionsMenu mainMenu;
   public VRCExpressionParameters parameters;
 
-  // --- --- --- Camera --- --- ---
+  // --- Camera
   public CameraController cameraController;
 
   // --- --- --- Start --- --- ---
   void Start() {
+   _initialized=Initialized();
+   if(!TEAManagerUpdateRegistered) {
+    TEA_Manager.current.TEAManagerEvent+=OnTEAManagerUpdate;
+    TEAManagerUpdateRegistered=true;
+   }
+  }
+
+  private bool TEAManagerUpdateRegistered;
+  public void OnTEAManagerUpdate(TEA_Manager tea_manager) {
+   _initialized=false;
+   Start();
+  }
+
+  private bool Initialized() {
+   if(_initialized)
+    return true;
+
    Avatar=TEA_Manager.current.Avatar;
 
-   if(null==Avatar) {
-    Debug.LogError("No avatar found");
-    gameObject.SetActive(false);
-    return;
-   } else
-    gameObject.SetActive(true);
-
+   if(null==Avatar)
+    return false;
+   
    newPosition=Avatar.transform.position;
 
    //--- Camera ---
@@ -41,7 +55,7 @@ namespace TEA {
    if(null==cameraController) {
     Debug.LogError("No Camera Controller found");
     gameObject.SetActive(false);
-    return;
+    return false;
    } else
     gameObject.SetActive(true);
 
@@ -58,15 +72,7 @@ namespace TEA {
    if(null==TEA_PlayableLayerControl.ApplySettings)
     TEA_PlayableLayerControl.ApplySettings+=TEA_PlayableLayerEvent;
 
-   if(!TEAManagerUpdateRegistered) {
-    TEA_Manager.current.TEAManagerEvent+=OnTEAManagerUpdate;
-    TEAManagerUpdateRegistered=true;
-   }
-  }
-
-  private bool TEAManagerUpdateRegistered;
-  public void OnTEAManagerUpdate(TEA_Manager tea_manager) {
-   Start();
+   return true;
   }
 
   // --- --- --- Events --- --- ---
@@ -99,6 +105,9 @@ namespace TEA {
   private Vector3 newPosition;
 
   private void Update() {
+   if(!Initialized())
+    return;
+
    //--- controls ---
    List<VRCPlayableLayerControl.BlendableLayer> remove = new List<VRC.SDKBase.VRC_PlayableLayerControl.BlendableLayer>();
    foreach(KeyValuePair<VRCPlayableLayerControl.BlendableLayer, TEA_PlayableLayerControl> item in controlEvents) {

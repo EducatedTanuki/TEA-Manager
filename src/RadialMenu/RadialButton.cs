@@ -66,7 +66,7 @@ namespace TEA.UI
    {
     isOn = (this.Control.value==parameter.fVal);
     transform.Find("Toggle").gameObject.SetActive(isOn);
-    Debug.Log($"OnParameter called in [{gameObject.name}], toggled to [{isOn}]");
+    //Debug.Log($"OnParameter called in [{gameObject.name}], toggled to [{isOn}]");
    }
   }
 
