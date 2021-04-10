@@ -59,27 +59,40 @@ TEA Animaiton layers are placed after **Base** and before **Additive** in the co
 
 ## GameObject Context Menu `TEA Functions`
 
-> This menu can be reached by right clicking game objects in the heirarchy
+> This menu can be reached by right clicking GameObject in the heirarchy
 
 ##### Make Avatar 3.0
-This setup a valid game object as an Avatar with some defaults I defined
+This sets up a GameObject as an Avatar with some defaults I defined.  
+What it does:  
 - Add VRCAvatarDescriptor with default values
   - Eye look positions
   - Viewport set to between eye bones
   - Sets playable layers to copies of defaults
   - Adds default Expression menu and parameters
   - Force 6 point locamotion \- off
+    - Think of the Full Body Thotties
 - Playable Layers
-  - Creates `Playable Layers` folder in same folder as the Scene
-  - Copies layers I created to the folder
+  - Copies default layers to `Playable Layers` folder in same folder as the Scene
+  - Base
+    - Default VRC locomotion controller
+  - Additive
+    - Blank
+  - Gesture
+    - Default VRC gesture controller
+  - Action
+    - Default vrc action layer with replaced emote animations
+  - FX
+    - Variation of default VRC gesture controller
 - Expressions
-  - Creates `Expressions` folder in same folder as the Scene
-  - Copies files I created to the folder
-  - Contains a SubMenu with all default acitons
+  - Copies Expression Menus and Parameters to `Expressions` folder in same folder as the Scene
+  - Expression Menu
+    - Contains a SubMenu with toggles for VRCEmote 1 \- 7
+  - Expression Parameters
+    - Contains VRCEmote
 
 ##### Create Toggle
 Create ON-OFF animations for a GameObject  
-The toggle(s) are added to a `Toggles` folder next to the Scene
+The toggle(s) are added to a `Toggles` folder in same folder as the Scene
 
 # Notes
 
