@@ -50,7 +50,8 @@ Controls are context sensative, but in general this is the Input mapping
 <h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
 
 TEA Animations are utility animations added to the runtime animation controller.  
-They functction similarly to Actions and can be toggled by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui)  
+There are two hand poses and an assortment of full body animations.  
+You can toggle TEA Animations by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui)  
 TEA Animaiton layers are placed after **Base** and before **Additive** in the compiled animator.  
 
 # Utilities
