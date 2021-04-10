@@ -30,8 +30,8 @@ Use the `TEA UI` in the Game tab to test your avatar
 
 ### TEA Manager Prefab
 The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate in play mode.
-`Play Tab` will automatically load the `TEA Manager Prefab` into the active scene when there is at least on avatar  
-If you toggle The "*Keep Prefab While Working*" option, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
+`Play Tab` will automatically load the `TEA Manager Prefab` into the active scene when there is at least one avatar.  
+If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
 
 ### Considerations
 > `TEA Manager Prefab` does not work across **loaded** Scenes. It will **not** detect Avatars in adjacent loaded Scenes.  
