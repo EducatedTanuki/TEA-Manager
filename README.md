@@ -34,10 +34,10 @@ The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate
 If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
 
 ### Considerations
+> I recommend you work with one Scene loaded at a time.  
 > `TEA Manager Prefab` does not work across **loaded** Scenes. It will **not** detect Avatars in adjacent loaded Scenes.  
 > There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
 > `Play Tab` tracks the active Scene, so multiple **loaded** Scenes can cause conflicts.  
-> I recommend you work with one Scene loaded at a time.  
 
 > For Scenes with multiple avatars  
 > You can switch between avatars using the avatar dropdown but only do so in **play mode**  
