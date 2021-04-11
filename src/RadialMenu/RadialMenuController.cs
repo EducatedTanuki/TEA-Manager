@@ -25,22 +25,7 @@ namespace TEA.UI {
     subMenus=new List<GameObject>();
    }
 
-   if(null!=TEA_Manager.current.Avatar) {
-    base.Start();
-    mainMenu=TEA_Manager.current.Avatar.expressionsMenu;
-    parameters=TEA_Manager.current.Avatar.expressionParameters;
-
-    if(null==mainMenu||null==parameters) {
-     //TODO warn of no menu or use default
-     Debug.Log($"Expression Menu [{null!=mainMenu}] or Parameters [{null!=parameters}]");
-     return;
-    }
-    root=CreateMainMenu(mainMenu, parameters);
-    root.gameObject.SetActive(true);
-    RadialPuppet.transform.SetAsLastSibling();
-    MultiAxisPuppet.transform.SetAsLastSibling();
-    RadialButtonEvent+=OnRadialButtonEvent;
-   }
+   _initialized=Initialized();
 
    if(!TEAManagerUpdateRegistered) {
     TEA_Manager.current.TEAManagerEvent+=OnTEAManagerUpdate;
@@ -54,7 +39,38 @@ namespace TEA.UI {
     TEA_Manager.current.TEAManagerEvent-=OnTEAManagerUpdate;
     return;
    }
+   _initialized=false;
    Start();
+  }
+
+  bool _initialized = false;
+  private bool Initialized() {
+   if(_initialized)
+    return true;
+
+   VRCAvatarDescriptor avatar=TEA_Manager.current.Avatar;
+
+   if(null==avatar)
+    return false;
+
+
+    base.Start();
+    mainMenu=avatar.expressionsMenu;
+    parameters=avatar.expressionParameters;
+
+    if(null==mainMenu||null==parameters) {
+     //TODO warn of no menu or use default
+     TEA_Manager.SDKError($"Expression Menu [{null!=mainMenu}] or Parameters [{null!=parameters}]");
+     return true;
+    }
+    root=CreateMainMenu(mainMenu, parameters);
+    root.gameObject.SetActive(true);
+    RadialPuppet.transform.SetAsLastSibling();
+    MultiAxisPuppet.transform.SetAsLastSibling();
+    RadialButtonEvent+=OnRadialButtonEvent;
+
+   _initialized=true;
+   return true;
   }
 
   public VRCExpressionsMenu mainMenu;
@@ -124,6 +140,9 @@ namespace TEA.UI {
   }
   private List<ButtonWait> pressedButtons = new List<ButtonWait>();
   private void Update() {
+   if(!Initialized())
+    return;
+
    List<ButtonWait> remove = new List<ButtonWait>();
 
    foreach(ButtonWait bw in pressedButtons) {

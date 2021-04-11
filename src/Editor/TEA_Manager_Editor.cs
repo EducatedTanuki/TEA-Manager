@@ -113,6 +113,14 @@ namespace TEA {
 
    // Folders
    string parentFolder = GetParent(newAvatar.scene.path, false);
+   string avatarFolder=CreatePath(parentFolder, newAvatar.gameObject.name);
+   if(!AssetDatabase.IsValidFolder(avatarFolder)) {
+    if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(parentFolder, newAvatar.gameObject.name))) {
+     EditorUtility.DisplayDialog("Make Avatar 3.0", $"Could not create folder [{avatarFolder}]", "ok");
+     return;
+    }
+   }
+   parentFolder=avatarFolder;
 
    // Playable Layers
    string animation_folder = CreatePath(parentFolder, PLAYABLE_LAYERS_FOLDER);
@@ -187,6 +195,7 @@ namespace TEA {
    if(null==animator.avatar) {
     accept=EditorUtility.DisplayDialog("Make Avatar 3.0", $"{newAvatar.name} does not have an Animator.Avatar", "Continue", "Cancel");
    }
+   parentFolder=CreatePath(parentFolder, newAvatar.gameObject.name);
    accept=EditorUtility.DisplayDialog("Make Avatar 3.0", $"This operation will create folders in\n[{parentFolder}]\nSome files may be overridden!", "Continue", "Cancel");
    return accept;
   }
@@ -267,7 +276,7 @@ namespace TEA {
 
   private static void CreateToggle(GameObject gameObject, Transform parent, float value) {
    string parentFolder = GetParent(parent.gameObject.scene.path, false);
-   string toggle_folder = CreatePath(parentFolder, "Toggles");
+   string toggle_folder = CreatePath(parentFolder, parent.gameObject.name, "Toggles");
    if(!AssetDatabase.IsValidFolder(toggle_folder))
     AssetDatabase.CreateFolder(parentFolder, "Toggles");
 

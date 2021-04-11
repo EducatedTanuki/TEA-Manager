@@ -2,10 +2,12 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 using UnityEditor;
 using VRC.SDK3.Avatars.Components;
 using static TEA.TEA_Utility;
 using TEA.ScriptableObject;
+using System;
 
 namespace TEA {
  public class TEA_Control_Tab : EditorWindow {
@@ -52,24 +54,18 @@ namespace TEA {
   private TEA_Compiler compiler = new TEA_Compiler();
 
   // ----- ----- Toggles ----- -----
+  TEA_Settings settings;
+
   // --- gui ---
   Texture2D play;
   Texture2D stop;
-  Texture2D visible;
+  Texture2D canvasTex;
   Texture2D stage;
   Texture2D center;
   Texture2D validation;
 
-  // --- state
-  bool keep_in_scene = true;
-  bool _visibility = true;
-  bool _stage = true;
-  bool _worldCenter = true;
-  bool _audioListener = true;
-  bool _light = true;
-
   // --- toggle objects
-  GameObject mainObj;
+  GameObject canvasObj;
   GameObject stageObj;
   GameObject worldCenterObj;
   GameObject audioListenerObj;
@@ -88,23 +84,49 @@ namespace TEA {
   GUIStyle layoutStyle;
   GUIStyle sectionStyle;
   RectOffset padding;
+  GUIStyle imageStyle;
 
   // ----- ----- Methods ----- -----
-  private void OnEnable() {
+  private void init() {
    prefabObject=EditorGUIUtility.Load(PREFAB) as GameObject;
 
    padding=new RectOffset(0, 0, 0, 0);
 
    play=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/play.png") as Texture2D;
    stop=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/stop.png") as Texture2D;
-   visible=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/TEA.png") as Texture2D;
+   canvasTex=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/TEA.png") as Texture2D;
    stage=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/floor.png") as Texture2D;
    center=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/center.png") as Texture2D;
    validation=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/validation.png") as Texture2D;
+
+   if(null==settings) {
+    var assets = AssetDatabase.FindAssets("t:TEA_Settings");
+    if(null==assets||assets.Length==0) {
+     Debug.Log("Creating setting file at Assets/");
+     string settingsPath = CreatePath(false, "Assets", "TEA_Settings.asset");
+     AssetDatabase.CreateAsset(TEA_Settings.CreateInstance<TEA_Settings>(), settingsPath);
+     settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(settingsPath);
+    } else if(assets.Length>1) {
+     bool delete = EditorUtility.DisplayDialog("TEA Settings", "there are more than one setting file present.\nUsing the first found", "Delete Extra", "Continue");
+     if(delete) {
+      for(int i = 1; i<assets.Length; i++) {
+       AssetDatabase.DeleteAsset(AssetDatabase.GUIDToAssetPath(assets[i]));
+      }
+     }
+    } else {
+     settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(AssetDatabase.GUIDToAssetPath(assets[0]));
+    }
+   }
   }
 
   private void OnGUI() {
+   if(null==settings)
+    return;
+
    try {
+    imageStyle=new GUIStyle() {
+     alignment=TextAnchor.UpperLeft
+    };
     if(null==layoutStyle) {
      layoutStyle=new GUIStyle(EditorStyles.boldLabel) {
       alignment=TextAnchor.MiddleCenter,
@@ -149,7 +171,11 @@ namespace TEA {
     // --- buttons
     DrawButtonParent(true);
 
-    DrawInfoParent(DrawSelector, SECTION_WIDTH);
+    if(EditorApplication.isPlaying)
+     DrawInfoParent(DrawSelector, SECTION_WIDTH);
+    else
+     DrawInfoParent(DrawWaiting, SECTION_WIDTH);
+
 
     //----------------
     EndLayout();
@@ -161,9 +187,16 @@ namespace TEA {
   }
 
   // --- --- --- Update --- --- ---
-  List<VRCAvatarDescriptor> avatars = new List<VRCAvatarDescriptor>();
   bool _patched = false;
   private void Update() {
+   if(null==settings)
+    init();
+
+   AvatarUtilities();
+   ManagerControls();
+  }
+
+  private void ManagerControls() {
    _avatars=null!=HasAvatars(SceneManager.GetActiveScene());
 
    // --- managers
@@ -171,26 +204,24 @@ namespace TEA {
 
    // --- Avatar
    Dictionary<string, VRCAvatarDescriptor> newAvatars;
-   if(null != manager && !EditorApplication.isPlaying && _avatars && (_play ||_compile)) {
+   if(null!=manager&&!EditorApplication.isPlaying&&_avatars&&(_play||_compile)) {
     avatarIndex=0;
 
     manager.Controllers=new List<RuntimeAnimatorController>();
     manager.LayerInfo=new List<TEA_PlayableLayerData>();
     manager.ViewPorts=new List<Vector3>();
 
-    newAvatars=GetAvatars();
+    newAvatars=GetAvatars(out bool crossScene);
     manager.Avatars=newAvatars.Keys.ToList<string>();
-    manager.AvatarDescriptor=newAvatars.Values.ToList<VRCAvatarDescriptor>();
-    avatars=newAvatars.Values.ToList<VRCAvatarDescriptor>();
+    TEA_Manager.AvatarDescriptor=newAvatars.Values.ToList<VRCAvatarDescriptor>();
 
-    manager.SetupComponents(avatars[0]);
+    manager.SetupComponents(0);
     _patched=false;
-   }else if (null != manager && EditorApplication.isPlaying && !_patched){
+   } else if(null!=manager&&EditorApplication.isPlaying&&!_patched) {
+    newAvatars=GetAvatars(out bool crossScene);
+    TEA_Manager.AvatarDescriptor=newAvatars.Values.ToList<VRCAvatarDescriptor>();
     if(manager.Avatar==null)
-     manager.Initialize(avatars[0]);
-    foreach(VRCAvatarDescriptor avatar in avatars) {
-     manager.AvatarDescriptor[avatars.IndexOf(avatar)]= avatar;
-    }
+     manager.Initialize(0);
     _patched=true;
    }
 
@@ -202,16 +233,24 @@ namespace TEA {
      bool issues = compiler.CompileAnimators(manager);
      if(!_play&&!issues)
       _play=EditorUtility.DisplayDialog($"Compilation", "Avatars Compiled", "Play", "Continue");
-     manager.gameObject.SetActive(!(!keep_in_scene&&!_play));
+     manager.gameObject.SetActive(!(!settings.keep_in_scene&&!_play));
      _compile=false;
     }
     if(_play) {
      if(!compiler.validate||valid) {
+      manager.Canvas.SetActive(true);
       EditorApplication.isPlaying=true;
      }
      _play=false;
     }
    }
+  }
+
+  private void AvatarUtilities() {
+   if(EditorApplication.isPlaying||_play||_compile)
+    return;
+
+   //TODO set viewport on avatar move
   }
 
   // --- --- --- GUI Util Methods --- --- ---
@@ -303,13 +342,13 @@ namespace TEA {
   // --- --- Toggle Section
   private void SetToggleObjects() {
    if(null==manager) {
-    mainObj=null;
+    canvasObj=null;
     stageObj=null;
     worldCenterObj=null;
     audioListenerObj=null;
     lightObj=null;
    } else {
-    mainObj=manager.gameObject;
+    canvasObj=manager.Canvas;
     stageObj=manager.Stage;
     worldCenterObj=manager.WorldCenter;
     audioListenerObj=manager.AudioListener;
@@ -333,13 +372,22 @@ namespace TEA {
 
   private void DrawAllToggles() {
    SetToggleObjects();
-   keep_in_scene=DrawToggle(keep_in_scene, EditorGUIUtility.IconContent("d_Prefab Icon").image, "Keep the TEA Manager prefab in your Scene while not in play mode");
-   _visibility=DrawObjectToggle(_visibility, mainObj, visible, "TEA Manager ON-OFF, will activate when you play");
-   _stage=DrawObjectToggle(_stage, stageObj, stage, "Stage ON-OFF");
-   _worldCenter=DrawObjectToggle(_worldCenter, worldCenterObj, center, "World Center ON-OFF");
-   _audioListener=DrawObjectToggle(_audioListener, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, "Audio Listener ON-OFF");
-   _light=DrawObjectToggle(_light, lightObj, EditorGUIUtility.IconContent("DirectionalLight Gizmo").image, "Directional Light ON-OFF");
+   settings.keep_in_scene=DrawToggle(settings.keep_in_scene, EditorGUIUtility.IconContent("d_Prefab Icon").image, "Keep the TEA Manager prefab in your Scene while not in play mode");
+
+   string toolTip = "TEA Canvas ON-OFF, will activate when you play";
+   if(null!=canvasObj&&EditorApplication.isPlaying) {
+    canvasObj.SetActive(true);
+    GUILayout.Box(new GUIContent(canvasTex, toolTip), new GUIStyle() { alignment=TextAnchor.MiddleCenter }, GUILayout.Height(MIN_HEIGHT), GUILayout.MaxWidth(TOGGLE_WIDTH), GUILayout.ExpandWidth(false));
+   } else
+    settings._canvas=DrawObjectToggle(settings._canvas, canvasObj, canvasTex, toolTip);
+
+   settings._stage=DrawObjectToggle(settings._stage, stageObj, stage, "Stage ON-OFF");
+   settings._worldCenter=DrawObjectToggle(settings._worldCenter, worldCenterObj, center, "World Center ON-OFF");
+   settings._audioListener=DrawObjectToggle(settings._audioListener, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, "Audio Listener ON-OFF");
+   settings._light=DrawObjectToggle(settings._light, lightObj, EditorGUIUtility.IconContent("DirectionalLight Gizmo").image, "Directional Light ON-OFF");
    compiler.validate=DrawToggle(compiler.validate, validation, "turn off validation");
+
+   EditorUtility.SetDirty(settings);
   }
 
   private bool DrawObjectToggle(bool val, GameObject obj, Texture tex, string toolTip) {
@@ -375,13 +423,18 @@ namespace TEA {
   }
 
   private void DrawNoManagers() {
-   GUILayout.Box(EditorGUIUtility.IconContent("d_Prefab Icon"), sectionStyle, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   GUILayout.Box(EditorGUIUtility.IconContent("d_Prefab Icon"), imageStyle, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
    EditorGUILayout.LabelField("TEA Manager will be added on Play", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
   }
 
   private void DrawNoAvatars() {
-   GUILayout.Box(EditorGUIUtility.IconContent("Collab.Warning"), GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   GUILayout.Box(EditorGUIUtility.IconContent("sv_icon_dot12_pix16_gizmo"), imageStyle, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
    EditorGUILayout.LabelField("There are no Avatars in the active Scene", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
+  }
+
+  private void DrawWaiting() {
+   GUILayout.Box(EditorGUIUtility.IconContent("sv_icon_dot11_pix16_gizmo"), imageStyle, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   EditorGUILayout.LabelField("Ready for play or validation", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
   }
 
   private void DrawSelector() {
@@ -390,7 +443,7 @@ namespace TEA {
    if(EditorGUI.EndChangeCheck()) {
     if(EditorApplication.isPlaying) {
      Debug.Log($"index selected {avatarIndex}");
-     manager.Initialize(avatars[avatarIndex]);
+     manager.Initialize(avatarIndex);
     }
    }
   }
@@ -426,7 +479,7 @@ namespace TEA {
    List<TEA_Manager> managers = new List<TEA_Manager>();
    manager=null;
    int activeCount = 0;
-   bool destroy = (!play||!_play||!_compile)&&!keep_in_scene;
+   bool destroy = (!play||!_play||!_compile)&&!settings.keep_in_scene;
    for(int i = 0; i<SceneManager.sceneCount; i++) {
     Scene scene = SceneManager.GetSceneAt(i);
     if(!scene.isLoaded)
@@ -451,7 +504,7 @@ namespace TEA {
    }// for scene
 
    // add managers
-   if(null==manager&&_avatars&&(_compile||_play||play||keep_in_scene)) {
+   if(null==manager&&_avatars&&(_compile||_play||play||settings.keep_in_scene)) {
     TEA_Manager newManager = Instantiate(prefabObject).GetComponent<TEA_Manager>();
     this.manager=newManager;
    }

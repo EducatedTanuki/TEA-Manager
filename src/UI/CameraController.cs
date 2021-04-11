@@ -127,6 +127,11 @@ namespace TEA {
    offsetId=offsets.Length-1;
 
    newPosition=CameraRig.transform.position;
+
+   // --- avoid parent constrait lock on switch
+   FreeCamera=FreeCamera;
+
+   _initialized=true;
    return true;
   }
 

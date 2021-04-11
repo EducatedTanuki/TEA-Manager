@@ -47,18 +47,18 @@ namespace TEA {
 
    int aCount = 0;
    // --- --- --- for all avatars
-   foreach(VRCAvatarDescriptor avatar in manager.AvatarDescriptor) {
+   foreach(VRCAvatarDescriptor avatar in TEA_Manager.AvatarDescriptor) {
 
     //Scene Folder
-    string sceneFolder = CreatePath(false, WORKING_DIR_PATH, manager.AvatarDescriptor[aCount].gameObject.scene.name);
+    string sceneFolder = CreatePath(false, WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
     if(!AssetDatabase.IsValidFolder(sceneFolder)) {
-     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(WORKING_DIR_PATH, manager.AvatarDescriptor[aCount].gameObject.scene.name))) {
+     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name))) {
       EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{sceneFolder}]", "ok");
       return true;
      }
     }
 
-    VRCAvatarDescriptor avatarComp = manager.AvatarDescriptor[aCount];
+    VRCAvatarDescriptor avatarComp = TEA_Manager.AvatarDescriptor[aCount];
     string avatarKey = avatarComp.gameObject.name;
     Debug.Log($"----- Creating animator controllers for [{avatarKey}]");
 

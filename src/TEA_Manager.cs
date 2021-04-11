@@ -23,10 +23,13 @@ namespace TEA {
 
   public event System.Action<TEA_Manager> TEAManagerEvent;
 
-  public VRCAvatarDescriptor Avatar;
+  // --- Avatar selection
+  public static int INDEX = 0;
+  public static List<VRCAvatarDescriptor> AvatarDescriptor = new List<VRCAvatarDescriptor>();
+  public VRCAvatarDescriptor Avatar { get => INDEX>=AvatarDescriptor.Count ? null : AvatarDescriptor[INDEX] ; set { } }
 
   public static int AvatarIndex() {
-   return current.Avatars.IndexOf(GetSceneAvatarKey(current.Avatar.gameObject.scene, current.Avatar));
+   return INDEX;
   }
 
   public static string GetSceneAvatarKey(Scene scene, VRCAvatarDescriptor avatar) {
@@ -36,7 +39,7 @@ namespace TEA {
   public Vector3 GetAvatarViewPortWorld() {
    Transform head =  AvatarController.GetBone(current.Avatar, HumanBodyBones.Head);
    Vector3 world = head.TransformPoint(ViewPorts[AvatarIndex()]);
-   Debug.Log($"viewport at [{world}]");
+   //Debug.Log($"viewport at [{world}]");
    return world;
   }
 
@@ -50,7 +53,6 @@ namespace TEA {
   public List<TEA_PlayableLayerData> LayerInfo = new List<TEA_PlayableLayerData>();
   public List<Vector3> ViewPorts = new List<Vector3>();
   public List<string> Avatars = new List<string>();
-  public List<VRCAvatarDescriptor> AvatarDescriptor = new List<VRCAvatarDescriptor>();
 
 
   [Header("Default Playable Layers")]
@@ -78,6 +80,7 @@ namespace TEA {
   private static List<GameObject> sDKIssues = new List<GameObject>();
 
   [Header("Canvas Objects")]
+  public GameObject Canvas;
   public GameObject Stage;
   public GameObject WorldCenter;
   public GameObject AudioListener;
@@ -93,13 +96,18 @@ namespace TEA {
    sDKIssues.Add(error);
   }
 
-  public void Initialize(VRCAvatarDescriptor avatar) {
+  public void Initialize(int avatarIndex) {
+   if(avatarIndex>=AvatarDescriptor.Count)
+    Debug.Log($"Index [{avatarIndex}] does not exist");
+   else
+    INDEX=avatarIndex;
+
    foreach(GameObject obj in sDKIssues) {
     Destroy(obj);
    }
    sDKIssues=new List<GameObject>();
 
-   SetupComponents(avatar);
+   SetupComponents(INDEX);
 
    if(null!=TEAManagerEvent) {
     Debug.Log("Calling OnTEAManagerUpdate");
@@ -107,39 +115,33 @@ namespace TEA {
    }
   }
 
-  public void SetupComponents(VRCAvatarDescriptor avatar) {
-   if(avatar==null) {
-    Debug.LogError("No avatar found");
+  public void SetupComponents(int avatarIndex) {
+   Avatar=AvatarDescriptor[avatarIndex];
+   if(Avatar==null) {
+    Debug.Log($"Avatar at [{avatarIndex}] does not exist");
     return;
    }
 
    //Debug.Log($"setting avatar to {avatar.name}");
 
-   // -- Avatar Selection --
-   Avatar=avatar;
-
-   Transform rootBone = AvatarController.GetRootBone(avatar);
-   Vector3 viewportToHead = avatar.ViewPosition-AvatarController.GetBone(avatar, HumanBodyBones.Head).position;
+   Transform rootBone = AvatarController.GetRootBone(Avatar);
+   Vector3 viewportToHead = Avatar.ViewPosition-AvatarController.GetBone(Avatar, HumanBodyBones.Head).position;
 
    if(null!=ViewPorts && ViewPorts.Count>0)
-    viewportToHead=GetAvatarViewPortWorld()-AvatarController.GetBone(avatar, HumanBodyBones.Head).position;
+    viewportToHead=GetAvatarViewPortWorld()-AvatarController.GetBone(Avatar, HumanBodyBones.Head).position;
 
    Vector3 rootToRoot = Vector3.zero;
 
 
    // -- Parent Contraints --
-   SetupCamera(FaceCamera, AvatarController.GetBone(avatar, HumanBodyBones.Head), Vector3.zero, Vector3.zero, viewportToHead+Vector3.forward, new Vector3(0, 180, 0));
+   SetupCamera(FaceCamera, AvatarController.GetBone(Avatar, HumanBodyBones.Head), Vector3.zero, Vector3.zero, viewportToHead+Vector3.forward, new Vector3(0, 180, 0));
 
    // -- Camera Placement --
    SetupCamera(CameraRig, rootBone, Vector3.zero, rootToRoot);
-   SetupCamera(ViewPort, AvatarController.GetBone(avatar, HumanBodyBones.Head), Vector3.zero, viewportToHead);
+   SetupCamera(ViewPort, AvatarController.GetBone(Avatar, HumanBodyBones.Head), Vector3.zero, viewportToHead);
   }
 
   private void Start() {
-   if(null==Avatar) {
-    Debug.Log("No avatar found");
-    gameObject.SetActive(false);
-   }
   }
 
   private static void SetupCamera(ParentConstraint camera, Transform source, Vector3 translationAtRest, Vector3 rotationAtRest, Vector3 translationOffset, Vector3 rotationOffset) {

@@ -8,7 +8,8 @@ using VRC.SDK3.Avatars.Components;
 namespace TEA {
  public class TEA_Utility : MonoBehaviour {
   // ----- ------ Avatar ----- -----
-  public static Dictionary<string, VRCAvatarDescriptor> GetAvatars() {
+  public static Dictionary<string, VRCAvatarDescriptor> GetAvatars(out bool crossScene) {
+   crossScene=false;
    Dictionary<string, VRCAvatarDescriptor> avatars = new Dictionary<string, VRCAvatarDescriptor>();
    for(int i = 0; i<SceneManager.sceneCount; i++) {
     Scene scene = SceneManager.GetSceneAt(i);
@@ -20,6 +21,8 @@ namespace TEA {
      VRCAvatarDescriptor avatar = root.GetComponent<VRCAvatarDescriptor>();
      if(null!=avatar) {
       avatars.Add(TEA_Manager.GetSceneAvatarKey(scene, avatar), avatar);
+      if(scene != SceneManager.GetActiveScene())
+       crossScene=true;
      }
     }
    }

@@ -16,13 +16,13 @@ namespace TEA {
 
   // --- --- --- Variables --- --- ---
   bool _initialized = false;
-  public VRCAvatarDescriptor Avatar;
+  private VRCAvatarDescriptor Avatar;
   private Animator avatarAnim;
   public VRCExpressionsMenu mainMenu;
   public VRCExpressionParameters parameters;
 
   // --- Camera
-  public CameraController cameraController;
+  public CameraController CameraController;
 
   // --- --- --- Start --- --- ---
   void Start() {
@@ -51,15 +51,6 @@ namespace TEA {
    newPosition=Avatar.transform.position;
    horizontalRotation=Avatar.transform.rotation;
 
-   //--- Camera ---
-   cameraController=GetComponentInChildren<CameraController>();
-   if(null==cameraController) {
-    //Debug.LogError("No Camera Controller found");
-    gameObject.SetActive(false);
-    return false;
-   } else
-    gameObject.SetActive(true);
-
    //--- paramters ---
    mainMenu=Avatar.expressionsMenu;
    parameters=Avatar.expressionParameters;
@@ -73,6 +64,7 @@ namespace TEA {
    if(null==TEA_PlayableLayerControl.ApplySettings)
     TEA_PlayableLayerControl.ApplySettings+=TEA_PlayableLayerEvent;
 
+   _initialized=true;
    return true;
   }
 
@@ -140,12 +132,12 @@ namespace TEA {
     moveMultiplier=RunMultiplier;
    } else { speed=Speed.Walk; moveMultiplier=1f; }
 
-   if(cameraController.mouseIn&&Input.GetMouseButton(1)&&!cameraController.FreeCamera) {
+   if(CameraController.mouseIn&&Input.GetMouseButton(1)&&!CameraController.FreeCamera) {
     newPosition=Vector3.zero;
     Avatar.transform.position=newPosition;
     VelocityX=0;
     VelocityZ=0;
-   } else if(cameraController.mouseIn&&!cameraController.FreeCamera) {
+   } else if(CameraController.mouseIn&&!CameraController.FreeCamera) {
     //Rotate
     if(Input.GetKey(KeyCode.E)) {
      horizontalRotation*=Quaternion.Euler(Vector3.up*RotationAmount);
@@ -157,16 +149,16 @@ namespace TEA {
 
     // Walk
     if(Input.GetKey(KeyCode.W)||Input.GetKey(KeyCode.UpArrow)) {
-     newPosition+=(cameraController.RigCamera.transform.forward*moveMultiplier*MoveSpeed);
+     newPosition+=(CameraController.RigCamera.transform.forward*moveMultiplier*MoveSpeed);
     }
     if(Input.GetKey(KeyCode.S)||Input.GetKey(KeyCode.DownArrow)) {
-     newPosition+=(cameraController.RigCamera.transform.forward*moveMultiplier*-MoveSpeed);
+     newPosition+=(CameraController.RigCamera.transform.forward*moveMultiplier*-MoveSpeed);
     }
     if(Input.GetKey(KeyCode.A)||Input.GetKey(KeyCode.LeftArrow)) {
-     newPosition+=(cameraController.RigCamera.transform.right*moveMultiplier*-MoveSpeed);
+     newPosition+=(CameraController.RigCamera.transform.right*moveMultiplier*-MoveSpeed);
     }
     if(Input.GetKey(KeyCode.D)||Input.GetKey(KeyCode.RightArrow)) {
-     newPosition+=(cameraController.RigCamera.transform.right*moveMultiplier*MoveSpeed);
+     newPosition+=(CameraController.RigCamera.transform.right*moveMultiplier*MoveSpeed);
     }
 
     // animator velocities
