@@ -102,21 +102,36 @@ namespace TEA {
    if(null==settings) {
     var assets = AssetDatabase.FindAssets("t:TEA_Settings");
     if(null==assets||assets.Length==0) {
-     Debug.Log("Creating setting file at Assets/");
-     string settingsPath = CreatePath(false, "Assets", "TEA_Settings.asset");
-     AssetDatabase.CreateAsset(TEA_Settings.CreateInstance<TEA_Settings>(), settingsPath);
-     settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(settingsPath);
+     CreateSettings();
     } else if(assets.Length>1) {
-     bool delete = EditorUtility.DisplayDialog("TEA Settings", "there are more than one setting file present.\nUsing the first found", "Delete Extra", "Continue");
-     if(delete) {
-      for(int i = 1; i<assets.Length; i++) {
-       AssetDatabase.DeleteAsset(AssetDatabase.GUIDToAssetPath(assets[i]));
-      }
+     string path = AssetDatabase.GUIDToAssetPath(assets[0]);
+     int delete = EditorUtility.DisplayDialogComplex("TEA Settings", $"there are more than one setting file present.\nWill use [{path}]", "Delete All", "Delete Extra", "Continue");
+     if(delete<2) {
+      DeleteSettings(assets, delete);
+     } 
+     
+     if(delete==0)
+      CreateSettings();
+     else {
+      settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(path);
      }
     } else {
      settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(AssetDatabase.GUIDToAssetPath(assets[0]));
     }
    }
+  }
+
+  private static void DeleteSettings(string[] assets, int delete) {
+   for(int i = delete; i<assets.Length; i++) {
+    AssetDatabase.DeleteAsset(AssetDatabase.GUIDToAssetPath(assets[i]));
+   }
+  }
+
+  private void CreateSettings() {
+   Debug.Log("Creating setting file at Assets/");
+   string settingsPath = CreatePath(false, "Assets", "TEA_Settings.asset");
+   AssetDatabase.CreateAsset(TEA_Settings.CreateInstance<TEA_Settings>(), settingsPath);
+   settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(settingsPath);
   }
 
   private void OnGUI() {
@@ -385,7 +400,8 @@ namespace TEA {
    settings._worldCenter=DrawObjectToggle(settings._worldCenter, worldCenterObj, center, "World Center ON-OFF");
    settings._audioListener=DrawObjectToggle(settings._audioListener, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, "Audio Listener ON-OFF");
    settings._light=DrawObjectToggle(settings._light, lightObj, EditorGUIUtility.IconContent("DirectionalLight Gizmo").image, "Directional Light ON-OFF");
-   compiler.validate=DrawToggle(compiler.validate, validation, "turn off validation");
+   settings._validate=DrawToggle(settings._validate, validation, "turn off validation");
+   compiler.validate=settings._validate;
 
    EditorUtility.SetDirty(settings);
   }

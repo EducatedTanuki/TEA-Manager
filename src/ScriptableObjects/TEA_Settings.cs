@@ -11,5 +11,6 @@ namespace TEA {
   [SerializeField] public bool _audioListener = true;
   [SerializeField] public bool _light = true;
   [SerializeField] public bool _stage = true;
+  [SerializeField] public bool _validate = true;
  }
 }
