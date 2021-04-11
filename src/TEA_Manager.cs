@@ -7,23 +7,37 @@ using UnityEngine.Animations;
 using VRC.SDK3.Avatars.Components;
 using TEA.ScriptableObject;
 using System;
+using UnityEngine.SceneManagement;
 
 namespace TEA {
  public class TEA_Manager : MonoBehaviour {
   public static TEA_Manager current;
 
+  private double id = 0;
   private void Awake() {
    current=this;
-   if(null==Avatar) {
-    Initialize(AvatarController.GetFirstAvatar(gameObject.scene));
-   }
+   System.Random random = new System.Random();
+   id=random.NextDouble();
+   Debug.Log($"TEA_Manager awake [{id}]");
   }
 
   public event System.Action<TEA_Manager> TEAManagerEvent;
 
   public VRCAvatarDescriptor Avatar;
+
   public static int AvatarIndex() {
-   return current.Avatars.IndexOf(current.Avatar.name);
+   return current.Avatars.IndexOf(GetSceneAvatarKey(current.Avatar.gameObject.scene, current.Avatar));
+  }
+
+  public static string GetSceneAvatarKey(Scene scene, VRCAvatarDescriptor avatar) {
+   return $"{avatar.name} |{scene.name}";
+  }
+
+  public Vector3 GetAvatarViewPortWorld() {
+   Transform head =  AvatarController.GetBone(current.Avatar, HumanBodyBones.Head);
+   Vector3 world = head.TransformPoint(ViewPorts[AvatarIndex()]);
+   Debug.Log($"viewport at [{world}]");
+   return world;
   }
 
   [Header("Avatar Masks")]
@@ -34,7 +48,9 @@ namespace TEA {
   [Header("Compiled Avatar Components")]
   public List<RuntimeAnimatorController> Controllers = new List<RuntimeAnimatorController>();
   public List<TEA_PlayableLayerData> LayerInfo = new List<TEA_PlayableLayerData>();
+  public List<Vector3> ViewPorts = new List<Vector3>();
   public List<string> Avatars = new List<string>();
+  public List<VRCAvatarDescriptor> AvatarDescriptor = new List<VRCAvatarDescriptor>();
 
 
   [Header("Default Playable Layers")]
@@ -97,14 +113,19 @@ namespace TEA {
     return;
    }
 
-   Debug.Log($"setting avatar to {avatar.name}");
+   //Debug.Log($"setting avatar to {avatar.name}");
 
    // -- Avatar Selection --
    Avatar=avatar;
 
    Transform rootBone = AvatarController.GetRootBone(avatar);
    Vector3 viewportToHead = avatar.ViewPosition-AvatarController.GetBone(avatar, HumanBodyBones.Head).position;
+
+   if(null!=ViewPorts && ViewPorts.Count>0)
+    viewportToHead=GetAvatarViewPortWorld()-AvatarController.GetBone(avatar, HumanBodyBones.Head).position;
+
    Vector3 rootToRoot = Vector3.zero;
+
 
    // -- Parent Contraints --
    SetupCamera(FaceCamera, AvatarController.GetBone(avatar, HumanBodyBones.Head), Vector3.zero, Vector3.zero, viewportToHead+Vector3.forward, new Vector3(0, 180, 0));
@@ -135,8 +156,8 @@ namespace TEA {
     camera.rotationAtRest=rotationAtRest;
     camera.SetTranslationOffset(0, translationOffset);
     camera.SetRotationOffset(0, rotationOffset);
-    camera.enabled = true;
-    camera.constraintActive = true;
+    camera.enabled=true;
+    camera.constraintActive=true;
    }
   }
 

@@ -41,12 +41,11 @@ If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only
 
 ### Considerations
 ###### Multi-Scene setups  
-> I recommend you work with one Scene loaded at a time.  
-> `TEA Manager Prefab` does not work across **loaded** Scenes. It will **not** detect Avatars in adjacent loaded Scenes.  
 > There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
-> `Play Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)  
+> `Play Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)
+> and will remove `TEA Manager Prefab` from all other loaded scenes.  
 
-###### Scenes with multiple avatars  
+###### Multiple Avatars  
 > You can switch between avatars using the avatar dropdown, but only do so in **play mode**  
 
 # Inputs
@@ -63,6 +62,7 @@ Controls are context sensative, but in general this is the Input mapping
 | W, A, S, D, Arrows |  Camera/Avatar Movement  |
 |       Shift+       |          Sprint          |
 |        Q, E        |  Camera/Avatar Rotation  |
+|          H         |   Un-hide All Controls   |
 
 <h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
 

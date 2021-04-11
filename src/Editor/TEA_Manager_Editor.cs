@@ -7,6 +7,7 @@ using UnityEditor.Animations;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 using UnityEngine.SceneManagement;
+using static TEA.TEA_Utility;
 
 namespace TEA {
  [CustomEditor(typeof(TEA_Manager))]
@@ -32,7 +33,7 @@ namespace TEA {
    //----------------
    EditorGUILayout.BeginVertical();
    EditorGUILayout.LabelField(MENU_ITEM, EditorStyles.boldLabel);
-   GUILayout.Box(bannerContent.image,GUILayout.Width(2048/4), GUILayout.Height(256/3.7f));
+   GUILayout.Box(bannerContent.image, GUILayout.Width(2048/4), GUILayout.Height(256/3.7f));
    EditorGUILayout.EndVertical();
    //------
    if(GUILayout.Button("Tanukis Only"))
@@ -42,7 +43,7 @@ namespace TEA {
     base.OnInspectorGUI();
   }
   // ----- ----- Utility ----- -----
-  
+
 
   // ----- ----- Avatar Setup Methods ----- -----
   private static readonly string TEA_OBJECT_MENU = "TEA Functions";
@@ -291,36 +292,5 @@ namespace TEA {
     EditorUtility.DisplayDialog("Create Toggle", $"{selected.name} is child of multiple avatars", "Cancel");
    return avatars.Length==1;
   }
-
-  // ----- ------ Utility ----- -----
-  #region
-  internal static string CreatePath(params string[] pathParts) {
-   string path = "";
-   foreach(string part in pathParts) {
-    if(path.Length>0&&!path.EndsWith("/"))
-     path+="/";
-    path+=part;
-   }
-   return path;
-  }
-
-  internal static void CreateAsset(UnityEngine.Object sibling, UnityEngine.Object newAsset, string name) {
-   AssetDatabase.CreateAsset(newAsset, GetAssetDirectory(sibling, true)+name);
-  }
-
-  internal static string GetAssetDirectory(UnityEngine.Object obj, bool keepSlash) {
-   if(keepSlash)
-    return Regex.Replace(AssetDatabase.GetAssetPath(obj), @"[^/]+\..*$", "");
-   else
-    return Regex.Replace(AssetDatabase.GetAssetPath(obj), @"/[^/]+\..*$", "");
-  }
-
-  internal static string GetParent(string asset, bool keepSlash) {
-   if(keepSlash)
-    return Regex.Replace(asset, @"[^/]+\..*$", "");
-   else
-    return Regex.Replace(asset, @"/[^/]+\..*$", "");
-  }
  }
- #endregion
 }

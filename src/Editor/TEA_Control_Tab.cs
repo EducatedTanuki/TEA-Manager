@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using VRC.SDK3.Avatars.Components;
+using static TEA.TEA_Utility;
+using TEA.ScriptableObject;
 
 namespace TEA {
  public class TEA_Control_Tab : EditorWindow {
@@ -32,13 +34,10 @@ namespace TEA {
   }
 
   // ----- ----- Instance ----- -----
-  List<TEA_Manager> managers = new List<TEA_Manager>();
   TEA_Manager manager;
   GameObject prefabObject;
 
   //--- Avatar ---
-  private Dictionary<string, VRCAvatarDescriptor> avatars = new Dictionary<string, VRCAvatarDescriptor>();
-  public string[] avatarKeys;
   public int avatarIndex = 0;
 
   // --- state bools
@@ -92,7 +91,7 @@ namespace TEA {
 
   // ----- ----- Methods ----- -----
   private void OnEnable() {
-   prefabObject = EditorGUIUtility.Load(PREFAB) as GameObject;
+   prefabObject=EditorGUIUtility.Load(PREFAB) as GameObject;
 
    padding=new RectOffset(0, 0, 0, 0);
 
@@ -135,7 +134,7 @@ namespace TEA {
      //TODO add list of potential avatar?
      EndLayout();
      return;
-    } else if(0==managers.Count) {
+    } else if(null==manager) {
      DrawButtonParent(true);
      DrawInfoParent(DrawNoManagers, SECTION_WIDTH*2);
      EndLayout();
@@ -156,48 +155,43 @@ namespace TEA {
     EndLayout();
 
     CleanLeanTween();
-   } catch(MissingReferenceException ex) {
-    // prevent issues when stopping play mode
-    //Debug.Log($"Ignoring: {ex.Message} ");
+   } catch(System.Exception ex) {
+    Debug.LogException(new System.Exception("Play Tab ran into an unexpected issue", ex));
    }
   }
 
   // --- --- --- Update --- --- ---
+  List<VRCAvatarDescriptor> avatars = new List<VRCAvatarDescriptor>();
+  bool _patched = false;
   private void Update() {
+   _avatars=null!=HasAvatars(SceneManager.GetActiveScene());
+
    // --- managers
    _managerOverload=ManagerSetup(EditorApplication.isPlaying, _play, _compile);
 
-   // --- avatars
-   Dictionary<string, VRCAvatarDescriptor> newAvatars = AvatarController.GetAvatars(SceneManager.GetActiveScene());
-   avatarKeys=newAvatars.Keys.ToArray();
-   if(avatars.Count!=newAvatars.Count) {
+   // --- Avatar
+   Dictionary<string, VRCAvatarDescriptor> newAvatars;
+   if(null != manager && !EditorApplication.isPlaying && _avatars && (_play ||_compile)) {
     avatarIndex=0;
-    if(null!=manager) {
-     if(newAvatars.Count>0)
-      manager.SetupComponents(newAvatars[avatarKeys[avatarIndex]]);
-     else
-      manager.Avatar=null;
-    }
-   } else {
-    foreach(KeyValuePair<string, VRCAvatarDescriptor> key in avatars) {
-     if(!(newAvatars.TryGetValue(key.Key, out VRCAvatarDescriptor value)&&value==key.Value)) {
-      avatarIndex=0;
-      if(null!=manager) {
-       if(newAvatars.Count>0)
-        manager.SetupComponents(newAvatars[avatarKeys[avatarIndex]]);
-       else
-        manager.Avatar=null;
-      }
-      break;
-     }
-    }
-   }
-   avatars=newAvatars;
-   _avatars=avatars.Count!=0;
 
-   if(null!=manager&&_avatars&&(null==manager.Avatar||(avatars[avatarKeys[avatarIndex]]!=manager.Avatar))) {
-    avatarIndex=0;
-    manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
+    manager.Controllers=new List<RuntimeAnimatorController>();
+    manager.LayerInfo=new List<TEA_PlayableLayerData>();
+    manager.ViewPorts=new List<Vector3>();
+
+    newAvatars=GetAvatars();
+    manager.Avatars=newAvatars.Keys.ToList<string>();
+    manager.AvatarDescriptor=newAvatars.Values.ToList<VRCAvatarDescriptor>();
+    avatars=newAvatars.Values.ToList<VRCAvatarDescriptor>();
+
+    manager.SetupComponents(avatars[0]);
+    _patched=false;
+   }else if (null != manager && EditorApplication.isPlaying && !_patched){
+    if(manager.Avatar==null)
+     manager.Initialize(avatars[0]);
+    foreach(VRCAvatarDescriptor avatar in avatars) {
+     manager.AvatarDescriptor[avatars.IndexOf(avatar)]= avatar;
+    }
+    _patched=true;
    }
 
    // --- button presses
@@ -205,14 +199,9 @@ namespace TEA {
     bool valid = true;
     if(_play||_compile) {
      manager.gameObject.SetActive(false);
-
-     foreach(TEA_Manager tm in managers) {
-      compiler.CompileAnimators(AvatarController.GetAvatars(tm.gameObject.scene), tm);
-      if(compiler.validationIssue)
-       valid=false;
-     }
-     if(!_play&&valid)
-      _play=EditorUtility.DisplayDialog($"{avatarKeys[avatarIndex]}", "Avatars Compiled", "Play", "Continue");
+     bool issues = compiler.CompileAnimators(manager);
+     if(!_play&&!issues)
+      _play=EditorUtility.DisplayDialog($"Compilation", "Avatars Compiled", "Play", "Continue");
      manager.gameObject.SetActive(!(!keep_in_scene&&!_play));
      _compile=false;
     }
@@ -397,12 +386,12 @@ namespace TEA {
 
   private void DrawSelector() {
    EditorGUI.BeginChangeCheck();
-   avatarIndex=EditorGUILayout.Popup("", avatarIndex, avatarKeys, EditorStyles.popup, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(SECTION_WIDTH+50), GUILayout.ExpandWidth(false));
+   avatarIndex=EditorGUILayout.Popup("", avatarIndex, manager.Avatars.ToArray(), EditorStyles.popup, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(SECTION_WIDTH+50), GUILayout.ExpandWidth(false));
    if(EditorGUI.EndChangeCheck()) {
-    if(EditorApplication.isPlaying)
-     manager.Initialize(avatars[avatarKeys[avatarIndex]]);
-    else
-     manager.SetupComponents(avatars[avatarKeys[avatarIndex]]);
+    if(EditorApplication.isPlaying) {
+     Debug.Log($"index selected {avatarIndex}");
+     manager.Initialize(avatars[avatarIndex]);
+    }
    }
   }
 
@@ -434,15 +423,15 @@ namespace TEA {
   }
 
   public bool ManagerSetup(bool play, bool _play, bool _compile) {
-   managers=new List<TEA_Manager>();
+   List<TEA_Manager> managers = new List<TEA_Manager>();
    manager=null;
    int activeCount = 0;
+   bool destroy = (!play||!_play||!_compile)&&!keep_in_scene;
    for(int i = 0; i<SceneManager.sceneCount; i++) {
     Scene scene = SceneManager.GetSceneAt(i);
     if(!scene.isLoaded)
      continue;
     int count = 0;
-    bool destroy=(!play||!_play||!_compile) && !keep_in_scene;
 
     foreach(GameObject obj in scene.GetRootGameObjects()) {
      Component comp = obj.GetComponentInChildren(typeof(TEA_Manager), true);
@@ -450,35 +439,22 @@ namespace TEA {
       count++;
       TEA_Manager manager = (TEA_Manager)comp;
 
-      if(destroy||count>1) {
+      if(!play&&(count>1||destroy||scene!=SceneManager.GetActiveScene()))
        DestroyImmediate(manager.gameObject);
-      } else {
-       managers.Add(manager);
-
-       if(SceneManager.GetActiveScene()!=scene)
-        manager.gameObject.SetActive(false);
-       else {
-        if(activeCount==0)
-         this.manager=manager;
-        activeCount++;
-       }
+      else if(scene==SceneManager.GetActiveScene()) {
+       this.manager=manager;
+       activeCount++;
       }
      }//exists
     }//for obj
 
-    // add managers
-    VRCAvatarDescriptor firstAvatar = AvatarController.HasAvatars(scene);
-    if(null != firstAvatar && count==0 && !destroy) {
-     if(SceneManager.GetActiveScene()==scene) {
-      TEA_Manager newManager = Instantiate(prefabObject).GetComponent<TEA_Manager>();
-      this.manager=newManager;
-     } else {
-      Debug.Log($"Created manager for {scene.name} ");
-      GameObject newManagerObj = Instantiate(prefabObject);
-      SceneManager.MoveGameObjectToScene(newManagerObj, scene);
-     }
-    }
    }// for scene
+
+   // add managers
+   if(null==manager&&_avatars&&(_compile||_play||play||keep_in_scene)) {
+    TEA_Manager newManager = Instantiate(prefabObject).GetComponent<TEA_Manager>();
+    this.manager=newManager;
+   }
    return activeCount>1;
   }
  }//class

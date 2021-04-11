@@ -10,7 +10,7 @@ namespace TEA {
   // --- --- --- Awake --- --- ---
   public static AvatarController current;
   private void Awake() {
-   Debug.Log("Avatar Controller waking");
+   //Debug.Log("Avatar Controller waking");
    current=this;
   }
 
@@ -47,13 +47,14 @@ namespace TEA {
 
    if(null==Avatar)
     return false;
-   
+
    newPosition=Avatar.transform.position;
+   horizontalRotation=Avatar.transform.rotation;
 
    //--- Camera ---
    cameraController=GetComponentInChildren<CameraController>();
    if(null==cameraController) {
-    Debug.LogError("No Camera Controller found");
+    //Debug.LogError("No Camera Controller found");
     gameObject.SetActive(false);
     return false;
    } else
@@ -63,7 +64,7 @@ namespace TEA {
    mainMenu=Avatar.expressionsMenu;
    parameters=Avatar.expressionParameters;
    avatarAnim=Avatar.gameObject.GetComponent<Animator>();
-   avatarAnim.runtimeAnimatorController=TEA_Manager.current.Controllers[TEA_Manager.current.Avatars.IndexOf(Avatar.name)];
+   avatarAnim.runtimeAnimatorController=TEA_Manager.current.Controllers[TEA_Manager.AvatarIndex()];
    Grounded=true;
    avatarAnim.SetBool("Grounded", Grounded);
 
@@ -103,6 +104,8 @@ namespace TEA {
   public float WalkSpeed = 1.56f;
   public float RunSpeed = 5.96f;
   private Vector3 newPosition;
+  public float RotationAmount = 1;
+  public Quaternion horizontalRotation;
 
   private void Update() {
    if(!Initialized())
@@ -143,6 +146,16 @@ namespace TEA {
     VelocityX=0;
     VelocityZ=0;
    } else if(cameraController.mouseIn&&!cameraController.FreeCamera) {
+    //Rotate
+    if(Input.GetKey(KeyCode.E)) {
+     horizontalRotation*=Quaternion.Euler(Vector3.up*RotationAmount);
+    }
+    if(Input.GetKey(KeyCode.Q)) {
+     horizontalRotation*=Quaternion.Euler(Vector3.up*-RotationAmount);
+    }
+    Avatar.transform.rotation=horizontalRotation;
+
+    // Walk
     if(Input.GetKey(KeyCode.W)||Input.GetKey(KeyCode.UpArrow)) {
      newPosition+=(cameraController.RigCamera.transform.forward*moveMultiplier*MoveSpeed);
     }
@@ -183,7 +196,7 @@ namespace TEA {
   }
 
   public void SetAnimatorParameter(Parameter param) {
-   Debug.Log($"setting param {param.name}:{param.type} [{param.fVal}] [{param.iVal}] [{param.boolean}]");
+   //Debug.Log($"setting param {param.name}:{param.type} [{param.fVal}] [{param.iVal}] [{param.boolean}]");
    switch(param.type) {
     case AnimatorControllerParameterType.Bool: {
      avatarAnim.SetBool(param.name, param.boolean);
@@ -211,7 +224,7 @@ namespace TEA {
   }
 
   internal void ExpressionParameterSet(VRCExpressionsMenu.Control control, params float[] values) {
-   Debug.Log($"setting [{control.name}]: {control.type}, sub params {values.Length}");
+   //Debug.Log($"setting [{control.name}]: {control.type}, sub params {values.Length}");
 
    if(!string.IsNullOrEmpty(control.parameter.name)) {
     SetExpressionParameter(control.parameter.name, control.value);
@@ -340,18 +353,18 @@ namespace TEA {
   public float Upright { get => avatarAnim.GetFloat("Upright"); set { avatarAnim.SetFloat("Upright", value); } }
 
   public void ResetGesture() {
-   Debug.Log("ResetGesture");
+   //Debug.Log("ResetGesture");
    GestureLeft=0;
    GestureRight=0;
   }
 
   public void RightGesture(int gesture) {
-   Debug.Log("RightGesture: "+gesture);
+   //Debug.Log("RightGesture: "+gesture);
    GestureRight=gesture;
   }
 
   public void LeftGesture(int gesture) {
-   Debug.Log("LeftGesture: "+gesture);
+   //Debug.Log("LeftGesture: "+gesture);
    GestureLeft=gesture;
   }
 
@@ -366,39 +379,6 @@ namespace TEA {
      return avatar;
     }
    }
-   return null;
-  }
-
-  public static Dictionary<string, VRCAvatarDescriptor> GetAvatars(Scene scene) {
-   Dictionary<string, VRCAvatarDescriptor> avatars = new Dictionary<string, VRCAvatarDescriptor>();
-   if(!scene.isLoaded) {
-    Debug.Log("Scene is not loaded");
-    return avatars;
-   }
-   GameObject[] rootObjects = scene.GetRootGameObjects();
-   foreach(GameObject root in rootObjects) {
-    VRCAvatarDescriptor avatar = root.GetComponent<VRCAvatarDescriptor>();
-    if(null!=avatar) {
-     avatars.Add(avatar.gameObject.name, avatar);
-    }
-   }
-
-   return avatars;
-  }
-
-  public static VRCAvatarDescriptor HasAvatars(Scene scene) {
-   if(!scene.isLoaded) {
-    Debug.Log("Scene is not loaded");
-    return null;
-   }
-   GameObject[] rootObjects = scene.GetRootGameObjects();
-   foreach(GameObject root in rootObjects) {
-    VRCAvatarDescriptor avatar = root.GetComponent<VRCAvatarDescriptor>();
-    if(null!=avatar) {
-     return avatar;
-    }
-   }
-
    return null;
   }
 
