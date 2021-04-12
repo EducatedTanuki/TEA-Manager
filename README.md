@@ -36,17 +36,23 @@ Use the `TEA UI` in the Game tab to test your avatar.
 
 ### TEA Manager Prefab
 The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate in play mode.
-`Play Tab` will automatically load the `TEA Manager Prefab` into the active scene when there is at least one avatar.  
+`Play Tab` will automatically load the `TEA Manager Prefab` into the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) when there is at least one avatar.  
 If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
 
 ### Considerations
+
+###### Multiple Avatars  
+> You can switch between avatars using the avatar dropdown in **play mode**  
+> `TEA UI` controls do not currently sync when switching avatars. Re-toggling them will sync them with the animator state.  
+> ***Avatars added during play will not work***  
+
 ###### Multi-Scene setups  
+> `Play Tab` will recognize avatars in every loaded Scene  
+> There must be avatars in the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) for `TEA Manager` to be added  
+
 > There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
 > `Play Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)
 > and will remove `TEA Manager Prefab` from all other loaded scenes.  
-
-###### Multiple Avatars  
-> You can switch between avatars using the avatar dropdown, but only do so in **play mode**  
 
 # Inputs
 Controls are context sensative, but in general this is the Input mapping  
@@ -89,7 +95,7 @@ What it does:
   - Force 6 point locamotion \- off
     - Think of the Full Body Thotties
 - Playable Layers
-  - Copies default layers to `Playable Layers` folder in same folder as the Scene
+  - Copies default playable layers to `Assets/<Scene Folder>/<Avatar Name>/Playable Layers`
   - Base
     - Default VRC locomotion controller
   - Additive
@@ -101,7 +107,7 @@ What it does:
   - FX
     - Variation of default VRC gesture controller
 - Expressions
-  - Copies Expression Menus and Parameters to `Expressions` folder in same folder as the Scene
+  - Copies default Expression Menus and Parameters to `Assets/<Scene Folder>/<Avatar Name>/Expressions`
   - Expression Menu
     - Contains a SubMenu with toggles for VRCEmote 1 \- 7
   - Expression Parameters
@@ -109,7 +115,7 @@ What it does:
 
 ##### Create Toggle
 Create ON-OFF animations for a GameObject  
-The toggle(s) are added to a `Toggles` folder in same folder as the Scene
+The toggle(s) are added to `Assets/<Scene Folder>/<Avatar Name>/Toggles`
 
 # Notes
 

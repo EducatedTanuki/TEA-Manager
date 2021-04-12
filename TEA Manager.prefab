@@ -6753,7 +6753,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6473900171552075049}
   m_HandleRect: {fileID: 6473900171552075050}
   m_Direction: 3
-  m_Value: 0
+  m_Value: 1
   m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7024,7 +7024,7 @@ MonoBehaviour:
   Additive: {fileID: 9100000, guid: e934e893dc619254eb102ea0fbe96b2a, type: 2}
   Gesture_Male: {fileID: 9100000, guid: 404d228aeae421f4590305bc4cdaba16, type: 2}
   Gesture_Female: {fileID: 9100000, guid: 5ecf8b95a27552840aef66909bdf588f, type: 2}
-  Action: {fileID: 9100000, guid: 86dc792916aef20499a9da9081d4c0dc, type: 2}
+  Action: {fileID: 9100000, guid: ab8ec91d7d2c4114cab767d3d10d3d15, type: 2}
   TEA_Animations: {fileID: 9100000, guid: d136f0376545b464eba7f7563e160ae0, type: 2}
   CameraRig: {fileID: 6473900171445381197}
   ViewPort: {fileID: 6473900171860915448}
@@ -11358,7 +11358,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00000176859}
+  m_AnchoredPosition: {x: 0, y: -0.00007110104}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6473900171661637592

@@ -47,17 +47,17 @@ namespace TEA {
 
   // ----- ----- Avatar Setup Methods ----- -----
   private static readonly string TEA_OBJECT_MENU = "TEA Functions";
-  private static string EXPRESSION_FOLDER = "Expressions";
-  private static string EXPRESSION_MENU = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionsMenu.asset";
-  private static string EXPRESSION_PARAMETER = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionParameters.asset";
+  private static readonly string EXPRESSION_FOLDER = "Expressions";
+  private static readonly string EXPRESSION_MENU = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionsMenu.asset";
+  private static readonly string EXPRESSION_PARAMETER = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionParameters.asset";
 
   private static readonly string PLAYABLE_LAYERS_FOLDER = "Playable Layers";
 
-  private static string Base_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3LocomotionLayer.controller";
-  private static string Additive_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Additive.controller";
-  private static string Gesture_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3HandsLayer.controller";
-  private static string Action_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Actions.controller";
-  private static string FX_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/FX.controller";
+  private static readonly string Base_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3LocomotionLayer.controller";
+  private static readonly string Additive_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Additive.controller";
+  private static readonly string Gesture_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3HandsLayer.controller";
+  private static readonly string Action_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Actions.controller";
+  private static readonly string FX_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/FX.controller";
 
   // ----- Make Avatar Menu -----
   #region
@@ -72,7 +72,7 @@ namespace TEA {
    Transform head = AvatarController.GetBone(vrcd, HumanBodyBones.Head);
    if(null!=leftEye&&null!=rightEye) {
     vrcd.ViewPosition=Vector3.Lerp(rightEye.position, leftEye.position, 0.5f);
-    Debug.Log($"{leftEye.position.x} - {rightEye.position.x}");
+    //Debug.Log($"{leftEye.position.x} - {rightEye.position.x}");
    } else if(null!=leftEye)
     vrcd.ViewPosition=leftEye.position;
    else if(null!=rightEye)
@@ -112,30 +112,25 @@ namespace TEA {
    vrcd.autoLocomotion=false;
 
    // Folders
-   string parentFolder = GetParent(newAvatar.scene.path, false);
-   string avatarFolder=CreatePath(parentFolder, newAvatar.gameObject.name);
-   if(!AssetDatabase.IsValidFolder(avatarFolder)) {
-    if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(parentFolder, newAvatar.gameObject.name))) {
-     EditorUtility.DisplayDialog("Make Avatar 3.0", $"Could not create folder [{avatarFolder}]", "ok");
-     return;
-    }
-   }
-   parentFolder=avatarFolder;
+   string scenePath = GetParent(newAvatar.gameObject.scene.path, false);
+   string parentFolder = CreatePath(false, scenePath, newAvatar.gameObject.name);
+   if(!AssetDatabase.IsValidFolder(parentFolder))
+    AssetDatabase.CreateFolder(scenePath, newAvatar.gameObject.name);
 
    // Playable Layers
    string animation_folder = CreatePath(parentFolder, PLAYABLE_LAYERS_FOLDER);
    if(!AssetDatabase.IsValidFolder(animation_folder))
     AssetDatabase.CreateFolder(parentFolder, PLAYABLE_LAYERS_FOLDER);
 
-   string bLayer = CreatePath(animation_folder, "BaseLayer.controller");
+   string bLayer = CreatePath(false, animation_folder, "BaseLayer.controller");
    AssetDatabase.CopyAsset(Base_Layer, bLayer);
-   string addLayer = CreatePath(animation_folder, "AdditiveLayer.controller");
+   string addLayer = CreatePath(false, animation_folder, "AdditiveLayer.controller");
    AssetDatabase.CopyAsset(Additive_Layer, addLayer);
-   string gLayer = CreatePath(animation_folder, "GestureLayer.controller");
+   string gLayer = CreatePath(false, animation_folder, "GestureLayer.controller");
    AssetDatabase.CopyAsset(Gesture_Layer, gLayer);
-   string acLayer = CreatePath(animation_folder, "ActionLayer.controller");
+   string acLayer = CreatePath(false, animation_folder, "ActionLayer.controller");
    AssetDatabase.CopyAsset(Action_Layer, acLayer);
-   string fxLayer = CreatePath(animation_folder, "FX.controller");
+   string fxLayer = CreatePath(false, animation_folder, "FX.controller");
    AssetDatabase.CopyAsset(FX_Layer, fxLayer);
 
    vrcd.baseAnimationLayers[0].isDefault=false;
@@ -175,6 +170,10 @@ namespace TEA {
   [MenuItem("GameObject/TEA Functions/Make Avatar 3.0", true, 0)]
   public static bool MakeAvatarCheck() {
    GameObject newAvatar = Selection.activeGameObject;
+   if(null==newAvatar) {
+    EditorUtility.DisplayDialog("Make Avatar 3.0", $"Nothing Selected (probably unity donking up)", "Cancel");
+    return false;
+   }
    VRCAvatarDescriptor descriptor = newAvatar.GetComponent<VRCAvatarDescriptor>();
    if(null!=descriptor) {
     EditorUtility.DisplayDialog("Make Avatar 3.0", $"{newAvatar.name} is already an avatar", "Cancel");
@@ -194,7 +193,10 @@ namespace TEA {
    bool accept = false;
    if(null==animator.avatar) {
     accept=EditorUtility.DisplayDialog("Make Avatar 3.0", $"{newAvatar.name} does not have an Animator.Avatar", "Continue", "Cancel");
+   if(!accept)
+    return false;
    }
+
    parentFolder=CreatePath(parentFolder, newAvatar.gameObject.name);
    accept=EditorUtility.DisplayDialog("Make Avatar 3.0", $"This operation will create folders in\n[{parentFolder}]\nSome files may be overridden!", "Continue", "Cancel");
    return accept;
