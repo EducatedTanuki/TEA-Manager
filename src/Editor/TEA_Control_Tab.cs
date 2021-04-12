@@ -71,15 +71,6 @@ namespace TEA {
   GameObject audioListenerObj;
   GameObject lightObj;
 
-  // --- layout 
-  bool _allLayout = true;
-  bool _beforeToggles = true;
-  bool _afterToggles = true;
-  bool _beforeButtons = true;
-  bool _afterButtons = true;
-  bool _beforeInfo = true;
-  bool _afterInfo = true;
-
   // --- styles
   GUIStyle layoutStyle;
   GUIStyle sectionStyle;
@@ -248,7 +239,7 @@ namespace TEA {
      bool issues = compiler.CompileAnimators(manager);
      if(!_play&&!issues)
       _play=EditorUtility.DisplayDialog($"Compilation", "Avatars Compiled", "Play", "Continue");
-     manager.gameObject.SetActive(!(!settings.keep_in_scene&&!_play));
+     manager.gameObject.SetActive(!(!settings.keepInScene&&!_play));
      _compile=false;
     }
     if(_play) {
@@ -278,43 +269,43 @@ namespace TEA {
     alignment=TextAnchor.MiddleCenter
    });
 
-   _allLayout=_beforeToggles&&_afterToggles&&_beforeButtons&&_afterButtons&&_beforeInfo&&_afterInfo;
+   settings.AllLayout=settings.BeforeToggles&&settings.AfterToggles&&settings.BeforeButtons&&settings.AfterButtons&&settings.BeforeInfo&&settings.AfterInfo;
 
    EditorGUILayout.LabelField("All", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
    EditorGUI.BeginChangeCheck();
-   _allLayout=EditorGUILayout.Toggle("", _allLayout, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   settings.AllLayout=EditorGUILayout.Toggle("", settings.AllLayout, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
    EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
    if(EditorGUI.EndChangeCheck()) {
-    if(_allLayout) {
-     _beforeToggles=true;
-     _beforeButtons=true;
-     _afterButtons=true;
-     _beforeInfo=true;
-     _afterInfo=true;
-     _afterToggles=true;
+    if(settings.AllLayout) {
+     settings.BeforeToggles=true;
+     settings.BeforeButtons=true;
+     settings.AfterButtons=true;
+     settings.BeforeInfo=true;
+     settings.AfterInfo=true;
+     settings.AfterToggles=true;
     } else {
-     _afterToggles=false;
-     _beforeToggles=false;
-     _beforeButtons=false;
-     _afterButtons=false;
-     _beforeInfo=false;
-     _afterInfo=false;
+     settings.AfterToggles=false;
+     settings.BeforeToggles=false;
+     settings.BeforeButtons=false;
+     settings.AfterButtons=false;
+     settings.BeforeInfo=false;
+     settings.AfterInfo=false;
     }
    }
 
-   _beforeToggles=EditorGUILayout.Toggle("", _beforeToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   settings.BeforeToggles=EditorGUILayout.Toggle("", settings.BeforeToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
    EditorGUILayout.LabelField("Toggles", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
-   _afterToggles=EditorGUILayout.Toggle("", _afterToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   settings.AfterToggles=EditorGUILayout.Toggle("", settings.AfterToggles, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
 
    EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
-   _beforeButtons=EditorGUILayout.Toggle("", _beforeButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   settings.BeforeButtons=EditorGUILayout.Toggle("", settings.BeforeButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
    EditorGUILayout.LabelField("Buttons", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
-   _afterButtons=EditorGUILayout.Toggle("", _afterButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   settings.AfterButtons=EditorGUILayout.Toggle("", settings.AfterButtons, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
    EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
 
-   _beforeInfo=EditorGUILayout.Toggle("", _beforeInfo, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
+   settings.BeforeInfo=EditorGUILayout.Toggle("", settings.BeforeInfo, GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
    EditorGUILayout.LabelField("Info", layoutStyle, GUILayout.Width(LABEL_WIDTH), GUILayout.ExpandWidth(false));
-   _afterInfo=EditorGUILayout.Toggle("", _afterInfo, GUILayout.ExpandWidth(false));
+   settings.AfterInfo=EditorGUILayout.Toggle("", settings.AfterInfo, GUILayout.ExpandWidth(false));
 
    EditorGUILayout.EndHorizontal();
   }
@@ -327,7 +318,7 @@ namespace TEA {
 
   // --- --- Button Section
   private void DrawButtonParent(bool render) {
-   if(_beforeButtons)
+   if(settings.BeforeButtons)
     GUILayout.FlexibleSpace();
 
    EditorGUILayout.BeginHorizontal(sectionStyle, GUILayout.Width(BUTTON_WIDTH*3), GUILayout.Height(MIN_HEIGHT));
@@ -339,7 +330,7 @@ namespace TEA {
    GUILayout.FlexibleSpace();
    EditorGUILayout.EndHorizontal();
 
-   if(_afterButtons)
+   if(settings.AfterButtons)
     GUILayout.FlexibleSpace();
    EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
   }
@@ -372,7 +363,7 @@ namespace TEA {
   }
 
   private void DrawToggleParent() {
-   if(_beforeToggles)
+   if(settings.BeforeToggles)
     GUILayout.FlexibleSpace();
 
    EditorGUILayout.BeginHorizontal(sectionStyle, GUILayout.MaxWidth(7*TOGGLE_WIDTH));
@@ -381,27 +372,26 @@ namespace TEA {
 
    EditorGUILayout.EndHorizontal();
 
-   if(_afterToggles)
+   if(settings.AfterToggles)
     GUILayout.FlexibleSpace();
   }
 
   private void DrawAllToggles() {
    SetToggleObjects();
-   settings.keep_in_scene=DrawToggle(settings.keep_in_scene, EditorGUIUtility.IconContent("d_Prefab Icon").image, "Keep the TEA Manager prefab in your Scene while not in play mode");
+   settings.keepInScene=DrawToggle(settings.keepInScene, EditorGUIUtility.IconContent("d_Prefab Icon").image, settings.keepInSceneTooltip);
 
-   string toolTip = "TEA Canvas ON-OFF, will activate when you play";
    if(null!=canvasObj&&EditorApplication.isPlaying) {
     canvasObj.SetActive(true);
-    GUILayout.Box(new GUIContent(canvasTex, toolTip), new GUIStyle() { alignment=TextAnchor.MiddleCenter }, GUILayout.Height(MIN_HEIGHT), GUILayout.MaxWidth(TOGGLE_WIDTH), GUILayout.ExpandWidth(false));
+    GUILayout.Box(new GUIContent(canvasTex, settings.CanvasTooltip), new GUIStyle() { alignment=TextAnchor.MiddleCenter }, GUILayout.Height(MIN_HEIGHT), GUILayout.MaxWidth(TOGGLE_WIDTH), GUILayout.ExpandWidth(false));
    } else
-    settings._canvas=DrawObjectToggle(settings._canvas, canvasObj, canvasTex, toolTip);
+    settings.CanvasActive=DrawObjectToggle(settings.CanvasActive, canvasObj, canvasTex, settings.CanvasTooltip);
 
-   settings._stage=DrawObjectToggle(settings._stage, stageObj, stage, "Stage ON-OFF");
-   settings._worldCenter=DrawObjectToggle(settings._worldCenter, worldCenterObj, center, "World Center ON-OFF");
-   settings._audioListener=DrawObjectToggle(settings._audioListener, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, "Audio Listener ON-OFF");
-   settings._light=DrawObjectToggle(settings._light, lightObj, EditorGUIUtility.IconContent("DirectionalLight Gizmo").image, "Directional Light ON-OFF");
-   settings._validate=DrawToggle(settings._validate, validation, "turn off validation");
-   compiler.validate=settings._validate;
+   settings.StageActive=DrawObjectToggle(settings.StageActive, stageObj, stage, settings.StageTooltip);
+   settings.WorldCenterActive=DrawObjectToggle(settings.WorldCenterActive, worldCenterObj, center, settings.worldCenterTooltip);
+   settings.AudioListenerActive=DrawObjectToggle(settings.AudioListenerActive, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, settings.AudioListenerTooltip);
+   settings.LightActive=DrawObjectToggle(settings.LightActive, lightObj, EditorGUIUtility.IconContent("DirectionalLight Gizmo").image, settings.LighTooltipt);
+   settings.ValidateActive=DrawToggle(settings.ValidateActive, validation, settings.ValidateTooltip);
+   compiler.validate=settings.ValidateActive;
 
    EditorUtility.SetDirty(settings);
   }
@@ -421,7 +411,7 @@ namespace TEA {
   private delegate void DrawInfoContent();
 
   private void DrawInfoParent(DrawInfoContent drawContent, int width) {
-   if(_beforeInfo)
+   if(settings.BeforeInfo)
     GUILayout.FlexibleSpace();
 
    EditorGUILayout.BeginHorizontal(GUILayout.Width(SECTION_WIDTH*2.5f));
@@ -434,7 +424,7 @@ namespace TEA {
 
    GUILayout.FlexibleSpace();
    EditorGUILayout.EndHorizontal();
-   if(_afterInfo)
+   if(settings.AfterInfo)
     GUILayout.FlexibleSpace();
   }
 
@@ -495,7 +485,7 @@ namespace TEA {
    List<TEA_Manager> managers = new List<TEA_Manager>();
    manager=null;
    int activeCount = 0;
-   bool destroy = (!play||!_play||!_compile)&&!settings.keep_in_scene;
+   bool destroy = (!play||!_play||!_compile)&&!settings.keepInScene;
    for(int i = 0; i<SceneManager.sceneCount; i++) {
     Scene scene = SceneManager.GetSceneAt(i);
     if(!scene.isLoaded)
@@ -520,7 +510,7 @@ namespace TEA {
    }// for scene
 
    // add managers
-   if(null==manager&&_avatars&&(_compile||_play||play||settings.keep_in_scene)) {
+   if(null==manager&&_avatars&&(_compile||_play||play||settings.keepInScene)) {
     TEA_Manager newManager = Instantiate(prefabObject).GetComponent<TEA_Manager>();
     this.manager=newManager;
    }

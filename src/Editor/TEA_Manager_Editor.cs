@@ -275,8 +275,12 @@ namespace TEA {
   }
 
   private static void CreateToggle(GameObject gameObject, Transform parent, float value) {
-   string parentFolder = GetParent(parent.gameObject.scene.path, false);
-   string toggle_folder = CreatePath(parentFolder, parent.gameObject.name, "Toggles");
+   string scenePath = GetParent(parent.gameObject.scene.path, false);
+   string parentFolder = CreatePath(false, scenePath, parent.gameObject.name);
+   if(!AssetDatabase.IsValidFolder(parentFolder))
+    AssetDatabase.CreateFolder(scenePath, parent.gameObject.name);
+
+   string toggle_folder = CreatePath(parentFolder, "Toggles");
    if(!AssetDatabase.IsValidFolder(toggle_folder))
     AssetDatabase.CreateFolder(parentFolder, "Toggles");
 
