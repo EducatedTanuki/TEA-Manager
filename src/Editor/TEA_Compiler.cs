@@ -76,7 +76,7 @@ namespace TEA {
     layerInfo.name=avatarKey+"-layerData";
 
     RuntimeAnimatorController baseRunContr = manager.Base;
-    if(!avatarComp.baseAnimationLayers[0].isDefault&&avatarComp.baseAnimationLayers[0].animatorController)
+    if(!avatarComp.baseAnimationLayers[0].isDefault&&null!=avatarComp.baseAnimationLayers[0].animatorController)
      baseRunContr=avatarComp.baseAnimationLayers[0].animatorController;
     string baseControllerPath = CreatePath(false, folderPath, "Base.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(baseRunContr), baseControllerPath);
@@ -88,7 +88,7 @@ namespace TEA {
 
     // Additive
     AnimatorController additiveAnimContr = null;
-    if(!avatarComp.baseAnimationLayers[1].isDefault||!avatarComp.baseAnimationLayers[1].animatorController) {
+    if(!avatarComp.baseAnimationLayers[1].isDefault&&null!=avatarComp.baseAnimationLayers[1].animatorController) {
      RuntimeAnimatorController additiveRunContr = avatarComp.baseAnimationLayers[1].animatorController;
      string additiveControllerPath = CreatePath(false, folderPath, "Additive.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(additiveRunContr), additiveControllerPath);
@@ -107,7 +107,7 @@ namespace TEA {
 
     // Gesture
     RuntimeAnimatorController gestureRunContr = manager.Gesture_Male;
-    if(!avatarComp.baseAnimationLayers[2].isDefault&&avatarComp.baseAnimationLayers[2].animatorController)
+    if(!avatarComp.baseAnimationLayers[2].isDefault&&null!=avatarComp.baseAnimationLayers[2].animatorController)
      gestureRunContr=avatarComp.baseAnimationLayers[2].animatorController;
     string gestureControllerPath = CreatePath(false, folderPath, "Gesture.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(gestureRunContr), gestureControllerPath);
@@ -119,7 +119,7 @@ namespace TEA {
 
     //Actions
     RuntimeAnimatorController actionRunContr = manager.Action;
-    if(!avatarComp.baseAnimationLayers[3].isDefault&&avatarComp.baseAnimationLayers[3].animatorController)
+    if(!avatarComp.baseAnimationLayers[3].isDefault&&null!=avatarComp.baseAnimationLayers[3].animatorController)
      actionRunContr=avatarComp.baseAnimationLayers[3].animatorController;
     string actionControllerPath = CreatePath(false, folderPath, "Action.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(actionRunContr), actionControllerPath);
@@ -131,7 +131,7 @@ namespace TEA {
 
     //FX
     AnimatorController fxAnimContr = null;
-    if(!avatarComp.baseAnimationLayers[4].isDefault||!avatarComp.baseAnimationLayers[4].animatorController) {
+    if(!avatarComp.baseAnimationLayers[4].isDefault&&null!=avatarComp.baseAnimationLayers[4].animatorController) {
      RuntimeAnimatorController fxRunContr = avatarComp.baseAnimationLayers[4].animatorController;
      string fxControllerPath = CreatePath(false, folderPath, "FX.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(fxRunContr), fxControllerPath);
@@ -156,7 +156,7 @@ namespace TEA {
     string layerInfoPath = CreatePath(false, folderPath, layerInfo.name+".asset");
     AssetDatabase.CreateAsset(layerInfo, layerInfoPath);
     manager.LayerInfo.Add(AssetDatabase.LoadAssetAtPath<TEA_PlayableLayerData>(layerInfoPath));
-    
+
     //Debug.Log($"HEAD[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).position.ToString("F4")}] ViewPort:[{avatarComp.ViewPosition.ToString("F4")}] Transform[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition).ToString("F4")}]");
     manager.ViewPorts.Add(AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition));
     Debug.Log($"----- Created animator controllers for [{avatarKey}]");
