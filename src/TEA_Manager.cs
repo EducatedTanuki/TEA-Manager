@@ -73,6 +73,7 @@ namespace TEA {
   public ParentConstraint CameraRig;
   public ParentConstraint ViewPort;
   public ParentConstraint FaceCamera;
+  public GameObject CameraRigPointer;
 
   [Header("SDK Warning Components")]
   public HorizontalOrVerticalLayoutGroup SDKErrorUI;

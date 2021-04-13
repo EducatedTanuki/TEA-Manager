@@ -9,7 +9,7 @@ namespace TEA {
  public class AvatarController : MonoBehaviour {
   // --- --- --- Awake --- --- ---
   public static AvatarController current;
-  private void Awake() {
+  private void Awake() { 
    //Debug.Log("Avatar Controller waking");
    current=this;
   }
@@ -83,21 +83,11 @@ namespace TEA {
   }
 
   // --- --- --- Update --- --- ---
-  public enum Speed {
-   Walk,
-   Sprint
-  }
-
-  [Header("Locomotion Settings")]
-  public float MoveSpeed = 0.15f;
-  public Speed speed = Speed.Walk;
-  private float moveMultiplier = 1f;
-  public float RunMultiplier = 3f;
-  public float WalkSpeed = 1.56f;
-  public float RunSpeed = 5.96f;
+  public TEA_Settings Locomotion { get; set; }
   private Vector3 newPosition;
-  public float RotationAmount = 1;
-  public Quaternion horizontalRotation;
+  private Quaternion horizontalRotation;
+  private float velocity = 1;
+  private int speed=0;
 
   private void Update() {
    if(!Initialized())
@@ -126,51 +116,74 @@ namespace TEA {
     controlEvents.Remove(rm);
    }
 
-   // --- input ---
-   if(Input.GetKey(KeyCode.LeftShift)) {
-    speed=Speed.Sprint;
-    moveMultiplier=RunMultiplier;
-   } else { speed=Speed.Walk; moveMultiplier=1f; }
-
    if(CameraController.mouseIn&&Input.GetMouseButton(1)&&!CameraController.FreeCamera) {
     newPosition=Vector3.zero;
     Avatar.transform.position=newPosition;
     VelocityX=0;
     VelocityZ=0;
-   } else if(CameraController.mouseIn&&!CameraController.FreeCamera) {
+   } else if(null!=Locomotion&&CameraController.mouseIn&&!CameraController.FreeCamera) {
     //Rotate
     if(Input.GetKey(KeyCode.E)) {
-     horizontalRotation*=Quaternion.Euler(Vector3.up*RotationAmount);
+     horizontalRotation*=Quaternion.Euler(Vector3.up*Locomotion.RotationAmount);
     }
     if(Input.GetKey(KeyCode.Q)) {
-     horizontalRotation*=Quaternion.Euler(Vector3.up*-RotationAmount);
+     horizontalRotation*=Quaternion.Euler(Vector3.up*-Locomotion.RotationAmount);
     }
     Avatar.transform.rotation=horizontalRotation;
 
+    // --- input ---
+    if(Input.GetKeyUp(KeyCode.LeftShift))
+     speed++;
+    if(3<=speed)
+     speed=0;
+
+    if(0==speed) {
+     Locomotion.MoveType=TEA_Settings.MoveTypes.Walk;
+     velocity=Locomotion.WalkVelocity;
+    } else if(1==speed) {
+     Locomotion.MoveType=TEA_Settings.MoveTypes.Run;
+     velocity=Locomotion.RunVelocity;
+    } else if(2==speed) {
+     Locomotion.MoveType=TEA_Settings.MoveTypes.Sprint;
+     velocity=Locomotion.SprintVelocity;
+    }
+
     // Walk
-    if(Input.GetKey(KeyCode.W)||Input.GetKey(KeyCode.UpArrow)) {
-     newPosition+=(CameraController.RigCamera.transform.forward*moveMultiplier*MoveSpeed);
-    }
-    if(Input.GetKey(KeyCode.S)||Input.GetKey(KeyCode.DownArrow)) {
-     newPosition+=(CameraController.RigCamera.transform.forward*moveMultiplier*-MoveSpeed);
-    }
-    if(Input.GetKey(KeyCode.A)||Input.GetKey(KeyCode.LeftArrow)) {
-     newPosition+=(CameraController.RigCamera.transform.right*moveMultiplier*-MoveSpeed);
-    }
-    if(Input.GetKey(KeyCode.D)||Input.GetKey(KeyCode.RightArrow)) {
-     newPosition+=(CameraController.RigCamera.transform.right*moveMultiplier*MoveSpeed);
-    }
+    int forward = Input.GetKey(KeyCode.W)  ||Input.GetKey(KeyCode.UpArrow) ? 1 : 0;
+    int backward = Input.GetKey(KeyCode.S) ||Input.GetKey(KeyCode.DownArrow) ? -1 : 0;
+    int right = Input.GetKey(KeyCode.D)    ||Input.GetKey(KeyCode.RightArrow) ? 1 : 0;
+    int left = Input.GetKey(KeyCode.A)     ||Input.GetKey(KeyCode.LeftArrow) ? -1 : 0;
+    int z = forward + backward;
+    int x = right   + left;
 
-    // animator velocities
-    Vector3 localMove = Vector3.Normalize(Avatar.transform.InverseTransformPoint(newPosition));
-    int zScale = (int)(Speed.Sprint==speed ? localMove.z*RunSpeed : localMove.z*WalkSpeed);
-    VelocityZ=zScale;
-    int xScale = (int)(Speed.Sprint==speed ? localMove.x*RunSpeed : localMove.x*WalkSpeed);
-    VelocityX=xScale;
+    if(x!=0||z!=0) {
+     float distance = Time.deltaTime*velocity;
+     float theta    = Mathf.Atan2(z, x);
+     float distanceX   = Mathf.Cos(theta)*(distance);
+     float distanceZ   = Mathf.Sin(theta)*(distance);
+     Vector3 cameraDirection = CameraController.RigCamera.transform.forward;
 
-    // world position
-    newPosition.y=0;
-    Avatar.transform.position=newPosition;
+     // animator velocities
+     if(TEA_Manager.current.ViewPort.gameObject.activeSelf) {
+      newPosition=Avatar.transform.TransformPoint(new Vector3(distanceX, 0, distanceZ));
+      VelocityZ=distanceZ/Time.deltaTime;
+     } else {
+      newPosition+=TEA_Manager.current.CameraRigPointer.transform.right*distanceX;
+      newPosition+=TEA_Manager.current.CameraRigPointer.transform.forward*distanceZ;
+      Vector3 movePoint = Avatar.transform.InverseTransformPoint(newPosition);
+      VelocityX=0+movePoint.x/Time.deltaTime;
+      VelocityZ=0+movePoint.z/Time.deltaTime;
+     }
+
+     Debug.Log($"[{x},{z}] distance[{distance}] float[{distanceX}, {distanceZ}] velocity[{VelocityX}, {VelocityZ}]");
+
+     // world position
+     Avatar.transform.position=newPosition;
+    } else {
+     newPosition=Avatar.transform.position;
+     VelocityX=0;
+     VelocityZ=0;
+    }
    } else {
     newPosition=Avatar.transform.position;
     VelocityX=0;

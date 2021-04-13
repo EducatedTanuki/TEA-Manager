@@ -186,6 +186,10 @@ namespace TEA {
     //----------------
     EndLayout();
 
+    EditorGUILayout.BeginVertical();
+    
+    EditorGUILayout.EndVertical();
+
     CleanLeanTween();
    } catch(System.Exception ex) {
     Debug.LogException(new System.Exception("Play Tab ran into an unexpected issue", ex));
@@ -228,6 +232,7 @@ namespace TEA {
     TEA_Manager.AvatarDescriptor=newAvatars.Values.ToList<VRCAvatarDescriptor>();
     if(manager.Avatar==null)
      manager.Initialize(0);
+    manager.GetComponent<AvatarController>().Locomotion=settings;
     _patched=true;
    }
 

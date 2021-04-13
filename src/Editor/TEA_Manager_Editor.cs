@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEditor.Animations;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
-using UnityEngine.SceneManagement;
 using static TEA.TEA_Utility;
 
 namespace TEA {

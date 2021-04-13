@@ -28,18 +28,19 @@ Here are options for getting `Play Tab` into your workspace.
 Use the checkboxes at the bottom to control the spacing of the main controls.  
 There are tooltips for most controls.  
 
-##### TEA UI
-In play mode `Tea Manager` emulates VRChat's Avatar system.  
-Use the `TEA UI` in the Game tab to test your avatar.  
+### `TEA Settings`
 
-![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
+`TEA Settings` is a file that saves the state of the `Play Tab` toggles and locomotion settings.  
+`Play Tab` will use the first `TEA Settings` found in your project.  
+If a `TEA Settings` file does not exist one is created as `Assets/TEA Settings.asset`.  
 
-### TEA Manager Prefab
+### Considerations
+
+###### TEA Manager Prefab
+
 The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate in play mode.
 `Play Tab` will automatically load the `TEA Manager Prefab` into the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) when there is at least one avatar.  
 If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
-
-### Considerations
 
 ###### Multiple Avatars  
 > You can switch between avatars using the avatar dropdown in **play mode**  
@@ -54,7 +55,15 @@ If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only
 > `Play Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)
 > and will remove `TEA Manager Prefab` from all other loaded scenes.  
 
-# Inputs
+# `TEA UI`
+
+In play mode `Tea Manager` emulates VRChat's Avatar system.  
+Use the `TEA UI` in the Game tab to test your avatar.  
+
+![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
+
+### Inputs
+
 Controls are context sensative, but in general this is the Input mapping  
 
 |        Input       |          Action          |
@@ -66,7 +75,7 @@ Controls are context sensative, but in general this is the Input mapping
 |     Ctrl+Mouse     |       Slower Action      |
 |    Shift+Mouse     |       Faster Action      |
 | W, A, S, D, Arrows |  Camera/Avatar Movement  |
-|       Shift+       |          Sprint          |
+|       Shift        |    Scroll Move Speeds    |
 |        Q, E        |  Camera/Avatar Rotation  |
 |          H         |   Un-hide All Controls   |
 
