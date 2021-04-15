@@ -283,14 +283,6 @@ namespace TEA {
    return avatarAnim.GetBool(name);
   }
 
-  internal bool HasAnimatorParameter(Animator animator, string name) {
-   foreach(AnimatorControllerParameter parameter in animator.parameters) {
-    if(parameter.name==name)
-     return true;
-   }
-   return false;
-  }
-
   // --- --- --- standing --- --- ---
 
   public void Falling(bool isFalling) {

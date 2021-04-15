@@ -62,6 +62,15 @@ namespace TEA {
    return null;
   }
 
+  // ------ ------ Animator ----- -----
+  public static bool HasAnimatorParameter(string name, AnimatorControllerParameter[] parameters) {
+   foreach(AnimatorControllerParameter parameter in parameters) {
+    if(parameter.name==name)
+     return true;
+   }
+   return false;
+  }
+
   // ----- ------ Folders ----- -----
   public static string CreatePath(bool keepslash, params string[] pathParts) {
    string path = CreatePath(pathParts);

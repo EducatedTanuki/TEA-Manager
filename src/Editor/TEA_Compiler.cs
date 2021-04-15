@@ -10,7 +10,9 @@ using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 using UnityEngine.SceneManagement;
 using TEA.ScriptableObject;
+using TEA;
 using static TEA.TEA_Utility;
+using static TEA.TEA_ValidationIssues;
 
 namespace TEA {
  public class TEA_Compiler {
@@ -24,13 +26,15 @@ namespace TEA {
   // --- Validation ---
   public static readonly string ERROR_HEADER = "Issue Compiling Animators";
   public bool validate = true;
-  public Dictionary<VRCAvatarDescriptor.AnimLayerType, List<string>> errorLog = new Dictionary<VRCAvatarDescriptor.AnimLayerType, List<string>>();
 
   // ----- ----- Compile ----- -----
+  VRCAvatarDescriptor currentAvatar;
+  AnimatorController superAnimator;
+  TEA_ValidationIssues issues;
+  bool _avatarIssue = false;
+  bool validationIssue = false;
 
   public bool CompileAnimators(TEA_Manager manager) {
-   bool validationIssue = false;
-
    // working folder
    if(!AssetDatabase.IsValidFolder(WORKING_DIR_PATH)) {
     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder("Assets", WORKING_DIR))) {
@@ -39,6 +43,8 @@ namespace TEA {
     }
    }
 
+   List<TEA_ValidationIssues> avatarIssues = new List<TEA_ValidationIssues>();
+   validationIssue=false;
    AnimatorController teaAnimContr = GenerateTEA_Animator(manager);
 
    foreach(string path in AssetDatabase.GetSubFolders(WORKING_DIR_PATH)) {
@@ -48,7 +54,6 @@ namespace TEA {
    int aCount = 0;
    // --- --- --- for all avatars
    foreach(VRCAvatarDescriptor avatar in TEA_Manager.AvatarDescriptor) {
-
     //Scene Folder
     string sceneFolder = CreatePath(false, WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
     if(!AssetDatabase.IsValidFolder(sceneFolder)) {
@@ -58,8 +63,14 @@ namespace TEA {
      }
     }
 
+    _avatarIssue=false;
+    drivers=new List<DriverIssue>();
     VRCAvatarDescriptor avatarComp = TEA_Manager.AvatarDescriptor[aCount];
+    currentAvatar=avatarComp;
+    issues=TEA_ValidationIssues.CreateInstance<TEA_ValidationIssues>();
+    issues.AvatarName=avatarComp.name;
     string avatarKey = avatarComp.gameObject.name;
+
     Debug.Log($"----- Creating animator controllers for [{avatarKey}]");
 
     // avatar folder
@@ -70,7 +81,7 @@ namespace TEA {
     }
 
     //--- Animator ---
-    AnimatorController superAnimator = new AnimatorController() { name=CONTROLLER_PREFIX+avatarKey };
+    superAnimator=new AnimatorController() { name=CONTROLLER_PREFIX+avatarKey };
     TEA_PlayableLayerData layerInfo = TEA_PlayableLayerData.CreateInstance<TEA_PlayableLayerData>();
     layerInfo.AvatarName=avatarKey;
     layerInfo.name=avatarKey+"-layerData";
@@ -81,7 +92,7 @@ namespace TEA {
     string baseControllerPath = CreatePath(false, folderPath, "Base.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(baseRunContr), baseControllerPath);
     AnimatorController baseAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(baseControllerPath);
-    GetBehaviours(baseAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Base);
+    GetBehaviours(baseRunContr, baseAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Base);
     CombineAnimator(superAnimator, baseAnimContr, null);
     layerInfo.data[0].start=0;
     layerInfo.data[0].end=baseAnimContr.layers.Length;
@@ -93,7 +104,7 @@ namespace TEA {
      string additiveControllerPath = CreatePath(false, folderPath, "Additive.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(additiveRunContr), additiveControllerPath);
      additiveAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(additiveControllerPath);
-     GetBehaviours(additiveAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Additive);
+     GetBehaviours(additiveRunContr, additiveAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Additive);
      CombineAnimator(superAnimator, additiveAnimContr, null);
      layerInfo.data[1].start=layerInfo.data[0].end;
      layerInfo.data[1].end=layerInfo.data[0].end+(additiveAnimContr.layers.Length);
@@ -112,7 +123,7 @@ namespace TEA {
     string gestureControllerPath = CreatePath(false, folderPath, "Gesture.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(gestureRunContr), gestureControllerPath);
     AnimatorController gestureAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(gestureControllerPath);
-    GetBehaviours(gestureAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Gesture);
+    GetBehaviours(gestureRunContr, gestureAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Gesture);
     CombineAnimator(superAnimator, gestureAnimContr, null);
     layerInfo.data[2].start=layerInfo.data[1].end+teaAnimContr.layers.Length;
     layerInfo.data[2].end=layerInfo.data[1].end+teaAnimContr.layers.Length+(gestureAnimContr.layers.Length);
@@ -124,7 +135,7 @@ namespace TEA {
     string actionControllerPath = CreatePath(false, folderPath, "Action.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(actionRunContr), actionControllerPath);
     AnimatorController actionAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(actionControllerPath);
-    GetBehaviours(actionAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Action);
+    GetBehaviours(actionRunContr, actionAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Action);
     CombineAnimator(superAnimator, actionAnimContr, null);
     layerInfo.data[3].start=layerInfo.data[2].end;
     layerInfo.data[3].end=layerInfo.data[2].end+(actionAnimContr.layers.Length);
@@ -138,7 +149,7 @@ namespace TEA {
      fxAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(fxControllerPath);
 
      SetFXDefault(superAnimator, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
-     GetBehaviours(fxAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.FX);
+     GetBehaviours(fxRunContr, fxAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.FX);
      CombineAnimator(superAnimator, fxAnimContr, manager.AvatarMaskNone);
      //SetFXDefault(action, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
      //CombineAnimator(action, fxAnimContr, manager.AvatarMaskNone);
@@ -163,34 +174,60 @@ namespace TEA {
 
     // Validation
     if(validate) {
-     errorLog=new Dictionary<VRCAvatarDescriptor.AnimLayerType, List<string>>();
+     //--- check layers
+     string nullLayer = "Playable Layer is not default, it should be set in Descriptor";
      foreach(VRCAvatarDescriptor.CustomAnimLayer layer in avatarComp.baseAnimationLayers) {
-      if(!layer.isDefault&&!layer.animatorController)
-       GetLayerIssues(layer.type).Add("No Controller specified");
-      else if(VRCAvatarDescriptor.AnimLayerType.Base==layer.type)
-       ValidateOnlyTransforms(true, layer.type, baseAnimContr);
-      else if(VRCAvatarDescriptor.AnimLayerType.Additive==layer.type)
-       ValidateOnlyTransforms(true, layer.type, additiveAnimContr);
-      else if(VRCAvatarDescriptor.AnimLayerType.Gesture==layer.type)
-       ValidateOnlyTransforms(true, layer.type, gestureAnimContr);
-      else if(VRCAvatarDescriptor.AnimLayerType.Action==layer.type)
-       ValidateOnlyTransforms(true, layer.type, actionAnimContr);
-      else if(VRCAvatarDescriptor.AnimLayerType.FX==layer.type)
-       ValidateOnlyTransforms(false, layer.type, fxAnimContr);
+      if(!layer.isDefault&&null==layer.animatorController) {
+       Issue issue = new TEA_ValidationIssues.Issue(nullLayer, currentAvatar);
+       issues.GetLayer(layer.type).Add(issue);
+       _avatarIssue=true;
+      }
+      ValidateOnlyTransforms(layer.type, AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(layer.animatorController)));
      }
 
-     missingParam=new List<string>();
+     // drivers
+     foreach(DriverIssue driver in drivers) {
+      if(driver.driver.parameters.Count==0) {
+       Issue issue = new TEA_ValidationIssues.Issue($"Layer[{ driver.layerName }]: no parameter set");
+       issue.Reference.Add(driver.state);
+       issue.Reference.Add(driver.driver);
+       issues.GetLayer(driver.layerType).Add(issue);
+       _avatarIssue=true;
+      }
+      foreach(VRCAvatarParameterDriver.Parameter param in driver.driver.parameters) {
+       if(null==currentAvatar.expressionParameters.FindParameter(param.name)) {
+        Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not in ExpressionParameters");
+        issue.Reference.Add(driver.state);
+        issue.Reference.Add(driver.driver);
+        issues.GetLayer(driver.layerType).Add(issue);
+        _avatarIssue=true;
+       }
+       if(!TEA_Utility.HasAnimatorParameter(param.name, superAnimator.parameters)) {
+        Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not a parameter in any Playable Layer");
+        issue.Reference.Add(driver.state);
+        issue.Reference.Add(driver.driver);
+        issues.GetLayer(driver.layerType).Add(issue);
+        _avatarIssue=true;
+       }
+      }
+     }
+
+     // missing Expression Parameters
      ValidateExpressionParameters(avatarComp, superAnimator);
 
-     string issues = PrintValidationIssues();
-     if(!string.IsNullOrEmpty(issues)) {
+     if(_avatarIssue) {
+      avatarIssues.Add(issues);
       validationIssue=true;
-      EditorUtility.DisplayDialog($"[{avatarKey}] Compile Issues", issues, "OK");
      }
-    }
+    }//validate
+
     AssetDatabase.SaveAssets();
     aCount++;
    }// for avatar
+
+   if(validationIssue) {
+    TEA_Error_Window.Open(avatarIssues);
+   }
    return validationIssue;
   }
 
@@ -274,10 +311,17 @@ namespace TEA {
   }
 
   #region
-  internal static void GetBehaviours(AnimatorController controller, TEA_PlayableLayerData layerData, VRCAvatarDescriptor.AnimLayerType type) {
+  private void GetBehaviours(RuntimeAnimatorController runController, AnimatorController controller, TEA_PlayableLayerData layerData, VRCAvatarDescriptor.AnimLayerType type) {
+   AnimatorController runCont = AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(runController));
+   int layerC = 0;
    foreach(AnimatorControllerLayer layer in controller.layers) {
+    AnimatorControllerLayer rLayer = runCont.layers[layerC];
+    int stateC = 0;
     foreach(ChildAnimatorState state in layer.stateMachine.states) {
+     ChildAnimatorState rState = rLayer.stateMachine.states[stateC];
+     int behC = 0;
      foreach(StateMachineBehaviour beh in state.state.behaviours) {
+      StateMachineBehaviour rBeh = rState.state.behaviours[behC];
       if(beh is VRCPlayableLayerControl) {
        VRCPlayableLayerControl pc = (VRCPlayableLayerControl)beh;
        TEA_PlayableLayerControl tc = state.state.AddStateMachineBehaviour<TEA_PlayableLayerControl>();
@@ -303,10 +347,47 @@ namespace TEA {
          valueMin=param.valueMin
         });
         td.state=state.state.name;
+        //--- validation ---
        }
+       ValidateParameterDriver((VRCAvatarParameterDriver)rBeh, type, rLayer, rState.state);
       }
-     }
-    }
+      behC++;
+     }//for behavior
+     stateC++;
+    }//for state
+    layerC++;
+   }//for layer
+
+  }
+
+  struct DriverIssue {
+   public VRCAvatarParameterDriver driver;
+   public string layerName;
+   public VRCAvatarDescriptor.AnimLayerType layerType;
+   public AnimatorState state;
+  }
+  List<DriverIssue> drivers;
+  private void ValidateParameterDriver(VRCAvatarParameterDriver d, VRCAvatarDescriptor.AnimLayerType type, AnimatorControllerLayer layer, AnimatorState state) {
+   drivers.Add(new DriverIssue {
+    driver=d,
+    layerName=layer.name,
+    layerType=type,
+    state=state
+   });
+  }
+
+  public static void RemoveBehaviour(AnimatorState state, StateMachineBehaviour behaviour) {
+
+   if(state!=null) {
+    StateMachineBehaviour[] theBehaviours = state.behaviours;
+
+    ArrayUtility.Remove(ref theBehaviours, behaviour);
+
+    Undo.RegisterCompleteObjectUndo(state, "Removed behaviour");
+
+    Undo.DestroyObjectImmediate(behaviour);
+
+    state.behaviours=theBehaviours;
    }
   }
 
@@ -421,40 +502,6 @@ namespace TEA {
 
   // --- --- Validation --- ---
   #region
-  private List<string> GetLayerIssues(VRCAvatarDescriptor.AnimLayerType layerName) {
-   if(!errorLog.TryGetValue(layerName, out List<string> list))
-    errorLog.Add(layerName, (list=new List<string>()));
-   return list;
-  }
-
-  private string PrintValidationIssues() {
-   string text = "";
-
-   // missing param
-   if(missingParam.Count>0) {
-    text+="Missing Parameters";
-    foreach(string missing in missingParam) {
-     text+="\n -";
-     text+=missing;
-    }
-    text+="\n";
-   }
-
-   //layer issues
-   foreach(KeyValuePair<VRCAvatarDescriptor.AnimLayerType, List<string>> layerIssue in errorLog) {
-    if(null==layerIssue.Value)
-     continue;
-    text+=layerIssue.Key;
-    foreach(string issue in layerIssue.Value) {
-     text+="\n  - ";
-     text+=issue;
-    }
-    text+="\n";
-   }
-   return text;
-  }
-
-  private List<string> missingParam = new List<string>();
   private void ValidateExpressionParameters(VRCAvatarDescriptor avatar, AnimatorController superAnimator) {
    if(avatar.customExpressions) {
     foreach(VRCExpressionParameters.Parameter parameter in avatar.expressionParameters.parameters) {
@@ -468,57 +515,71 @@ namespace TEA {
       }
      }//for aParam
      if(!exists)
-      missingParam.Add(parameter.name);
+      issues.ParametersNotInAnimators.Add(parameter.name);
     }//for parameter
    }
   }
 
-  private void ValidateOnlyTransforms(bool onlyTransfroms, VRCAvatarDescriptor.AnimLayerType layerName, AnimatorController controller) {
+  private void ValidateOnlyTransforms(VRCAvatarDescriptor.AnimLayerType layerName, AnimatorController controller) {
+   bool onlyTransfroms = layerName!=VRCAvatarDescriptor.AnimLayerType.FX;
    if(!controller)
     return;
    foreach(AnimatorControllerLayer layer in controller.layers) {
-    ValidateOnlyTransforms(onlyTransfroms, layerName, layer.stateMachine.states);
+    ValidateOnlyTransforms(onlyTransfroms, layerName, layer.stateMachine.states, layer.name);
     foreach(ChildAnimatorStateMachine childMachine in layer.stateMachine.stateMachines) {
-     ValidateOnlyTransforms(onlyTransfroms, layerName, childMachine.stateMachine.states);
+     ValidateOnlyTransforms(onlyTransfroms, layerName, childMachine.stateMachine.states, layer.name);
     }
    }
   }
 
-  private void ValidateOnlyTransforms(bool onlyTransfroms, VRCAvatarDescriptor.AnimLayerType layerName, ChildAnimatorState[] states) {
+  private void ValidateOnlyTransforms(bool onlyTransfroms, VRCAvatarDescriptor.AnimLayerType layerName, ChildAnimatorState[] states, string animLayerName) {
    foreach(ChildAnimatorState state in states) {
     Motion m = state.state.motion;
-    if(!ValidateOnlyTransforms(onlyTransfroms, layerName, m)) {
-     List<string> list = GetLayerIssues(layerName);
-     if(onlyTransfroms)
-      list.Add($"State [{state.state.name}] contains non-Transformations");
-     else
-      list.Add($"State [{state.state.name}] contains Transformations");
+    Issue issue = ValidateOnlyTransformsMotion(onlyTransfroms, layerName, m);
+    if(null!=issue) {
+     if(onlyTransfroms) {
+      issue.Cause=$"Layer[{animLayerName}]: Motion contains non-Transformations";
+      issue.Reference.Add(state.state);
+      issues.GetLayer(layerName).Insert(0, issue);
+      _avatarIssue=true;
+     } else {
+      issue.Cause=$"Layer[{animLayerName}]: Motion contains Transformations";
+      issue.Reference.Add(state.state);
+      issues.GetLayer(layerName).Insert(0, issue);
+      _avatarIssue=true;
+     }
     }
    }
   }
 
-  private bool ValidateOnlyTransforms(bool onlyTransfroms, VRCAvatarDescriptor.AnimLayerType layerName, Motion motion) {
+  private Issue ValidateOnlyTransformsMotion(bool onlyTransfroms, VRCAvatarDescriptor.AnimLayerType layerName, Motion motion) {
+   Issue issue = new Issue();
    if(!motion)
-    return true;
+    return null;
    else if(motion is BlendTree) {
     BlendTree bTree = (BlendTree)motion;
-    bool bRetVal = true;
+    bool hadIssue = false;
     foreach(ChildMotion child in bTree.children) {
-     if(!ValidateOnlyTransforms(onlyTransfroms, layerName, child.motion))
-      bRetVal=false;
+     Issue mIssue = ValidateOnlyTransformsMotion(onlyTransfroms, layerName, child.motion);
+     if(null!=mIssue) {
+      issue.Reference.AddRange(mIssue.Reference);
+      hadIssue=true;
+     }
     }
-    return bRetVal;
+    if(hadIssue)
+     return issue;
    } else if(motion is AnimationClip) {
     AnimationClip clip = (AnimationClip)motion;
     foreach(EditorCurveBinding binding in AnimationUtility.GetCurveBindings(clip)) {
      if(onlyTransfroms!=(binding.type==typeof(Transform)||binding.type==typeof(Animator))) {
-      string issue = onlyTransfroms ? "Transforms" : "Non-Transforms";
-      Debug.LogWarning($"[{clip.name}] in {layerName} layer contains {issue}");
-      return false;
+      //string issue = onlyTransfroms ? "Transforms" : "Non-Transforms";
+      //Debug.LogWarning($"[{clip.name}] in {layerName} layer contains {issue}");
+      issue.Reference.Add(clip);
+      return issue;
      }
     }
    }
-   return true;
+   return null;
   }
   #endregion
  }//class
