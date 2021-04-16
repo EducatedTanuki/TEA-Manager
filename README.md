@@ -34,7 +34,22 @@ There are tooltips for most controls.
 `Play Tab` will use the first `TEA Settings` found in your project.  
 If a `TEA Settings` file does not exist one is created as `Assets/TEA Settings.asset`.  
 
-### Considerations
+### Things to Note
+
+###### Validation
+
+Turn validation on or off using the last checkbox.  
+`TEA Manager` can run validation on your avatar to check:  
+- Avatar is compliant with SDK 3.0.  
+- All Expression Parameters are used
+- Expression Menu Controls are valid
+  - Button parameter is set
+  - Toggle parameter is set
+  - SubMenus are set
+  - Radial Puppet has at least 1 sub parameter
+  - Two Axis Puppet has at least 1 sub parameter
+  - Four Axis Puppet has all 4 sub parameters
+- Parameter Drivers are valid
 
 ###### TEA Manager Prefab
 
