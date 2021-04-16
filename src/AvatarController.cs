@@ -175,7 +175,7 @@ namespace TEA {
       VelocityZ=0+movePoint.z/Time.deltaTime;
      }
 
-     Debug.Log($"[{x},{z}] distance[{distance}] float[{distanceX}, {distanceZ}] velocity[{VelocityX}, {VelocityZ}]");
+     //Debug.Log($"[{x},{z}] distance[{distance}] float[{distanceX}, {distanceZ}] velocity[{VelocityX}, {VelocityZ}]");
 
      // world position
      Avatar.transform.position=newPosition;
