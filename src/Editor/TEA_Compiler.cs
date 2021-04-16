@@ -13,6 +13,7 @@ using TEA.ScriptableObject;
 using TEA;
 using static TEA.TEA_Utility;
 using static TEA.TEA_ValidationIssues;
+using System;
 
 namespace TEA {
  public class TEA_Compiler {
@@ -31,7 +32,6 @@ namespace TEA {
   VRCAvatarDescriptor currentAvatar;
   AnimatorController superAnimator;
   TEA_ValidationIssues issues;
-  bool _avatarIssue = false;
   bool validationIssue = false;
 
   public bool CompileAnimators(TEA_Manager manager) {
@@ -63,7 +63,6 @@ namespace TEA {
      }
     }
 
-    _avatarIssue=false;
     drivers=new List<DriverIssue>();
     VRCAvatarDescriptor avatarComp = TEA_Manager.AvatarDescriptor[aCount];
     currentAvatar=avatarComp;
@@ -87,8 +86,11 @@ namespace TEA {
     layerInfo.name=avatarKey+"-layerData";
 
     RuntimeAnimatorController baseRunContr = manager.Base;
-    if(!avatarComp.baseAnimationLayers[0].isDefault&&null!=avatarComp.baseAnimationLayers[0].animatorController)
+    if(!avatarComp.baseAnimationLayers[0].isDefault&&null!=avatarComp.baseAnimationLayers[0].animatorController) {
      baseRunContr=avatarComp.baseAnimationLayers[0].animatorController;
+     EditorUtility.SetDirty(baseRunContr);
+     AssetDatabase.SaveAssets();
+    }
     string baseControllerPath = CreatePath(false, folderPath, "Base.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(baseRunContr), baseControllerPath);
     AnimatorController baseAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(baseControllerPath);
@@ -101,6 +103,8 @@ namespace TEA {
     AnimatorController additiveAnimContr = null;
     if(!avatarComp.baseAnimationLayers[1].isDefault&&null!=avatarComp.baseAnimationLayers[1].animatorController) {
      RuntimeAnimatorController additiveRunContr = avatarComp.baseAnimationLayers[1].animatorController;
+     EditorUtility.SetDirty(additiveRunContr);
+     AssetDatabase.SaveAssets();
      string additiveControllerPath = CreatePath(false, folderPath, "Additive.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(additiveRunContr), additiveControllerPath);
      additiveAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(additiveControllerPath);
@@ -118,8 +122,11 @@ namespace TEA {
 
     // Gesture
     RuntimeAnimatorController gestureRunContr = manager.Gesture_Male;
-    if(!avatarComp.baseAnimationLayers[2].isDefault&&null!=avatarComp.baseAnimationLayers[2].animatorController)
+    if(!avatarComp.baseAnimationLayers[2].isDefault&&null!=avatarComp.baseAnimationLayers[2].animatorController) {
      gestureRunContr=avatarComp.baseAnimationLayers[2].animatorController;
+     EditorUtility.SetDirty(gestureRunContr);
+     AssetDatabase.SaveAssets();
+    }
     string gestureControllerPath = CreatePath(false, folderPath, "Gesture.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(gestureRunContr), gestureControllerPath);
     AnimatorController gestureAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(gestureControllerPath);
@@ -130,8 +137,11 @@ namespace TEA {
 
     //Actions
     RuntimeAnimatorController actionRunContr = manager.Action;
-    if(!avatarComp.baseAnimationLayers[3].isDefault&&null!=avatarComp.baseAnimationLayers[3].animatorController)
+    if(!avatarComp.baseAnimationLayers[3].isDefault&&null!=avatarComp.baseAnimationLayers[3].animatorController) {
      actionRunContr=avatarComp.baseAnimationLayers[3].animatorController;
+     EditorUtility.SetDirty(actionRunContr);
+     AssetDatabase.SaveAssets();
+    }
     string actionControllerPath = CreatePath(false, folderPath, "Action.controller");
     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(actionRunContr), actionControllerPath);
     AnimatorController actionAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(actionControllerPath);
@@ -144,6 +154,8 @@ namespace TEA {
     AnimatorController fxAnimContr = null;
     if(!avatarComp.baseAnimationLayers[4].isDefault&&null!=avatarComp.baseAnimationLayers[4].animatorController) {
      RuntimeAnimatorController fxRunContr = avatarComp.baseAnimationLayers[4].animatorController;
+     EditorUtility.SetDirty(fxRunContr);
+     AssetDatabase.SaveAssets();
      string fxControllerPath = CreatePath(false, folderPath, "FX.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(fxRunContr), fxControllerPath);
      fxAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(fxControllerPath);
@@ -174,48 +186,50 @@ namespace TEA {
 
     // Validation
     if(validate) {
+
      //--- check layers
      string nullLayer = "Playable Layer is not default, it should be set in Descriptor";
      foreach(VRCAvatarDescriptor.CustomAnimLayer layer in avatarComp.baseAnimationLayers) {
       if(!layer.isDefault&&null==layer.animatorController) {
        Issue issue = new TEA_ValidationIssues.Issue(nullLayer, currentAvatar);
        issues.GetLayer(layer.type).Add(issue);
-       _avatarIssue=true;
       }
       ValidateOnlyTransforms(layer.type, AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(layer.animatorController)));
      }
 
+     // missing Expression Parameters
+     ValidateCustomExpressions(avatarComp, superAnimator);
+
      // drivers
-     foreach(DriverIssue driver in drivers) {
-      if(driver.driver.parameters.Count==0) {
-       Issue issue = new TEA_ValidationIssues.Issue($"Layer[{ driver.layerName }]: no parameter set");
-       issue.Reference.Add(driver.state);
-       issue.Reference.Add(driver.driver);
-       issues.GetLayer(driver.layerType).Add(issue);
-       _avatarIssue=true;
-      }
-      foreach(VRCAvatarParameterDriver.Parameter param in driver.driver.parameters) {
-       if(null==currentAvatar.expressionParameters.FindParameter(param.name)) {
-        Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not in ExpressionParameters");
+     if(null==avatar.expressionParameters) {
+      if(drivers.Count>0)
+       issues.ParameterDrivers.Add(new Issue("You have Parameter Drivers but no ExpressionParameters"));
+     } else {
+      foreach(DriverIssue driver in drivers) {
+       if(driver.driver.parameters.Count==0) {
+        Issue issue = new TEA_ValidationIssues.Issue($"Layer[{ driver.layerName }]: no parameter set");
         issue.Reference.Add(driver.state);
         issue.Reference.Add(driver.driver);
         issues.GetLayer(driver.layerType).Add(issue);
-        _avatarIssue=true;
        }
-       if(!TEA_Utility.HasAnimatorParameter(param.name, superAnimator.parameters)) {
-        Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not a parameter in any Playable Layer");
-        issue.Reference.Add(driver.state);
-        issue.Reference.Add(driver.driver);
-        issues.GetLayer(driver.layerType).Add(issue);
-        _avatarIssue=true;
+       foreach(VRCAvatarParameterDriver.Parameter param in driver.driver.parameters) {
+        if(null==currentAvatar.expressionParameters.FindParameter(param.name)) {
+         Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not in ExpressionParameters");
+         issue.Reference.Add(driver.state);
+         issue.Reference.Add(driver.driver);
+         issues.GetLayer(driver.layerType).Add(issue);
+        }
+        if(!TEA_Utility.HasAnimatorParameter(param.name, superAnimator.parameters)) {
+         Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not a parameter in any Playable Layer");
+         issue.Reference.Add(driver.state);
+         issue.Reference.Add(driver.driver);
+         issues.GetLayer(driver.layerType).Add(issue);
+        }
        }
-      }
+      }//for
      }
 
-     // missing Expression Parameters
-     ValidateExpressionParameters(avatarComp, superAnimator);
-
-     if(_avatarIssue) {
+     if(issues.ValidationIssues()) {
       avatarIssues.Add(issues);
       validationIssue=true;
      }
@@ -502,8 +516,20 @@ namespace TEA {
 
   // --- --- Validation --- ---
   #region
-  private void ValidateExpressionParameters(VRCAvatarDescriptor avatar, AnimatorController superAnimator) {
+  private void ValidateCustomExpressions(VRCAvatarDescriptor avatar, AnimatorController superAnimator) {
    if(avatar.customExpressions) {
+
+    if(null==avatar.expressionsMenu)
+     issues.ExpressionsMenu.Add(new Issue("CustomExpressions is set but you have no ExpressionsMenu", avatar));
+
+    if(null==avatar.expressionParameters)
+     issues.ExpressionParameters.Add(new Issue("CustomExpressions is set but you have no ExpressionParameters", avatar));
+
+    if(null==avatar.expressionParameters||null==avatar.expressionsMenu)
+     return;
+
+    ValidateExpressionsMenu(avatar, avatar.expressionsMenu);
+
     foreach(VRCExpressionParameters.Parameter parameter in avatar.expressionParameters.parameters) {
      bool exists = false;
      if(string.IsNullOrEmpty(parameter.name))
@@ -517,6 +543,68 @@ namespace TEA {
      if(!exists)
       issues.ParametersNotInAnimators.Add(parameter.name);
     }//for parameter
+   }
+  }
+
+  private void ValidateExpressionsMenu(VRCAvatarDescriptor avatar, VRCExpressionsMenu menu) {
+   foreach(VRCExpressionsMenu.Control control in menu.controls) {
+    if(control.type==VRCExpressionsMenu.Control.ControlType.Button) {
+     if(string.IsNullOrEmpty(control.parameter.name))
+      issues.ExpressionsMenu.Add(new Issue($"Button[{control.name}] has no parameter", menu));
+     else if(null==avatar.expressionParameters.FindParameter(control.parameter.name))
+      issues.ExpressionsMenu.Add(new Issue($"Button[{control.name}] parameter[{control.parameter.name}] not in ExpressionParameters", menu));
+    }
+    if(control.type==VRCExpressionsMenu.Control.ControlType.Toggle) {
+     if(string.IsNullOrEmpty(control.parameter.name))
+      issues.ExpressionsMenu.Add(new Issue($"Toggle[{control.name}] has no parameter", menu));
+     else if(null==avatar.expressionParameters.FindParameter(control.parameter.name))
+      issues.ExpressionsMenu.Add(new Issue($"Toggle[{control.name}] parameter[{control.parameter.name}] not in ExpressionParameters", menu));
+    }
+    if(control.type==VRCExpressionsMenu.Control.ControlType.RadialPuppet) {
+     if(1>control.subParameters.Length)
+      issues.ExpressionsMenu.Add(new Issue($"Radial Puppet[{control.name}] has no sub parameters", menu));
+     int count = 0;
+     foreach(VRCExpressionsMenu.Control.Parameter param in control.subParameters) {
+      if(!string.IsNullOrEmpty(param.name))
+       count++;
+      if(null==avatar.expressionParameters.FindParameter(param.name))
+       issues.ExpressionsMenu.Add(new Issue($"Radial Puppet[{control.name}] parameter[{param.name}] not in ExpressionParameters", menu));
+     }
+     if(count<1)
+      issues.ExpressionsMenu.Add(new Issue($"Radial Puppet[{control.name}] has no sub parameters", menu));
+    }
+    if(control.type==VRCExpressionsMenu.Control.ControlType.FourAxisPuppet) {
+     if(4!=control.subParameters.Length)
+      issues.ExpressionsMenu.Add(new Issue($"Four Axis Puppet[{control.name}] less than 4 sub parameters", menu));
+     int count = 0;
+     foreach(VRCExpressionsMenu.Control.Parameter param in control.subParameters) {
+      if(!string.IsNullOrEmpty(param.name))
+       count++;
+      if(null==avatar.expressionParameters.FindParameter(param.name))
+       issues.ExpressionsMenu.Add(new Issue($"Four Axis Puppet[{control.name}] parameter[{param.name}] not in ExpressionParameters", menu));
+     }
+     if(count<4)
+      issues.ExpressionsMenu.Add(new Issue($"Four Axis Puppet[{control.name}] less than 4 sub parameters", menu));
+    }
+    if(control.type==VRCExpressionsMenu.Control.ControlType.TwoAxisPuppet) {
+     if(1>control.subParameters.Length)
+      issues.ExpressionsMenu.Add(new Issue($"Two Axis Puppet[{control.name}] has no sub parameters", menu));
+     int count = 0;
+     foreach(VRCExpressionsMenu.Control.Parameter param in control.subParameters) {
+      if(!string.IsNullOrEmpty(param.name))
+       count++;
+      if(null==avatar.expressionParameters.FindParameter(param.name))
+       issues.ExpressionsMenu.Add(new Issue($"Two Axis Puppet[{control.name}] parameter[{param.name}] not in ExpressionParameters", menu));
+     }
+     if(count<1)
+      issues.ExpressionsMenu.Add(new Issue($"Two Axis Puppet[{control.name}] has no sub parameters", menu));
+    }
+    if(control.type==VRCExpressionsMenu.Control.ControlType.SubMenu) {
+     if(null==control.subMenu)
+      issues.ExpressionsMenu.Add(new Issue($"Sub Menu[{control.name}] is blank", menu));
+     else
+      ValidateExpressionsMenu(avatar, control.subMenu);
+    }
    }
   }
 
@@ -541,12 +629,10 @@ namespace TEA {
       issue.Cause=$"Layer[{animLayerName}]: Motion contains non-Transformations";
       issue.Reference.Add(state.state);
       issues.GetLayer(layerName).Insert(0, issue);
-      _avatarIssue=true;
      } else {
       issue.Cause=$"Layer[{animLayerName}]: Motion contains Transformations";
       issue.Reference.Add(state.state);
       issues.GetLayer(layerName).Insert(0, issue);
-      _avatarIssue=true;
      }
     }
    }

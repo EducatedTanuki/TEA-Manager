@@ -46,9 +46,20 @@ namespace TEA {
    throw new System.Exception("TEA Manager has a playable layer mapping issue, the VRChat SDK may not be compatible");
   }
 
+  public List<Issue> ExpressionsMenu = new List<Issue>();
+
+  public List<Issue> ExpressionParameters = new List<Issue>();
+
   public List<string> ParametersNotInAnimators = new List<string>();
 
   public List<Issue> ParameterDrivers = new List<Issue>();
+
+  public bool ValidationIssues() {
+   return BaseLayer.Count>0||AdditiveLayer.Count>0||GestureLayer.Count>0
+    ||ActionLayer.Count>0||FXLayer.Count>0
+    ||ExpressionsMenu.Count>0||ExpressionParameters.Count>0||ParameterDrivers.Count>0
+    ||ParametersNotInAnimators.Count>0;
+  }
  }
 
 
