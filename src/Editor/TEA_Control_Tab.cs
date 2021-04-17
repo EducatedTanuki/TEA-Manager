@@ -23,7 +23,7 @@ namespace TEA {
   private static readonly int VALIDATE_BUTTON_WIDTH = 60;
   private static readonly int LABEL_WIDTH = 70;
 
-  [MenuItem("TEA Manager/Play Tab")]
+  [MenuItem("TEA Manager/Play Tab", false, 0)]
   static void OpenWindow() {
    EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Control_Tab), false, "TEA Manager", true);
    window.minSize=new Vector2(500, MIN_HEIGHT+5);
@@ -99,8 +99,8 @@ namespace TEA {
      int delete = EditorUtility.DisplayDialogComplex("TEA Settings", $"there are more than one setting file present.\nWill use [{path}]", "Delete All", "Delete Extra", "Continue");
      if(delete<2) {
       DeleteSettings(assets, delete);
-     } 
-     
+     }
+
      if(delete==0)
       CreateSettings();
      else {
@@ -187,7 +187,7 @@ namespace TEA {
     EndLayout();
 
     EditorGUILayout.BeginVertical();
-    
+
     EditorGUILayout.EndVertical();
 
     CleanLeanTween();
@@ -201,11 +201,11 @@ namespace TEA {
   private void Update() {
    if(null==settings)
     init();
-
-   AvatarUtilities();
    ManagerControls();
+   //AvatarUtilities();
   }
 
+  Dictionary<string, VRCAvatarDescriptor> newAvatars;
   private void ManagerControls() {
    _avatars=null!=HasAvatars(SceneManager.GetActiveScene());
 
@@ -213,7 +213,8 @@ namespace TEA {
    _managerOverload=ManagerSetup(EditorApplication.isPlaying, _play, _compile);
 
    // --- Avatar
-   Dictionary<string, VRCAvatarDescriptor> newAvatars;
+   if(!EditorApplication.isPlaying)
+    newAvatars=GetAvatars(out bool crossScene);
    if(null!=manager&&!EditorApplication.isPlaying&&_avatars&&(_play||_compile)) {
     avatarIndex=0;
 
@@ -221,7 +222,6 @@ namespace TEA {
     manager.LayerInfo=new List<TEA_PlayableLayerData>();
     manager.ViewPorts=new List<Vector3>();
 
-    newAvatars=GetAvatars(out bool crossScene);
     manager.Avatars=newAvatars.Keys.ToList<string>();
     TEA_Manager.AvatarDescriptor=newAvatars.Values.ToList<VRCAvatarDescriptor>();
 
@@ -241,8 +241,8 @@ namespace TEA {
     bool valid = true;
     if(_play||_compile) {
      manager.gameObject.SetActive(false);
-     bool issues = compiler.CompileAnimators(manager);
-     if(!_play&&!issues)
+     valid=compiler.CompileAnimators(manager);
+     if(!_play&&valid)
       _play=EditorUtility.DisplayDialog($"Compilation", "Avatars Compiled", "Play", "Continue");
      manager.gameObject.SetActive(!(!settings.keepInScene&&!_play));
      _compile=false;
@@ -257,11 +257,20 @@ namespace TEA {
    }
   }
 
+  Dictionary<VRCAvatarDescriptor, Vector3> prevPositions = new Dictionary<VRCAvatarDescriptor, Vector3>();
   private void AvatarUtilities() {
    if(EditorApplication.isPlaying||_play||_compile)
     return;
 
-   //TODO set viewport on avatar move
+   foreach(KeyValuePair<string, VRCAvatarDescriptor> key in newAvatars) {
+    if(key.Value.transform.hasChanged) {
+     if(prevPositions.TryGetValue(key.Value, out Vector3 prevPosition)) {
+      key.Value.ViewPosition+=(key.Value.transform.position-prevPosition);
+     }
+    }
+    prevPositions.Remove(key.Value);
+    prevPositions.Add(key.Value, key.Value.transform.position);
+   }
   }
 
   // --- --- --- GUI Util Methods --- --- ---
@@ -453,7 +462,7 @@ namespace TEA {
    avatarIndex=EditorGUILayout.Popup("", avatarIndex, manager.Avatars.ToArray(), EditorStyles.popup, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(SECTION_WIDTH+50), GUILayout.ExpandWidth(false));
    if(EditorGUI.EndChangeCheck()) {
     if(EditorApplication.isPlaying) {
-     Debug.Log($"index selected {avatarIndex}");
+     //Debug.Log($"index selected {avatarIndex}");
      manager.Initialize(avatarIndex);
     }
    }

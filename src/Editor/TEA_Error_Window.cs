@@ -57,6 +57,7 @@ namespace TEA {
     EditorGUILayout.LabelField(avatarIssue.AvatarName, headerStyle, GUILayout.Height(FONT_SIZE));
     foldout[count]=EditorGUILayout.Foldout(foldout[count], "show/hide", true, EditorStyles.boldLabel);
 
+    //Debug.Log($"count[{count}] foldout[{foldout[count]}]");
     if(foldout[count])
      DrawIssue(avatarIssue, serializedObjects[count]);
 
@@ -80,6 +81,16 @@ namespace TEA {
 
     if(field.Name=="AvatarName")
      continue;
+
+    if(field.Name=="ParametersNotInAnimators") {
+     EditorGUILayout.LabelField("Parameters Not In Animators", header1Style, GUILayout.Height(FONT_SIZE1));
+     EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+     EditorGUI.indentLevel++;
+     foreach(string s in avatarIssue.ParametersNotInAnimators)
+      EditorGUILayout.LabelField($"{s}", EditorStyles.boldLabel);
+     EditorGUI.indentLevel--;
+     continue;
+    }
 
     if(currentProperty.isArray) {
      Look(currentProperty, true);
@@ -110,8 +121,11 @@ namespace TEA {
      EditorGUI.indentLevel++;
     }
 
+    //Debug.Log($"[{prop.name}] [{prop.isArray}] [{prop.type}]");
     EditorGUI.indentLevel++;
-    if(p.isArray) {
+    if(prop.type=="string") {
+     EditorGUILayout.LabelField($"{prop.stringValue}", EditorStyles.boldLabel);
+    } else if(p.isArray) {
      Look(p, true);
     } else if(p.type==typeof(TEA_ValidationIssues.Issue).Name) {
 

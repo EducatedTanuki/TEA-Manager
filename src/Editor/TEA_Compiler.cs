@@ -35,214 +35,221 @@ namespace TEA {
   bool validationIssue = false;
 
   public bool CompileAnimators(TEA_Manager manager) {
-   // working folder
-   if(!AssetDatabase.IsValidFolder(WORKING_DIR_PATH)) {
-    if(string.IsNullOrEmpty(AssetDatabase.CreateFolder("Assets", WORKING_DIR))) {
-     EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{WORKING_DIR_PATH}]", "ok");
-     return true;
-    }
-   }
-
-   List<TEA_ValidationIssues> avatarIssues = new List<TEA_ValidationIssues>();
-   validationIssue=false;
-   AnimatorController teaAnimContr = GenerateTEA_Animator(manager);
-
-   foreach(string path in AssetDatabase.GetSubFolders(WORKING_DIR_PATH)) {
-    AssetDatabase.DeleteAsset(path);
-   }
-
-   int aCount = 0;
-   // --- --- --- for all avatars
-   foreach(VRCAvatarDescriptor avatar in TEA_Manager.AvatarDescriptor) {
-    //Scene Folder
-    string sceneFolder = CreatePath(false, WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
-    if(!AssetDatabase.IsValidFolder(sceneFolder)) {
-     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name))) {
-      EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{sceneFolder}]", "ok");
+   try {
+    // working folder
+    if(!AssetDatabase.IsValidFolder(WORKING_DIR_PATH)) {
+     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder("Assets", WORKING_DIR))) {
+      EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{WORKING_DIR_PATH}]", "ok");
       return true;
      }
     }
 
-    drivers=new List<DriverIssue>();
-    VRCAvatarDescriptor avatarComp = TEA_Manager.AvatarDescriptor[aCount];
-    currentAvatar=avatarComp;
-    issues=TEA_ValidationIssues.CreateInstance<TEA_ValidationIssues>();
-    issues.AvatarName=avatarComp.name;
-    string avatarKey = avatarComp.gameObject.name;
+    List<TEA_ValidationIssues> avatarIssues = new List<TEA_ValidationIssues>();
+    validationIssue=false;
+    AnimatorController teaAnimContr = GenerateTEA_Animator(manager);
 
-    Debug.Log($"----- Creating animator controllers for [{avatarKey}]");
-
-    // avatar folder
-    string folderPath = CreatePath(false, sceneFolder, avatarKey);
-    if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(sceneFolder, avatarKey))) {
-     EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{folderPath}]", "ok");
-     return true;
+    foreach(string path in AssetDatabase.GetSubFolders(WORKING_DIR_PATH)) {
+     AssetDatabase.DeleteAsset(path);
     }
 
-    //--- Animator ---
-    superAnimator=new AnimatorController() { name=CONTROLLER_PREFIX+avatarKey };
-    TEA_PlayableLayerData layerInfo = TEA_PlayableLayerData.CreateInstance<TEA_PlayableLayerData>();
-    layerInfo.AvatarName=avatarKey;
-    layerInfo.name=avatarKey+"-layerData";
-
-    RuntimeAnimatorController baseRunContr = manager.Base;
-    if(!avatarComp.baseAnimationLayers[0].isDefault&&null!=avatarComp.baseAnimationLayers[0].animatorController) {
-     baseRunContr=avatarComp.baseAnimationLayers[0].animatorController;
-     EditorUtility.SetDirty(baseRunContr);
-     AssetDatabase.SaveAssets();
-    }
-    string baseControllerPath = CreatePath(false, folderPath, "Base.controller");
-    AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(baseRunContr), baseControllerPath);
-    AnimatorController baseAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(baseControllerPath);
-    GetBehaviours(baseRunContr, baseAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Base);
-    CombineAnimator(superAnimator, baseAnimContr, null);
-    layerInfo.data[0].start=0;
-    layerInfo.data[0].end=baseAnimContr.layers.Length;
-
-    // Additive
-    AnimatorController additiveAnimContr = null;
-    if(!avatarComp.baseAnimationLayers[1].isDefault&&null!=avatarComp.baseAnimationLayers[1].animatorController) {
-     RuntimeAnimatorController additiveRunContr = avatarComp.baseAnimationLayers[1].animatorController;
-     EditorUtility.SetDirty(additiveRunContr);
-     AssetDatabase.SaveAssets();
-     string additiveControllerPath = CreatePath(false, folderPath, "Additive.controller");
-     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(additiveRunContr), additiveControllerPath);
-     additiveAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(additiveControllerPath);
-     GetBehaviours(additiveRunContr, additiveAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Additive);
-     CombineAnimator(superAnimator, additiveAnimContr, null);
-     layerInfo.data[1].start=layerInfo.data[0].end;
-     layerInfo.data[1].end=layerInfo.data[0].end+(additiveAnimContr.layers.Length);
-    } else {
-     layerInfo.data[1].start=layerInfo.data[0].end;
-     layerInfo.data[1].end=layerInfo.data[0].end;
-    }
-
-    // TEA Animations
-    CombineAnimator(superAnimator, teaAnimContr, null);
-
-    // Gesture
-    RuntimeAnimatorController gestureRunContr = manager.Gesture_Male;
-    if(!avatarComp.baseAnimationLayers[2].isDefault&&null!=avatarComp.baseAnimationLayers[2].animatorController) {
-     gestureRunContr=avatarComp.baseAnimationLayers[2].animatorController;
-     EditorUtility.SetDirty(gestureRunContr);
-     AssetDatabase.SaveAssets();
-    }
-    string gestureControllerPath = CreatePath(false, folderPath, "Gesture.controller");
-    AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(gestureRunContr), gestureControllerPath);
-    AnimatorController gestureAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(gestureControllerPath);
-    GetBehaviours(gestureRunContr, gestureAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Gesture);
-    CombineAnimator(superAnimator, gestureAnimContr, null);
-    layerInfo.data[2].start=layerInfo.data[1].end+teaAnimContr.layers.Length;
-    layerInfo.data[2].end=layerInfo.data[1].end+teaAnimContr.layers.Length+(gestureAnimContr.layers.Length);
-
-    //Actions
-    RuntimeAnimatorController actionRunContr = manager.Action;
-    if(!avatarComp.baseAnimationLayers[3].isDefault&&null!=avatarComp.baseAnimationLayers[3].animatorController) {
-     actionRunContr=avatarComp.baseAnimationLayers[3].animatorController;
-     EditorUtility.SetDirty(actionRunContr);
-     AssetDatabase.SaveAssets();
-    }
-    string actionControllerPath = CreatePath(false, folderPath, "Action.controller");
-    AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(actionRunContr), actionControllerPath);
-    AnimatorController actionAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(actionControllerPath);
-    GetBehaviours(actionRunContr, actionAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Action);
-    CombineAnimator(superAnimator, actionAnimContr, null);
-    layerInfo.data[3].start=layerInfo.data[2].end;
-    layerInfo.data[3].end=layerInfo.data[2].end+(actionAnimContr.layers.Length);
-
-    //FX
-    AnimatorController fxAnimContr = null;
-    if(!avatarComp.baseAnimationLayers[4].isDefault&&null!=avatarComp.baseAnimationLayers[4].animatorController) {
-     RuntimeAnimatorController fxRunContr = avatarComp.baseAnimationLayers[4].animatorController;
-     EditorUtility.SetDirty(fxRunContr);
-     AssetDatabase.SaveAssets();
-     string fxControllerPath = CreatePath(false, folderPath, "FX.controller");
-     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(fxRunContr), fxControllerPath);
-     fxAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(fxControllerPath);
-
-     SetFXDefault(superAnimator, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
-     GetBehaviours(fxRunContr, fxAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.FX);
-     CombineAnimator(superAnimator, fxAnimContr, manager.AvatarMaskNone);
-     //SetFXDefault(action, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
-     //CombineAnimator(action, fxAnimContr, manager.AvatarMaskNone);
-     layerInfo.data[4].start=layerInfo.data[3].end+1;
-     layerInfo.data[4].end=layerInfo.data[3].end+1+(fxAnimContr.layers.Length);
-    } else {
-     layerInfo.data[4].start=layerInfo.data[3].end;
-     layerInfo.data[4].end=layerInfo.data[3].end;
-    }
-
-    string superAnimatorPath = CreatePath(false, folderPath, superAnimator.name+".controller");
-    AssetDatabase.CreateAsset(superAnimator, superAnimatorPath);
-    manager.Controllers.Add(AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(superAnimatorPath));
-
-    string layerInfoPath = CreatePath(false, folderPath, layerInfo.name+".asset");
-    AssetDatabase.CreateAsset(layerInfo, layerInfoPath);
-    manager.LayerInfo.Add(AssetDatabase.LoadAssetAtPath<TEA_PlayableLayerData>(layerInfoPath));
-
-    //Debug.Log($"HEAD[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).position.ToString("F4")}] ViewPort:[{avatarComp.ViewPosition.ToString("F4")}] Transform[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition).ToString("F4")}]");
-    manager.ViewPorts.Add(AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition));
-    Debug.Log($"----- Created animator controllers for [{avatarKey}]");
-
-    // Validation
-    if(validate) {
-
-     //--- check layers
-     string nullLayer = "Playable Layer is not default, it should be set in Descriptor";
-     foreach(VRCAvatarDescriptor.CustomAnimLayer layer in avatarComp.baseAnimationLayers) {
-      if(!layer.isDefault&&null==layer.animatorController) {
-       Issue issue = new TEA_ValidationIssues.Issue(nullLayer, currentAvatar);
-       issues.GetLayer(layer.type).Add(issue);
+    int aCount = 0;
+    // --- --- --- for all avatars
+    foreach(VRCAvatarDescriptor avatar in TEA_Manager.AvatarDescriptor) {
+     //Scene Folder
+     string sceneFolder = CreatePath(false, WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
+     if(!AssetDatabase.IsValidFolder(sceneFolder)) {
+      if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name))) {
+       EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{sceneFolder}]", "ok");
+       return true;
       }
-      ValidateOnlyTransforms(layer.type, AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(layer.animatorController)));
      }
 
-     // missing Expression Parameters
-     ValidateCustomExpressions(avatarComp, superAnimator);
+     drivers=new List<DriverIssue>();
+     VRCAvatarDescriptor avatarComp = TEA_Manager.AvatarDescriptor[aCount];
+     currentAvatar=avatarComp;
+     issues=TEA_ValidationIssues.CreateInstance<TEA_ValidationIssues>();
+     issues.AvatarName=avatarComp.name;
+     string avatarKey = avatarComp.gameObject.name;
 
-     // drivers
-     if(null==avatar.expressionParameters) {
-      if(drivers.Count>0)
-       issues.ParameterDrivers.Add(new Issue("You have Parameter Drivers but no ExpressionParameters"));
+     Debug.Log($"----- Creating animator controllers for [{avatarKey}]");
+
+     // avatar folder
+     string folderPath = CreatePath(false, sceneFolder, avatarKey);
+     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(sceneFolder, avatarKey))) {
+      EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{folderPath}]", "ok");
+      return true;
+     }
+
+     //--- Animator ---
+     superAnimator=new AnimatorController() { name=CONTROLLER_PREFIX+avatarKey };
+     TEA_PlayableLayerData layerInfo = TEA_PlayableLayerData.CreateInstance<TEA_PlayableLayerData>();
+     layerInfo.AvatarName=avatarKey;
+     layerInfo.name=avatarKey+"-layerData";
+
+     RuntimeAnimatorController baseRunContr = manager.Base;
+     if(!avatarComp.baseAnimationLayers[0].isDefault&&null!=avatarComp.baseAnimationLayers[0].animatorController) {
+      baseRunContr=avatarComp.baseAnimationLayers[0].animatorController;
+      EditorUtility.SetDirty(baseRunContr);
+      AssetDatabase.SaveAssets();
+     }
+     string baseControllerPath = CreatePath(false, folderPath, "Base.controller");
+     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(baseRunContr), baseControllerPath);
+     AnimatorController baseAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(baseControllerPath);
+     GetBehaviours(baseRunContr, baseAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Base);
+     CombineAnimator(superAnimator, baseAnimContr, null);
+     layerInfo.data[0].start=0;
+     layerInfo.data[0].end=baseAnimContr.layers.Length;
+
+     // Additive
+     AnimatorController additiveAnimContr = null;
+     if(!avatarComp.baseAnimationLayers[1].isDefault&&null!=avatarComp.baseAnimationLayers[1].animatorController) {
+      RuntimeAnimatorController additiveRunContr = avatarComp.baseAnimationLayers[1].animatorController;
+      EditorUtility.SetDirty(additiveRunContr);
+      AssetDatabase.SaveAssets();
+      string additiveControllerPath = CreatePath(false, folderPath, "Additive.controller");
+      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(additiveRunContr), additiveControllerPath);
+      additiveAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(additiveControllerPath);
+      GetBehaviours(additiveRunContr, additiveAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Additive);
+      CombineAnimator(superAnimator, additiveAnimContr, null);
+      layerInfo.data[1].start=layerInfo.data[0].end;
+      layerInfo.data[1].end=layerInfo.data[0].end+(additiveAnimContr.layers.Length);
      } else {
-      foreach(DriverIssue driver in drivers) {
-       if(driver.driver.parameters.Count==0) {
-        Issue issue = new TEA_ValidationIssues.Issue($"Layer[{ driver.layerName }]: no parameter set");
-        issue.Reference.Add(driver.state);
-        issue.Reference.Add(driver.driver);
-        issues.GetLayer(driver.layerType).Add(issue);
+      layerInfo.data[1].start=layerInfo.data[0].end;
+      layerInfo.data[1].end=layerInfo.data[0].end;
+     }
+
+     // TEA Animations
+     CombineAnimator(superAnimator, teaAnimContr, null);
+
+     // Gesture
+     RuntimeAnimatorController gestureRunContr = manager.Gesture_Male;
+     if(!avatarComp.baseAnimationLayers[2].isDefault&&null!=avatarComp.baseAnimationLayers[2].animatorController) {
+      gestureRunContr=avatarComp.baseAnimationLayers[2].animatorController;
+      EditorUtility.SetDirty(gestureRunContr);
+      AssetDatabase.SaveAssets();
+     }
+     string gestureControllerPath = CreatePath(false, folderPath, "Gesture.controller");
+     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(gestureRunContr), gestureControllerPath);
+     AnimatorController gestureAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(gestureControllerPath);
+     GetBehaviours(gestureRunContr, gestureAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Gesture);
+     CombineAnimator(superAnimator, gestureAnimContr, null);
+     layerInfo.data[2].start=layerInfo.data[1].end+teaAnimContr.layers.Length;
+     layerInfo.data[2].end=layerInfo.data[1].end+teaAnimContr.layers.Length+(gestureAnimContr.layers.Length);
+
+     //Actions
+     RuntimeAnimatorController actionRunContr = manager.Action;
+     if(!avatarComp.baseAnimationLayers[3].isDefault&&null!=avatarComp.baseAnimationLayers[3].animatorController) {
+      actionRunContr=avatarComp.baseAnimationLayers[3].animatorController;
+      EditorUtility.SetDirty(actionRunContr);
+      AssetDatabase.SaveAssets();
+     }
+     string actionControllerPath = CreatePath(false, folderPath, "Action.controller");
+     AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(actionRunContr), actionControllerPath);
+     AnimatorController actionAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(actionControllerPath);
+     GetBehaviours(actionRunContr, actionAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Action);
+     CombineAnimator(superAnimator, actionAnimContr, null);
+     layerInfo.data[3].start=layerInfo.data[2].end;
+     layerInfo.data[3].end=layerInfo.data[2].end+(actionAnimContr.layers.Length);
+
+     //FX
+     AnimatorController fxAnimContr = null;
+     if(!avatarComp.baseAnimationLayers[4].isDefault&&null!=avatarComp.baseAnimationLayers[4].animatorController) {
+      RuntimeAnimatorController fxRunContr = avatarComp.baseAnimationLayers[4].animatorController;
+      EditorUtility.SetDirty(fxRunContr);
+      AssetDatabase.SaveAssets();
+      string fxControllerPath = CreatePath(false, folderPath, "FX.controller");
+      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(fxRunContr), fxControllerPath);
+      fxAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(fxControllerPath);
+
+      SetFXDefault(superAnimator, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
+      GetBehaviours(fxRunContr, fxAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.FX);
+      CombineAnimator(superAnimator, fxAnimContr, manager.AvatarMaskNone);
+      //SetFXDefault(action, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
+      //CombineAnimator(action, fxAnimContr, manager.AvatarMaskNone);
+      layerInfo.data[4].start=layerInfo.data[3].end+1;
+      layerInfo.data[4].end=layerInfo.data[3].end+1+(fxAnimContr.layers.Length);
+     } else {
+      layerInfo.data[4].start=layerInfo.data[3].end;
+      layerInfo.data[4].end=layerInfo.data[3].end;
+     }
+
+     string superAnimatorPath = CreatePath(false, folderPath, superAnimator.name+".controller");
+     AssetDatabase.CreateAsset(superAnimator, superAnimatorPath);
+     manager.Controllers.Add(AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(superAnimatorPath));
+
+     string layerInfoPath = CreatePath(false, folderPath, layerInfo.name+".asset");
+     AssetDatabase.CreateAsset(layerInfo, layerInfoPath);
+     manager.LayerInfo.Add(AssetDatabase.LoadAssetAtPath<TEA_PlayableLayerData>(layerInfoPath));
+
+     //Debug.Log($"HEAD[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).position.ToString("F4")}] ViewPort:[{avatarComp.ViewPosition.ToString("F4")}] Transform[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition).ToString("F4")}]");
+     manager.ViewPorts.Add(AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition));
+     Debug.Log($"----- Created animator controllers for [{avatarKey}]");
+
+     // Validation
+     if(validate) {
+
+      //--- check layers
+      string nullLayer = "Playable Layer is not default, it should be set in Descriptor";
+      foreach(VRCAvatarDescriptor.CustomAnimLayer layer in avatarComp.baseAnimationLayers) {
+       if(!layer.isDefault&&null==layer.animatorController) {
+        Issue issue = new TEA_ValidationIssues.Issue(nullLayer, currentAvatar);
+        issues.GetLayer(layer.type).Add(issue);
        }
-       foreach(VRCAvatarParameterDriver.Parameter param in driver.driver.parameters) {
-        if(null==currentAvatar.expressionParameters.FindParameter(param.name)) {
-         Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not in ExpressionParameters");
+       ValidateOnlyTransforms(layer.type, AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(layer.animatorController)));
+      }
+
+      // missing Expression Parameters
+      ValidateCustomExpressions(avatarComp, superAnimator);
+
+      // drivers
+      if(null==avatar.expressionParameters) {
+       if(drivers.Count>0)
+        issues.ParameterDrivers.Add(new Issue("You have Parameter Drivers but no ExpressionParameters"));
+      } else {
+       foreach(DriverIssue driver in drivers) {
+        if(driver.driver.parameters.Count==0) {
+         Issue issue = new TEA_ValidationIssues.Issue($"Layer[{ driver.layerName }]: no parameter set");
          issue.Reference.Add(driver.state);
          issue.Reference.Add(driver.driver);
          issues.GetLayer(driver.layerType).Add(issue);
         }
-        if(!TEA_Utility.HasAnimatorParameter(param.name, superAnimator.parameters)) {
-         Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not a parameter in any Playable Layer");
-         issue.Reference.Add(driver.state);
-         issue.Reference.Add(driver.driver);
-         issues.GetLayer(driver.layerType).Add(issue);
+        foreach(VRCAvatarParameterDriver.Parameter param in driver.driver.parameters) {
+         if(null==currentAvatar.expressionParameters.FindParameter(param.name)) {
+          Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not in ExpressionParameters");
+          issue.Reference.Add(driver.state);
+          issue.Reference.Add(driver.driver);
+          issues.GetLayer(driver.layerType).Add(issue);
+         }
+         if(!TEA_Utility.HasAnimatorParameter(param.name, superAnimator.parameters)) {
+          Issue issue = new TEA_ValidationIssues.Issue($"Layer [{driver.layerName}]: [{param.name}] is not a parameter in any Playable Layer");
+          issue.Reference.Add(driver.state);
+          issue.Reference.Add(driver.driver);
+          issues.GetLayer(driver.layerType).Add(issue);
+         }
         }
-       }
-      }//for
-     }
+       }//for
+      }
 
-     if(issues.ValidationIssues()) {
-      avatarIssues.Add(issues);
-      validationIssue=true;
-     }
-    }//validate
+      if(issues.ValidationIssues()) {
+       avatarIssues.Add(issues);
+       validationIssue=true;
+      }
+     }//validate
 
-    AssetDatabase.SaveAssets();
-    aCount++;
-   }// for avatar
+     AssetDatabase.SaveAssets();
+     aCount++;
+    }// for avatar
 
-   if(validationIssue) {
-    TEA_Error_Window.Open(avatarIssues);
+    if(validationIssue) {
+     TEA_Error_Window.Open(avatarIssues);
+    }
+    return !validationIssue;
+   }catch(Exception e) {
+    EditorUtility.DisplayDialog(ERROR_HEADER, $"TEA Manager ran into an unexpected issue while compiling [{currentAvatar.name}].\n"
+     +"If you cannot resolve the issue please raise a ticket on the GitHub and include the error log in the console.", "ok");
+    Debug.LogError(e);
    }
-   return validationIssue;
+   return false;
   }
 
   private static AnimatorController GenerateTEA_Animator(TEA_Manager manager) {
@@ -328,25 +335,25 @@ namespace TEA {
   private void GetBehaviours(RuntimeAnimatorController runController, AnimatorController controller, TEA_PlayableLayerData layerData, VRCAvatarDescriptor.AnimLayerType type) {
    AnimatorController runCont = AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(runController));
    int layerC = 0;
-   foreach(AnimatorControllerLayer layer in controller.layers) {
-    AnimatorControllerLayer rLayer = runCont.layers[layerC];
+   foreach(AnimatorControllerLayer layer in runCont.layers) {
+    AnimatorControllerLayer copyLayer = controller.layers[layerC];
     int stateC = 0;
     foreach(ChildAnimatorState state in layer.stateMachine.states) {
-     ChildAnimatorState rState = rLayer.stateMachine.states[stateC];
+     ChildAnimatorState copyState = copyLayer.stateMachine.states[stateC];
      int behC = 0;
      foreach(StateMachineBehaviour beh in state.state.behaviours) {
-      StateMachineBehaviour rBeh = rState.state.behaviours[behC];
+      //Debug.Log($"getting avatar[{currentAvatar.name}] copyState[{copyState.state.name}] state[{state.state.name}] behC[{behC}] count[{copyState.state.behaviours.Length}]");
       if(beh is VRCPlayableLayerControl) {
        VRCPlayableLayerControl pc = (VRCPlayableLayerControl)beh;
-       TEA_PlayableLayerControl tc = state.state.AddStateMachineBehaviour<TEA_PlayableLayerControl>();
+       TEA_PlayableLayerControl tc = copyState.state.AddStateMachineBehaviour<TEA_PlayableLayerControl>();
        tc.blendDuration=pc.blendDuration;
        tc.debugString=pc.debugString;
        tc.goalWeight=pc.goalWeight;
        tc.layer=pc.layer;
-       tc.state=state.state.name;
+       tc.state=copyState.state.name;
       } else if(beh is VRCAvatarParameterDriver) {
        VRCAvatarParameterDriver vd = (VRCAvatarParameterDriver)beh;
-       TEA_AvatarParameterDriver td = state.state.AddStateMachineBehaviour<TEA_AvatarParameterDriver>();
+       TEA_AvatarParameterDriver td = copyState.state.AddStateMachineBehaviour<TEA_AvatarParameterDriver>();
        td.name=vd.name;
        td.debugString=vd.debugString;
        td.localOnly=vd.localOnly;
@@ -360,10 +367,10 @@ namespace TEA {
          valueMax=param.valueMax,
          valueMin=param.valueMin
         });
-        td.state=state.state.name;
+        td.state=copyState.state.name;
         //--- validation ---
        }
-       ValidateParameterDriver((VRCAvatarParameterDriver)rBeh, type, rLayer, rState.state);
+       ValidateParameterDriver((VRCAvatarParameterDriver)beh, type, copyLayer, copyState.state);
       }
       behC++;
      }//for behavior

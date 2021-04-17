@@ -111,7 +111,7 @@ namespace TEA {
    SetupComponents(INDEX);
 
    if(null!=TEAManagerEvent) {
-    Debug.Log("Calling OnTEAManagerUpdate");
+    //Debug.Log("Calling OnTEAManagerUpdate");
     TEAManagerEvent(this);
    }
   }

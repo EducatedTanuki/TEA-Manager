@@ -149,6 +149,19 @@ The toggle(s) are added to `Assets/<Scene Folder>/<Avatar Name>/Toggles`
 > Do not expect your avatar to have full walking, running, or action animations in play mode unless you replace the appropriate layers and proxy animations.  
 > If you use [Make Avatar 3.0](#make-avatar-30) your **Action** layer will have full animations
 
+# TEA Tools
+
+### Avatar 8 Tracks
+
+`Avatar 8Track` allows you to take a folder of AudioClips and add them all to your avatar.  
+Go to the menu `TEA Manager/Tools/Avatar 8Track`  
+Set default control icons using `Assets/TEA Manager/TEA Tools/Avatar 8Tracks/Avatar8TrackSettings.asset`  
+Instruction are part of the tool.  
+
+> You can bulk change the Audio Source settings by selecting all of the `Track` objects created.  
+
+![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/8Tracks/example.png)  
+
 # Resources
 [Game Dev Guide](https://www.youtube.com/channel/UCR35rzd4LLomtQout93gi0w)  
 [Stage](https://assetstore.unity.com/packages/2d/textures-materials/sky/farland-skies-cloudy-crown-60004)  
