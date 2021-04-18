@@ -78,7 +78,10 @@ namespace TEA {
   GUIStyle imageStyle;
 
   // ----- ----- Methods ----- -----
-  private void init() {
+  private void Init() {
+   if(null!=settings)
+    return;
+
    prefabObject=EditorGUIUtility.Load(PREFAB) as GameObject;
 
    padding=new RectOffset(0, 0, 0, 0);
@@ -90,39 +93,11 @@ namespace TEA {
    center=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/center.png") as Texture2D;
    validation=EditorGUIUtility.Load("Assets/TEA Manager/Resources/UI/Icons/validation.png") as Texture2D;
 
-   if(null==settings) {
-    var assets = AssetDatabase.FindAssets("t:TEA_Settings");
-    if(null==assets||assets.Length==0) {
-     CreateSettings();
-    } else if(assets.Length>1) {
-     string path = AssetDatabase.GUIDToAssetPath(assets[0]);
-     int delete = EditorUtility.DisplayDialogComplex("TEA Settings", $"there are more than one setting file present.\nWill use [{path}]", "Delete All", "Delete Extra", "Continue");
-     if(delete<2) {
-      DeleteSettings(assets, delete);
-     }
-
-     if(delete==0)
-      CreateSettings();
-     else {
-      settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(path);
-     }
-    } else {
-     settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(AssetDatabase.GUIDToAssetPath(assets[0]));
-    }
+   try {
+    settings=GetTEA_Settings();
+   } catch(TEA_Exception) {
+    this.Close();
    }
-  }
-
-  private static void DeleteSettings(string[] assets, int delete) {
-   for(int i = delete; i<assets.Length; i++) {
-    AssetDatabase.DeleteAsset(AssetDatabase.GUIDToAssetPath(assets[i]));
-   }
-  }
-
-  private void CreateSettings() {
-   Debug.Log("Creating setting file at Assets/");
-   string settingsPath = CreatePath(false, "Assets", "TEA_Settings.asset");
-   AssetDatabase.CreateAsset(TEA_Settings.CreateInstance<TEA_Settings>(), settingsPath);
-   settings=AssetDatabase.LoadAssetAtPath<TEA_Settings>(settingsPath);
   }
 
   private void OnGUI() {
@@ -199,8 +174,10 @@ namespace TEA {
   // --- --- --- Update --- --- ---
   bool _patched = false;
   private void Update() {
+   Init();
    if(null==settings)
-    init();
+    return;
+
    ManagerControls();
    //AvatarUtilities();
   }
@@ -241,7 +218,7 @@ namespace TEA {
     bool valid = true;
     if(_play||_compile) {
      manager.gameObject.SetActive(false);
-     valid=compiler.CompileAnimators(manager);
+     valid=compiler.CompileAnimators(manager, settings);
      if(!_play&&valid)
       _play=EditorUtility.DisplayDialog($"Compilation", "Avatars Compiled", "Play", "Continue");
      manager.gameObject.SetActive(!(!settings.keepInScene&&!_play));

@@ -46,22 +46,12 @@ namespace TEA {
 
   // ----- ----- Avatar Setup Methods ----- -----
   private static readonly string TEA_OBJECT_MENU = "TEA Functions";
-  private static readonly string EXPRESSION_FOLDER = "Expressions";
-  private static readonly string EXPRESSION_MENU = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionsMenu.asset";
-  private static readonly string EXPRESSION_PARAMETER = $"Assets/TEA Manager/Resources/{EXPRESSION_FOLDER}/ExpressionParameters.asset";
-
-  private static readonly string PLAYABLE_LAYERS_FOLDER = "Playable Layers";
-
-  private static readonly string Base_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3LocomotionLayer.controller";
-  private static readonly string Additive_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Additive.controller";
-  private static readonly string Gesture_Layer = "Assets/VRCSDK/Examples3/Animation/Controllers/vrc_AvatarV3HandsLayer.controller";
-  private static readonly string Action_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/Actions.controller";
-  private static readonly string FX_Layer = "Assets/TEA Manager/Resources/Animation/Controllers/FX.controller";
 
   // ----- Make Avatar Menu -----
   #region
   [MenuItem("GameObject/TEA Functions/Make Avatar 3.0", false, 0)]
   public static void MakeAvatar() {
+   TEA_Settings settings = GetTEA_Settings();
    GameObject newAvatar = Selection.activeGameObject;
    VRCAvatarDescriptor vrcd = newAvatar.AddComponent<VRCAvatarDescriptor>();
 
@@ -70,14 +60,14 @@ namespace TEA {
    Transform rightEye = AvatarController.GetBone(vrcd, HumanBodyBones.RightEye);
    Transform head = AvatarController.GetBone(vrcd, HumanBodyBones.Head);
    if(null!=leftEye&&null!=rightEye) {
-    vrcd.ViewPosition=Vector3.Lerp(rightEye.position, leftEye.position, 0.5f);
+    vrcd.ViewPosition=newAvatar.transform.InverseTransformPoint(Vector3.Lerp(rightEye.position, leftEye.position, 0.5f));
     //Debug.Log($"{leftEye.position.x} - {rightEye.position.x}");
    } else if(null!=leftEye)
-    vrcd.ViewPosition=leftEye.position;
+    vrcd.ViewPosition=newAvatar.transform.InverseTransformPoint(leftEye.position);
    else if(null!=rightEye)
-    vrcd.ViewPosition=rightEye.position;
+    vrcd.ViewPosition=newAvatar.transform.InverseTransformPoint(rightEye.position);
    else if(null!=head) {
-    vrcd.ViewPosition=head.position;
+    vrcd.ViewPosition=newAvatar.transform.InverseTransformPoint(head.position);
    }
 
    // Eye Look
@@ -86,20 +76,20 @@ namespace TEA {
     vrcd.customEyeLookSettings.leftEye=leftEye;
     vrcd.customEyeLookSettings.rightEye=rightEye;
     vrcd.customEyeLookSettings.eyesLookingDown=new VRCAvatarDescriptor.CustomEyeLookSettings.EyeRotations();
-    vrcd.customEyeLookSettings.eyesLookingDown.left=new Quaternion(0.3f, 0f, 0f, 1f);
-    vrcd.customEyeLookSettings.eyesLookingDown.right=new Quaternion(0.3f, 0f, 0f, 1f);
+    vrcd.customEyeLookSettings.eyesLookingDown.left=settings.EyeLookDownLeft;
+    vrcd.customEyeLookSettings.eyesLookingDown.right=settings.EyeLookDownRight;
     vrcd.customEyeLookSettings.eyesLookingDown.linked=false;
     vrcd.customEyeLookSettings.eyesLookingRight=new VRCAvatarDescriptor.CustomEyeLookSettings.EyeRotations();
-    vrcd.customEyeLookSettings.eyesLookingRight.left=new Quaternion(0f, 0.2f, 0f, 1f);
-    vrcd.customEyeLookSettings.eyesLookingRight.right=new Quaternion(0f, 0.2f, 0f, 1f);
+    vrcd.customEyeLookSettings.eyesLookingRight.left=settings.EyeLookRightLeft;
+    vrcd.customEyeLookSettings.eyesLookingRight.right=settings.EyeLookRightRight;
     vrcd.customEyeLookSettings.eyesLookingRight.linked=false;
     vrcd.customEyeLookSettings.eyesLookingLeft=new VRCAvatarDescriptor.CustomEyeLookSettings.EyeRotations();
-    vrcd.customEyeLookSettings.eyesLookingLeft.left=new Quaternion(0f, -0.2f, 0f, 1f);
-    vrcd.customEyeLookSettings.eyesLookingLeft.right=new Quaternion(0f, -0.2f, 0f, 1f);
+    vrcd.customEyeLookSettings.eyesLookingLeft.left=settings.EyeLookLeftLeft;
+    vrcd.customEyeLookSettings.eyesLookingLeft.right=settings.EyeLookLeftRight;
     vrcd.customEyeLookSettings.eyesLookingLeft.linked=false;
     vrcd.customEyeLookSettings.eyesLookingUp=new VRCAvatarDescriptor.CustomEyeLookSettings.EyeRotations();
-    vrcd.customEyeLookSettings.eyesLookingUp.left=new Quaternion(-0.2f, 0f, 0f, 1f);
-    vrcd.customEyeLookSettings.eyesLookingUp.right=new Quaternion(-0.2f, 0f, 0f, 1f);
+    vrcd.customEyeLookSettings.eyesLookingUp.left=settings.EyeLookUpLeft;
+    vrcd.customEyeLookSettings.eyesLookingUp.right=settings.EyeLookUpRight;
     vrcd.customEyeLookSettings.eyesLookingUp.linked=false;
    }
 
@@ -107,6 +97,12 @@ namespace TEA {
    //AvatarDescriptorEditor3 editor = (AvatarDescriptorEditor3)Editor.CreateEditor(vrcd, typeof(AvatarDescriptorEditor3));
    //AutoDetectVisemes(vrcd);
 
+   //portraitCameraPositionOffset
+   if(settings.PortraitCameraPositionOffset!=Vector3.zero)
+    vrcd.portraitCameraPositionOffset=settings.PortraitCameraPositionOffset;
+   else
+    vrcd.portraitCameraPositionOffset=vrcd.ViewPosition;
+   
    // Locomotion
    vrcd.autoLocomotion=false;
 
@@ -117,52 +113,41 @@ namespace TEA {
     AssetDatabase.CreateFolder(scenePath, newAvatar.gameObject.name);
 
    // Playable Layers
-   string animation_folder = CreatePath(parentFolder, PLAYABLE_LAYERS_FOLDER);
+   string animation_folder = CreatePath(parentFolder, settings.PlayableLayersFolder);
    if(!AssetDatabase.IsValidFolder(animation_folder))
-    AssetDatabase.CreateFolder(parentFolder, PLAYABLE_LAYERS_FOLDER);
+    AssetDatabase.CreateFolder(parentFolder, settings.PlayableLayersFolder);
 
-   string bLayer = CreatePath(false, animation_folder, "BaseLayer.controller");
-   AssetDatabase.CopyAsset(Base_Layer, bLayer);
-   string addLayer = CreatePath(false, animation_folder, "AdditiveLayer.controller");
-   AssetDatabase.CopyAsset(Additive_Layer, addLayer);
-   string gLayer = CreatePath(false, animation_folder, "GestureLayer.controller");
-   AssetDatabase.CopyAsset(Gesture_Layer, gLayer);
-   string acLayer = CreatePath(false, animation_folder, "ActionLayer.controller");
-   AssetDatabase.CopyAsset(Action_Layer, acLayer);
-   string fxLayer = CreatePath(false, animation_folder, "FX.controller");
-   AssetDatabase.CopyAsset(FX_Layer, fxLayer);
-
-   vrcd.baseAnimationLayers[0].isDefault=false;
-   vrcd.baseAnimationLayers[0].isEnabled=true;
-   vrcd.baseAnimationLayers[0].animatorController=AssetDatabase.LoadAssetAtPath<AnimatorController>(bLayer);
-
-   vrcd.baseAnimationLayers[1].isDefault=false;
-   vrcd.baseAnimationLayers[1].isEnabled=true;
-   vrcd.baseAnimationLayers[1].animatorController=AssetDatabase.LoadAssetAtPath<AnimatorController>(addLayer);
-
-   vrcd.baseAnimationLayers[2].animatorController=AssetDatabase.LoadAssetAtPath<AnimatorController>(gLayer);
-   vrcd.baseAnimationLayers[2].isDefault=false;
-   vrcd.baseAnimationLayers[2].isEnabled=true;
-
-   vrcd.baseAnimationLayers[3].animatorController=AssetDatabase.LoadAssetAtPath<AnimatorController>(acLayer);
-   vrcd.baseAnimationLayers[3].isDefault=false;
-   vrcd.baseAnimationLayers[3].isEnabled=true;
-
-   vrcd.baseAnimationLayers[4].animatorController=AssetDatabase.LoadAssetAtPath<AnimatorController>(fxLayer);
-   vrcd.baseAnimationLayers[4].isDefault=false;
-   vrcd.baseAnimationLayers[4].isEnabled=true;
+   CopyPlayableLayer(vrcd, settings, animation_folder);
    vrcd.customizeAnimationLayers=true;
+
+   // Custome Layers
+   if(null!=settings.Sitting) {
+    vrcd.specialAnimationLayers[0].isDefault=false;
+    vrcd.specialAnimationLayers[0].isEnabled=true;
+    vrcd.specialAnimationLayers[0].animatorController=settings.Sitting;
+   }
+   if(null!=settings.TPose) {
+    vrcd.specialAnimationLayers[1].isDefault=false;
+    vrcd.specialAnimationLayers[1].isEnabled=true;
+    vrcd.specialAnimationLayers[1].animatorController=settings.TPose;
+   }
+   if(null!=settings.IKPose) {
+    vrcd.specialAnimationLayers[2].isDefault=false;
+    vrcd.specialAnimationLayers[2].isEnabled=true;
+    vrcd.specialAnimationLayers[2].animatorController=settings.IKPose;
+   }
 
    // Expressions
    vrcd.customExpressions=true;
-   string expression_folder = CreatePath(parentFolder, EXPRESSION_FOLDER);
+   string expression_folder = CreatePath(parentFolder, settings.ExpressionsFolder);
    if(!AssetDatabase.IsValidFolder(expression_folder))
-    AssetDatabase.CreateFolder(parentFolder, EXPRESSION_FOLDER);
+    AssetDatabase.CreateFolder(parentFolder, settings.ExpressionsFolder);
+
    string em = CreatePath(expression_folder, "ExpressionsMenu.asset");
    string ep = CreatePath(expression_folder, "ExpressionParameters.asset");
-   AssetDatabase.CopyAsset(EXPRESSION_MENU, em);
+   AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(settings.ExpressionsMenu), em);
    vrcd.expressionsMenu=AssetDatabase.LoadAssetAtPath<VRCExpressionsMenu>(em);
-   AssetDatabase.CopyAsset(EXPRESSION_PARAMETER, ep);
+   AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(settings.ExpressionParameters), ep);
    vrcd.expressionParameters=AssetDatabase.LoadAssetAtPath<VRCExpressionParameters>(ep);
   }
 

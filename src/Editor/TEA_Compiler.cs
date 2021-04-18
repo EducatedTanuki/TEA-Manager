@@ -19,10 +19,9 @@ namespace TEA {
  public class TEA_Compiler {
   public static readonly string CONTROLLER_PREFIX = "TEA_Controller-";
   public static readonly string ACTION_CONTROLLER_PREFIX = "TEA_ActionController-";
-  public static readonly string ASSETS_CONTENT = "Assets/";
-  public static readonly string WORKING_DIR = "TEA_Temp";
-  public static readonly string WORKING_DIR_PATH = ASSETS_CONTENT+WORKING_DIR;
-  public static readonly string WORKING_DIR_CONTENT = WORKING_DIR_PATH+"/";
+
+  public string WorkingDirPath;
+  public string WorkingDirContent;
 
   // --- Validation ---
   public static readonly string ERROR_HEADER = "Issue Compiling Animators";
@@ -34,12 +33,15 @@ namespace TEA {
   TEA_ValidationIssues issues;
   bool validationIssue = false;
 
-  public bool CompileAnimators(TEA_Manager manager) {
+  public bool CompileAnimators(TEA_Manager manager, TEA_Settings settings) {
+   WorkingDirPath=ASSETS_CONTENT+settings.WorkingDirectory;
+   WorkingDirContent=WorkingDirPath+"/";
+
    try {
     // working folder
-    if(!AssetDatabase.IsValidFolder(WORKING_DIR_PATH)) {
-     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder("Assets", WORKING_DIR))) {
-      EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{WORKING_DIR_PATH}]", "ok");
+    if(!AssetDatabase.IsValidFolder(WorkingDirPath)) {
+     if(string.IsNullOrEmpty(AssetDatabase.CreateFolder("Assets", settings.WorkingDirectory))) {
+      EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{WorkingDirPath}]", "ok");
       return true;
      }
     }
@@ -48,7 +50,7 @@ namespace TEA {
     validationIssue=false;
     AnimatorController teaAnimContr = GenerateTEA_Animator(manager);
 
-    foreach(string path in AssetDatabase.GetSubFolders(WORKING_DIR_PATH)) {
+    foreach(string path in AssetDatabase.GetSubFolders(WorkingDirPath)) {
      AssetDatabase.DeleteAsset(path);
     }
 
@@ -56,9 +58,9 @@ namespace TEA {
     // --- --- --- for all avatars
     foreach(VRCAvatarDescriptor avatar in TEA_Manager.AvatarDescriptor) {
      //Scene Folder
-     string sceneFolder = CreatePath(false, WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
+     string sceneFolder = CreatePath(false, WorkingDirPath, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
      if(!AssetDatabase.IsValidFolder(sceneFolder)) {
-      if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(WORKING_DIR_PATH, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name))) {
+      if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(WorkingDirPath, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name))) {
        EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{sceneFolder}]", "ok");
        return true;
       }
@@ -182,7 +184,7 @@ namespace TEA {
      manager.LayerInfo.Add(AssetDatabase.LoadAssetAtPath<TEA_PlayableLayerData>(layerInfoPath));
 
      //Debug.Log($"HEAD[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).position.ToString("F4")}] ViewPort:[{avatarComp.ViewPosition.ToString("F4")}] Transform[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition).ToString("F4")}]");
-     manager.ViewPorts.Add(AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition));
+     manager.ViewPorts.Add(AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.transform.TransformPoint(avatarComp.ViewPosition)));
      Debug.Log($"----- Created animator controllers for [{avatarKey}]");
 
      // Validation
@@ -244,7 +246,7 @@ namespace TEA {
      TEA_Error_Window.Open(avatarIssues);
     }
     return !validationIssue;
-   }catch(Exception e) {
+   } catch(Exception e) {
     EditorUtility.DisplayDialog(ERROR_HEADER, $"TEA Manager ran into an unexpected issue while compiling [{currentAvatar.name}].\n"
      +"If you cannot resolve the issue please raise a ticket on the GitHub and include the error log in the console.", "ok");
     Debug.LogError(e);
