@@ -47,13 +47,79 @@ namespace TEA {
   // ----- ----- Avatar Setup Methods ----- -----
   private static readonly string TEA_OBJECT_MENU = "TEA Functions";
 
+  private static readonly string SET_EYE_LOOK = "Set Eye Look as default";
+
+  [MenuItem("GameObject/TEA Functions/Set Eye Look as default", false, 10)]
+  public static void SetEyeLook() {
+   GameObject newAvatar = Selection.activeGameObject;
+   VRCAvatarDescriptor descriptor = newAvatar.GetComponent<VRCAvatarDescriptor>();
+   TEA_Settings settings = GetTEA_Settings();
+   settings.EyeLookUpLeft=descriptor.customEyeLookSettings.eyesLookingUp.left;
+   settings.EyeLookUpRight=descriptor.customEyeLookSettings.eyesLookingUp.right;
+   settings.EyeLookDownLeft=descriptor.customEyeLookSettings.eyesLookingDown.left;
+   settings.EyeLookDownRight=descriptor.customEyeLookSettings.eyesLookingDown.right;
+   settings.EyeLookLeftLeft=descriptor.customEyeLookSettings.eyesLookingLeft.left;
+   settings.EyeLookLeftRight=descriptor.customEyeLookSettings.eyesLookingLeft.right;
+   settings.EyeLookRightLeft=descriptor.customEyeLookSettings.eyesLookingRight.left;
+   settings.EyeLookRightRight=descriptor.customEyeLookSettings.eyesLookingRight.right;
+   EditorUtility.SetDirty(settings);
+   AssetDatabase.SaveAssets();
+  }
+
+  [MenuItem("GameObject/TEA Functions/Set Eye Look as default", true, 10)]
+  public static bool SetEyeLookCheck() {
+   GameObject newAvatar = Selection.activeGameObject;
+   if(null==newAvatar) {
+    EditorUtility.DisplayDialog(SET_EYE_LOOK, $"Nothing Selected (probably unity donking up)", "Cancel");
+    return false;
+   }
+   VRCAvatarDescriptor descriptor = newAvatar.GetComponent<VRCAvatarDescriptor>();
+   if(null==descriptor) {
+    EditorUtility.DisplayDialog(SET_EYE_LOOK, $"[{newAvatar.name}] is has no Avatar Descriptor", "Cancel");
+    return false;
+   }
+
+   if(!descriptor.enableEyeLook) {
+    EditorUtility.DisplayDialog(SET_EYE_LOOK, $"[{newAvatar.name}] does not custom eye look", "Cancel");
+    return false;
+   }
+   bool accept = accept=EditorUtility.DisplayDialog(SET_EYE_LOOK, $"Use [{newAvatar.name}]'s Eye Look settings as the default when using '{MAKE_AVATAR}'", "Accept", "Cancel");
+   return accept;
+  }
+
+
   // ----- Make Avatar Menu -----
+  private static readonly string MAKE_AVATAR = "Make Avatar 3.0";
   #region
   [MenuItem("GameObject/TEA Functions/Make Avatar 3.0", false, 0)]
   public static void MakeAvatar() {
-   TEA_Settings settings = GetTEA_Settings();
    GameObject newAvatar = Selection.activeGameObject;
+   TEA_Settings settings = GetTEA_Settings();
+
+   // Folders
+   string scenePath = GetParentPath(newAvatar.gameObject.scene.path, false);
+   string parentFolder = GetPath(false, scenePath, newAvatar.gameObject.name);
+   string animation_folder = GetPath(false, parentFolder, settings.PlayableLayersFolder);
+   string expression_folder = GetPath(false, parentFolder, settings.ExpressionsFolder);
+
+   if(!EditorUtility.DisplayDialog(MAKE_AVATAR,
+    $"Avatar assets will be saved in root folder [{parentFolder}]"
+    +"\n"
+    +"\nThis operation may overridden files!"
+    +$"\nExpression assets at [{expression_folder}]"
+    +$"\nPlayable Layer assets at [{animation_folder}]"
+    , "Continue", "Cancel"))
+    return;
+
    VRCAvatarDescriptor vrcd = newAvatar.AddComponent<VRCAvatarDescriptor>();
+
+   // Folders
+   if(!AssetDatabase.IsValidFolder(parentFolder))
+    AssetDatabase.CreateFolder(scenePath, newAvatar.gameObject.name);
+   if(!AssetDatabase.IsValidFolder(animation_folder))
+    AssetDatabase.CreateFolder(parentFolder, settings.PlayableLayersFolder);
+   if(!AssetDatabase.IsValidFolder(expression_folder))
+    AssetDatabase.CreateFolder(parentFolder, settings.ExpressionsFolder);
 
    // ViewPort
    Transform leftEye = AvatarController.GetBone(vrcd, HumanBodyBones.LeftEye);
@@ -98,25 +164,21 @@ namespace TEA {
    //AutoDetectVisemes(vrcd);
 
    //portraitCameraPositionOffset
-   if(settings.PortraitCameraPositionOffset!=Vector3.zero)
-    vrcd.portraitCameraPositionOffset=settings.PortraitCameraPositionOffset;
-   else
-    vrcd.portraitCameraPositionOffset=vrcd.ViewPosition;
+   if(settings.SetCameraPosition) {
+    if(settings.PortraitCameraPositionOffset==Vector3.zero)
+     vrcd.portraitCameraPositionOffset=vrcd.ViewPosition+new Vector3(0, 0, 0.492f);
+    else
+     vrcd.portraitCameraPositionOffset=settings.PortraitCameraPositionOffset;
+   }
    
+   if(settings.SetCameraRotation)
+    vrcd.portraitCameraRotationOffset=Quaternion.Euler(settings.PortraitCameraRotationOffset);
+
    // Locomotion
    vrcd.autoLocomotion=false;
 
-   // Folders
-   string scenePath = GetParent(newAvatar.gameObject.scene.path, false);
-   string parentFolder = CreatePath(false, scenePath, newAvatar.gameObject.name);
-   if(!AssetDatabase.IsValidFolder(parentFolder))
-    AssetDatabase.CreateFolder(scenePath, newAvatar.gameObject.name);
-
    // Playable Layers
-   string animation_folder = CreatePath(parentFolder, settings.PlayableLayersFolder);
-   if(!AssetDatabase.IsValidFolder(animation_folder))
-    AssetDatabase.CreateFolder(parentFolder, settings.PlayableLayersFolder);
-
+   //Debug.Log($"[{vrcd.baseAnimationLayers[0]}]");
    CopyPlayableLayer(vrcd, settings, animation_folder);
    vrcd.customizeAnimationLayers=true;
 
@@ -139,12 +201,9 @@ namespace TEA {
 
    // Expressions
    vrcd.customExpressions=true;
-   string expression_folder = CreatePath(parentFolder, settings.ExpressionsFolder);
-   if(!AssetDatabase.IsValidFolder(expression_folder))
-    AssetDatabase.CreateFolder(parentFolder, settings.ExpressionsFolder);
 
-   string em = CreatePath(expression_folder, "ExpressionsMenu.asset");
-   string ep = CreatePath(expression_folder, "ExpressionParameters.asset");
+   string em = GetPath(expression_folder, "ExpressionsMenu.asset");
+   string ep = GetPath(expression_folder, "ExpressionParameters.asset");
    AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(settings.ExpressionsMenu), em);
    vrcd.expressionsMenu=AssetDatabase.LoadAssetAtPath<VRCExpressionsMenu>(em);
    AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(settings.ExpressionParameters), ep);
@@ -155,34 +214,29 @@ namespace TEA {
   public static bool MakeAvatarCheck() {
    GameObject newAvatar = Selection.activeGameObject;
    if(null==newAvatar) {
-    EditorUtility.DisplayDialog("Make Avatar 3.0", $"Nothing Selected (probably unity donking up)", "Cancel");
+    EditorUtility.DisplayDialog(MAKE_AVATAR, $"Nothing Selected (probably unity donking up)", "Cancel");
     return false;
    }
    VRCAvatarDescriptor descriptor = newAvatar.GetComponent<VRCAvatarDescriptor>();
    if(null!=descriptor) {
-    EditorUtility.DisplayDialog("Make Avatar 3.0", $"{newAvatar.name} is already an avatar", "Cancel");
+    EditorUtility.DisplayDialog(MAKE_AVATAR, $"{newAvatar.name} is already an avatar", "Cancel");
     return false;
    }
 
    Animator animator = newAvatar.GetComponent<Animator>();
    if(null==animator) {
-    EditorUtility.DisplayDialog("Make Avatar 3.0", $"{newAvatar.name} does not have an Animator", "Cancel");
+    EditorUtility.DisplayDialog(MAKE_AVATAR, $"{newAvatar.name} does not have an Animator", "Cancel");
     return false;
    }
-   string parentFolder = GetParent(newAvatar.scene.path, false);
+   string parentFolder = GetParentPath(newAvatar.scene.path, false);
    if(!AssetDatabase.IsValidFolder(parentFolder)) {
-    EditorUtility.DisplayDialog("Make Avatar 3.0", $"The scene needs to be saved before you can use 'Make Avatar 3.0'", "OK");
+    EditorUtility.DisplayDialog(MAKE_AVATAR, $"The scene needs to be saved before you can use 'Make Avatar 3.0'", "OK");
     return false;
    }
-   bool accept = false;
-   if(null==animator.avatar) {
-    accept=EditorUtility.DisplayDialog("Make Avatar 3.0", $"{newAvatar.name} does not have an Animator.Avatar", "Continue", "Cancel");
-   if(!accept)
-    return false;
-   }
+   bool accept = true;
+   if(null==animator.avatar)
+    accept=EditorUtility.DisplayDialog(MAKE_AVATAR, $"{newAvatar.name} does not have an Animator.Avatar", "Continue", "Cancel");
 
-   parentFolder=CreatePath(parentFolder, newAvatar.gameObject.name);
-   accept=EditorUtility.DisplayDialog("Make Avatar 3.0", $"This operation will create folders in\n[{parentFolder}]\nSome files may be overridden!", "Continue", "Cancel");
    return accept;
   }
 
@@ -252,7 +306,15 @@ namespace TEA {
   public static void CreateToggle() {
    GameObject selected = Selection.activeGameObject;
    VRCAvatarDescriptor avatar = (VRCAvatarDescriptor)selected.GetComponentsInParent(typeof(VRCAvatarDescriptor), true)[0];
-   int isActive = EditorUtility.DisplayDialogComplex($"Create Toggle for [{selected.name}]", "", "OFF", "ON", "BOTH");
+
+   TEA_Settings settings = GetTEA_Settings();
+   string toggle_folder = SubFolder(avatar.transform, settings.ToggleFolder, false);
+
+   int isActive = EditorUtility.DisplayDialogComplex(
+    $"Create Toggle for [{selected.name}]",
+    $"AnimationClips will be created at [{toggle_folder}]",
+    "OFF", "ON", "BOTH");
+
    if(2==isActive) {
     CreateToggle(selected, avatar.transform, 0);
     CreateToggle(selected, avatar.transform, 1);
@@ -261,24 +323,34 @@ namespace TEA {
   }
 
   private static void CreateToggle(GameObject gameObject, Transform parent, float value) {
-   string scenePath = GetParent(parent.gameObject.scene.path, false);
-   string parentFolder = CreatePath(false, scenePath, parent.gameObject.name);
-   if(!AssetDatabase.IsValidFolder(parentFolder))
-    AssetDatabase.CreateFolder(scenePath, parent.gameObject.name);
-
-   string toggle_folder = CreatePath(parentFolder, "Toggles");
-   if(!AssetDatabase.IsValidFolder(toggle_folder))
-    AssetDatabase.CreateFolder(parentFolder, "Toggles");
+   TEA_Settings settings = GetTEA_Settings();
+   string toggle_folder = SubFolder(parent, settings.ToggleFolder, true);
 
    AnimationClip clip = new AnimationClip() {
     name=gameObject.name
    };
    clip.SetCurve(AnimationUtility.CalculateTransformPath(gameObject.transform, parent), typeof(GameObject), "m_IsActive", AnimationCurve.Constant(0.0f, 0.0f, value));
-   string path = CreatePath(toggle_folder, gameObject.name+(value==1 ? "-ON.anim" : "-OFF.anim"));
+   string path = GetPath(toggle_folder, gameObject.name+(value==1 ? "-ON.anim" : "-OFF.anim"));
    if(!AssetDatabase.LoadAssetAtPath<AnimationClip>(path))
     AssetDatabase.CreateAsset(clip, path);
    else
     EditorUtility.DisplayDialog($"Toggle Already Exists", $"[{path}]", "OK");
+  }
+
+  private static string SubFolder(Transform parent, string subFolder, bool create) {
+   string scenePath = GetParentPath(parent.gameObject.scene.path, false);
+   string parentFolder = GetPath(false, scenePath, parent.gameObject.name);
+   string subFolderPath = GetPath(false, parentFolder, subFolder);
+
+   if(!create)
+    return subFolderPath;
+
+   if(!AssetDatabase.IsValidFolder(parentFolder))
+    AssetDatabase.CreateFolder(scenePath, parent.gameObject.name);
+
+   if(!AssetDatabase.IsValidFolder(subFolderPath))
+    AssetDatabase.CreateFolder(parentFolder, subFolder);
+   return subFolderPath;
   }
 
   [MenuItem("GameObject/TEA Functions/Create Toggle", true, 0)]

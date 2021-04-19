@@ -18,7 +18,7 @@ MonoBehaviour:
     type: 2}
   PlayableLayersFolder: Playable Layers
   BaseCopy: 1
-  Base: {fileID: 9100000, guid: 4e4e1a372a526074884b7311d6fc686b, type: 2}
+  Base: {fileID: 9100000, guid: 9a8d02585ab2a5b4292c177ef5db0c54, type: 2}
   AdditiveCopy: 1
   Additive: {fileID: 9100000, guid: e934e893dc619254eb102ea0fbe96b2a, type: 2}
   GestureCopy: 1
@@ -39,6 +39,7 @@ MonoBehaviour:
   EyeLookRightRight: {x: 0, y: 0.2, z: 0, w: 1}
   EyeLookLeftLeft: {x: 0, y: -0.2, z: 0, w: 1}
   EyeLookLeftRight: {x: 0, y: -0.2, z: 0, w: 1}
+  ToggleFolder: Toggles
   keepInSceneTooltip: Keep the TEA Manager prefab in your Scene while not in play
     mode
   keepInScene: 1

@@ -46,6 +46,7 @@ namespace TEA {
   bool _avatars = false;
   bool _play = false;
   bool _compile = false;
+  bool _compiled = false;
   bool _managerOverload = false;
   bool _startedPlaying = false;
   bool _stoppedPlaying = false;
@@ -100,14 +101,24 @@ namespace TEA {
    }
   }
 
+  private void OnInspectorUpdate() {
+   try {
+    settings=GetTEA_Settings();
+   } catch(TEA_Exception) {
+    this.Close();
+   }
+  }
+
   private void OnGUI() {
    if(null==settings)
     return;
 
    try {
-    imageStyle=new GUIStyle() {
-     alignment=TextAnchor.UpperLeft
-    };
+    if(null==imageStyle) {
+     imageStyle=new GUIStyle() {
+      alignment=TextAnchor.UpperLeft
+     };
+    }
     if(null==layoutStyle) {
      layoutStyle=new GUIStyle(EditorStyles.boldLabel) {
       alignment=TextAnchor.MiddleCenter,
@@ -122,11 +133,21 @@ namespace TEA {
 
     EditorGUILayout.BeginHorizontal();
     //------
+    if(EditorApplication.isPlaying &&!_compiled) {
+     if(null!=manager)
+      manager.gameObject.SetActive(false);
+     EditorGUILayout.HelpBox("TEA Manager will not activate unless you use the custom play/validate buttons", MessageType.Warning);
+     return;
+    }
+
     if(_managerOverload) {
      EditorGUILayout.HelpBox($"Only one TEA Manager can be loaded at a time, please delete one form the Active Scene", MessageType.Error);
      EndLayout();
      return;
     }
+
+    if(GUILayout.Button("Settings", GUILayout.Width(SECTION_WIDTH/3)))
+     TEA_Settings_EditorWindow.OpenWindow();
 
     DrawToggleParent();
     EditorGUILayout.LabelField("", GUI.skin.verticalSlider, GUILayout.Width(SEPARATOR_WIDTH), GUILayout.Height(MIN_HEIGHT));
@@ -227,10 +248,12 @@ namespace TEA {
     if(_play) {
      if(!compiler.validate||valid) {
       manager.Canvas.SetActive(true);
+      _compiled=true;
       EditorApplication.isPlaying=true;
      }
      _play=false;
-    }
+    } else
+     _compiled=false;
    }
   }
 

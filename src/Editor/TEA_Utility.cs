@@ -31,25 +31,28 @@ namespace TEA {
     throw new TEA_Exception("Default Settings file is missing");
    }
 
+   if(assets.Length==1)
+    return CreateSettings(defaultGUID);
+
+   string path = AssetDatabase.GUIDToAssetPath(firstGUID);
    if(assets.Length>2) {
-    string path = AssetDatabase.GUIDToAssetPath(firstGUID);
-    int delete = EditorUtility.DisplayDialogComplex("TEA Settings", $"There are more than one settings files present."
-     +$"\nWill use [{path}]"
-     +$"\n'Delete All' will create a new settings file under {ASSETS_CONTENT}", "Delete All", "Delete Extra", "Continue");
+    int delete = EditorUtility.DisplayDialogComplex("TEA Settings", $"There are multiple settings files present."
+     +$"\n'Continue' use [{path}]"
+     +$"\n'Delete Extra' delete all but [{path}]"
+     +$"\n'Delete All' will create a new settings file under {ASSETS_CONTENT}"
+     , "Delete All", "Delete Extra", "Continue");
     if(delete==0) {
      DeleteSettings(defaultGUID);
      return CreateSettings(defaultGUID);
     } else if(delete==1)
      DeleteSettings(defaultGUID, firstGUID);
-
-    return AssetDatabase.LoadAssetAtPath<TEA_Settings>(path);
    }
-   return CreateSettings(defaultGUID);
+   return AssetDatabase.LoadAssetAtPath<TEA_Settings>(path);
   }
 
   private static TEA_Settings CreateSettings(string defaultSettingsGUID) {
    Debug.Log($"Creating setting file at [{ASSETS_CONTENT}]");
-   string settingsPath = CreateAssetPath(ASSETS, "TEA_Settings");
+   string settingsPath = GetAssetPath(ASSETS, "TEA_Settings");
    AssetDatabase.CopyAsset(AssetDatabase.GUIDToAssetPath(defaultSettingsGUID), settingsPath);
    return AssetDatabase.LoadAssetAtPath<TEA_Settings>(settingsPath);
   }
@@ -126,17 +129,20 @@ namespace TEA {
   }
 
   public static void CopyPlayableLayer(VRCAvatarDescriptor vrcd, int layer, string folder, string sourceController, bool copy) {
-   string controllerPath = CreatePath(false, folder, vrcd.baseAnimationLayers[layer].type+".controller");
+   string controllerPath = GetPath(false, folder, vrcd.baseAnimationLayers[layer].type+".controller");
    AnimatorController controller;
    if(copy) {
     AssetDatabase.CopyAsset(sourceController, controllerPath);
     controller=AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);
    } else
     controller=AssetDatabase.LoadAssetAtPath<AnimatorController>(sourceController);
+
    vrcd.baseAnimationLayers[layer].isDefault=false;
    vrcd.baseAnimationLayers[layer].isEnabled=true;
    vrcd.baseAnimationLayers[layer].animatorController=controller;
-   CopyBlendTrees(controller, folder);
+
+   if(copy)
+    CopyBlendTrees(controller, folder);
   }
 
   // ------ ------ Animator ----- -----
@@ -150,7 +156,7 @@ namespace TEA {
 
   public static void CopyBlendTrees(AnimatorController controller, string path) {
    foreach(AnimatorControllerLayer layer in controller.layers) {
-    CopyBlendTrees(layer.stateMachine, path);
+    CopyBlendTrees( layer.stateMachine, path);
     foreach(ChildAnimatorStateMachine cSM in layer.stateMachine.stateMachines) {
      CopyBlendTrees(cSM.stateMachine, path);
     }
@@ -161,17 +167,20 @@ namespace TEA {
 
   public static void CopyBlendTrees(AnimatorStateMachine stateMachine, string path) {
    foreach(ChildAnimatorState state in stateMachine.states) {
-    Debug.Log($"BlendTree[{state.state.motion is BlendTree}] isSubAsset[{!AssetDatabase.IsSubAsset(state.state.motion)}]");
+    if(null==state.state.motion)
+     continue;
+    //Debug.Log($"BlendTree[{state.state.motion is BlendTree}] isSubAsset[{!AssetDatabase.IsSubAsset(state.state.motion)}]");
     if(state.state.motion is BlendTree&&!AssetDatabase.IsSubAsset(state.state.motion)) {
-     string newTreePath = CreateAssetPath(path, state.state.motion.name);
+     string newTreePath = GetAssetPath(path, state.state.motion.name);
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(state.state.motion), newTreePath);
+     state.state.motion=AssetDatabase.LoadAssetAtPath<BlendTree>(newTreePath);
     }
    }
   }
 
   // ----- ------ Pathing ----- -----
-  public static string CreatePath(bool keepslash, params string[] pathParts) {
-   string path = CreatePath(pathParts);
+  public static string GetPath(bool keepslash, params string[] pathParts) {
+   string path = GetPath(pathParts);
    if(!keepslash)
     return Regex.Replace(path, @"/$", "");
    else if(!path.EndsWith("/"))
@@ -179,7 +188,7 @@ namespace TEA {
    return path;
   }
 
-  public static string CreatePath(params string[] pathParts) {
+  public static string GetPath(params string[] pathParts) {
    string path = "";
    foreach(string part in pathParts) {
     if(null==part)
@@ -191,8 +200,8 @@ namespace TEA {
    return path;
   }
 
-  public static string CreateAssetPath(string parent, string name) {
-   return CreatePath(false, parent, name+".asset");
+  public static string GetAssetPath(string parent, string name) {
+   return GetPath(false, parent, name+".asset");
   }
 
   public static void CreateAsset(UnityEngine.Object sibling, UnityEngine.Object newAsset, string name) {
@@ -206,7 +215,7 @@ namespace TEA {
     return Regex.Replace(AssetDatabase.GetAssetPath(obj), @"/[^/]+\..*$", "");
   }
 
-  public static string GetParent(string asset, bool keepSlash) {
+  public static string GetParentPath(string asset, bool keepSlash) {
    if(keepSlash)
     return Regex.Replace(asset, @"[^/]+\..*$", "");
    else

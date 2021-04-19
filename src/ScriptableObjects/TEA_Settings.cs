@@ -8,10 +8,12 @@ namespace TEA {
  [CreateAssetMenu(fileName = "Default Settings", menuName = "ScriptableObjects/TEA_Settings", order = 1)]
  public class TEA_Settings : UnityEngine.ScriptableObject {
   [Header("Make Avatar 3.0")]
+  [Tooltip("Setting empty will place assets in the Avatars root folder")]
   [SerializeField] public string ExpressionsFolder = "Expressions";
   [SerializeField] public VRCExpressionsMenu ExpressionsMenu;
   [SerializeField] public VRCExpressionParameters ExpressionParameters;
   [Space]
+  [Tooltip("Setting empty will place assets in the Avatars root folder")]
   [SerializeField] public string PlayableLayersFolder = "Playable Layers";
   [Tooltip("Copy Layer to Avatar Folder (turn off if you want all avatars to point to the same asset)")]
   [SerializeField] public bool BaseCopy = true;
@@ -33,8 +35,14 @@ namespace TEA {
   [SerializeField] public RuntimeAnimatorController TPose;
   [SerializeField] public RuntimeAnimatorController IKPose;
   [Space]
+  [Tooltip("Set the VRC Portrait Camara Position with the values below")]
+  [SerializeField] public bool SetCameraPosition = true;
   [Tooltip("When zero the avatars calculated viewport will be used")]
   [SerializeField] public Vector3 PortraitCameraPositionOffset = Vector3.zero;
+  [Tooltip("Set the VRC Portrait Camara Rotation with the values below")]
+  [SerializeField] public bool SetCameraRotation = true;
+  [SerializeField] public Vector3 PortraitCameraRotationOffset = new Vector3(0,180,0);
+  [Tooltip("Use 'TEA Functions/Set Eye Look as default' to change this")]
   [SerializeField] public Quaternion EyeLookDownLeft = new Quaternion(0.3f, 0f, 0f, 1f);
   [SerializeField] public Quaternion EyeLookDownRight = new Quaternion(0.3f, 0f, 0f, 1f);
   [SerializeField] public Quaternion EyeLookUpLeft = new Quaternion(-0.2f, 0f, 0f, 1f);
@@ -43,6 +51,11 @@ namespace TEA {
   [SerializeField] public Quaternion EyeLookRightRight = new Quaternion(0f, 0.2f, 0f, 1f);
   [SerializeField] public Quaternion EyeLookLeftLeft = new Quaternion(0f, -0.2f, 0f, 1f);
   [SerializeField] public Quaternion EyeLookLeftRight = new Quaternion(0f, -0.2f, 0f, 1f);
+
+  [Header("Create Toggle")]
+  [Tooltip("Setting empty will place assets in the Avatars root folder")]
+  [SerializeField] public string ToggleFolder = "Toggles";
+
 
   [Header("Play Tab Toggles Settings")]
   [SerializeField] public string keepInSceneTooltip = "Keep the TEA Manager prefab in your Scene while not in play mode";

@@ -58,7 +58,7 @@ namespace TEA {
     // --- --- --- for all avatars
     foreach(VRCAvatarDescriptor avatar in TEA_Manager.AvatarDescriptor) {
      //Scene Folder
-     string sceneFolder = CreatePath(false, WorkingDirPath, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
+     string sceneFolder = GetPath(false, WorkingDirPath, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name);
      if(!AssetDatabase.IsValidFolder(sceneFolder)) {
       if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(WorkingDirPath, TEA_Manager.AvatarDescriptor[aCount].gameObject.scene.name))) {
        EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{sceneFolder}]", "ok");
@@ -76,7 +76,7 @@ namespace TEA {
      Debug.Log($"----- Creating animator controllers for [{avatarKey}]");
 
      // avatar folder
-     string folderPath = CreatePath(false, sceneFolder, avatarKey);
+     string folderPath = GetPath(false, sceneFolder, avatarKey);
      if(string.IsNullOrEmpty(AssetDatabase.CreateFolder(sceneFolder, avatarKey))) {
       EditorUtility.DisplayDialog(ERROR_HEADER, $"Could not create working folder [{folderPath}]", "ok");
       return true;
@@ -94,7 +94,7 @@ namespace TEA {
       EditorUtility.SetDirty(baseRunContr);
       AssetDatabase.SaveAssets();
      }
-     string baseControllerPath = CreatePath(false, folderPath, "Base.controller");
+     string baseControllerPath = GetPath(false, folderPath, "Base.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(baseRunContr), baseControllerPath);
      AnimatorController baseAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(baseControllerPath);
      GetBehaviours(baseRunContr, baseAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Base);
@@ -108,7 +108,7 @@ namespace TEA {
       RuntimeAnimatorController additiveRunContr = avatarComp.baseAnimationLayers[1].animatorController;
       EditorUtility.SetDirty(additiveRunContr);
       AssetDatabase.SaveAssets();
-      string additiveControllerPath = CreatePath(false, folderPath, "Additive.controller");
+      string additiveControllerPath = GetPath(false, folderPath, "Additive.controller");
       AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(additiveRunContr), additiveControllerPath);
       additiveAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(additiveControllerPath);
       GetBehaviours(additiveRunContr, additiveAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Additive);
@@ -130,7 +130,7 @@ namespace TEA {
       EditorUtility.SetDirty(gestureRunContr);
       AssetDatabase.SaveAssets();
      }
-     string gestureControllerPath = CreatePath(false, folderPath, "Gesture.controller");
+     string gestureControllerPath = GetPath(false, folderPath, "Gesture.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(gestureRunContr), gestureControllerPath);
      AnimatorController gestureAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(gestureControllerPath);
      GetBehaviours(gestureRunContr, gestureAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Gesture);
@@ -145,7 +145,7 @@ namespace TEA {
       EditorUtility.SetDirty(actionRunContr);
       AssetDatabase.SaveAssets();
      }
-     string actionControllerPath = CreatePath(false, folderPath, "Action.controller");
+     string actionControllerPath = GetPath(false, folderPath, "Action.controller");
      AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(actionRunContr), actionControllerPath);
      AnimatorController actionAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(actionControllerPath);
      GetBehaviours(actionRunContr, actionAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Action);
@@ -159,7 +159,7 @@ namespace TEA {
       RuntimeAnimatorController fxRunContr = avatarComp.baseAnimationLayers[4].animatorController;
       EditorUtility.SetDirty(fxRunContr);
       AssetDatabase.SaveAssets();
-      string fxControllerPath = CreatePath(false, folderPath, "FX.controller");
+      string fxControllerPath = GetPath(false, folderPath, "FX.controller");
       AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(fxRunContr), fxControllerPath);
       fxAnimContr=AssetDatabase.LoadAssetAtPath<AnimatorController>(fxControllerPath);
 
@@ -175,11 +175,11 @@ namespace TEA {
       layerInfo.data[4].end=layerInfo.data[3].end;
      }
 
-     string superAnimatorPath = CreatePath(false, folderPath, superAnimator.name+".controller");
+     string superAnimatorPath = GetPath(false, folderPath, superAnimator.name+".controller");
      AssetDatabase.CreateAsset(superAnimator, superAnimatorPath);
      manager.Controllers.Add(AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(superAnimatorPath));
 
-     string layerInfoPath = CreatePath(false, folderPath, layerInfo.name+".asset");
+     string layerInfoPath = GetPath(false, folderPath, layerInfo.name+".asset");
      AssetDatabase.CreateAsset(layerInfo, layerInfoPath);
      manager.LayerInfo.Add(AssetDatabase.LoadAssetAtPath<TEA_PlayableLayerData>(layerInfoPath));
 
