@@ -56,6 +56,22 @@ namespace TEA {
   [Tooltip("Setting empty will place assets in the Avatars root folder")]
   [SerializeField] public string ToggleFolder = "Toggles";
 
+  [System.Serializable]
+  public enum MoveTypes {
+   Walk,
+   Sprint,
+   Run
+  }
+
+  [Header("Avatar Locomotion Settings")]
+  [SerializeField] public MoveTypes MoveType = MoveTypes.Walk;
+  [SerializeField] public float WalkVelocity = 1.56f;
+  [SerializeField] public float RunVelocity = 3.4f;
+  [SerializeField] public float SprintVelocity = 5.96f;
+  [SerializeField] public float RotationAmount = 3;
+
+  [Header("Compiler Settings")]
+  public string WorkingDirectory = "TEA_Temp";
 
   [Header("Play Tab Toggles Settings")]
   [SerializeField] public string keepInSceneTooltip = "Keep the TEA Manager prefab in your Scene while not in play mode";
@@ -81,22 +97,5 @@ namespace TEA {
   [SerializeField] public bool AfterButtons = true;
   [SerializeField] public bool BeforeInfo = true;
   [SerializeField] public bool AfterInfo = true;
-
-  [System.Serializable]
-  public enum MoveTypes {
-   Walk,
-   Sprint,
-   Run
-  }
-
-  [Header("Avatar Locomotion Settings")]
-  [SerializeField] public MoveTypes MoveType = MoveTypes.Walk;
-  [SerializeField] public float WalkVelocity = 1.56f;
-  [SerializeField] public float RunVelocity = 3.4f;
-  [SerializeField] public float SprintVelocity = 5.96f;
-  [SerializeField] public float RotationAmount = 3;
-
-  [Header("Compiler Settings")]
-  public string WorkingDirectory = "TEA_Temp";
  }
 }

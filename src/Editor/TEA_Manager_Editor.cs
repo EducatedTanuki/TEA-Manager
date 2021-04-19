@@ -91,7 +91,7 @@ namespace TEA {
   // ----- Make Avatar Menu -----
   private static readonly string MAKE_AVATAR = "Make Avatar 3.0";
   #region
-  [MenuItem("GameObject/TEA Functions/Make Avatar 3.0", false, 0)]
+  [MenuItem("GameObject/TEA Functions/Make Avatar 3.0", false, 1)]
   public static void MakeAvatar() {
    GameObject newAvatar = Selection.activeGameObject;
    TEA_Settings settings = GetTEA_Settings();
@@ -210,7 +210,7 @@ namespace TEA {
    vrcd.expressionParameters=AssetDatabase.LoadAssetAtPath<VRCExpressionParameters>(ep);
   }
 
-  [MenuItem("GameObject/TEA Functions/Make Avatar 3.0", true, 0)]
+  [MenuItem("GameObject/TEA Functions/Make Avatar 3.0", true, 1)]
   public static bool MakeAvatarCheck() {
    GameObject newAvatar = Selection.activeGameObject;
    if(null==newAvatar) {

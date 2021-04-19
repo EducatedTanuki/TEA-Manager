@@ -249,7 +249,7 @@ namespace TEA {
    } catch(Exception e) {
     EditorUtility.DisplayDialog(ERROR_HEADER, $"TEA Manager ran into an unexpected issue while compiling [{currentAvatar.name}].\n"
      +"If you cannot resolve the issue please raise a ticket on the GitHub and include the error log in the console.", "ok");
-    Debug.LogError(e);
+    Debug.LogError(new TEA_Exception("Unexpected Exception", e));
    }
    return false;
   }
@@ -537,6 +537,8 @@ namespace TEA {
     if(null==avatar.expressionParameters||null==avatar.expressionsMenu)
      return;
 
+    EMenus=new List<VRCExpressionsMenu>();
+    EMenusText=new List<string>();
     ValidateExpressionsMenu(avatar, avatar.expressionsMenu);
 
     foreach(VRCExpressionParameters.Parameter parameter in avatar.expressionParameters.parameters) {
@@ -555,6 +557,9 @@ namespace TEA {
    }
   }
 
+  List<VRCExpressionsMenu> EMenus;
+  List<string> EMenusText;
+  int eMenuIndent = 0;
   private void ValidateExpressionsMenu(VRCAvatarDescriptor avatar, VRCExpressionsMenu menu) {
    foreach(VRCExpressionsMenu.Control control in menu.controls) {
     if(control.type==VRCExpressionsMenu.Control.ControlType.Button) {
@@ -611,8 +616,22 @@ namespace TEA {
     if(control.type==VRCExpressionsMenu.Control.ControlType.SubMenu) {
      if(null==control.subMenu)
       issues.ExpressionsMenu.Add(new Issue($"Sub Menu[{control.name}] is blank", menu));
-     else
-      ValidateExpressionsMenu(avatar, control.subMenu);
+     else {
+      EMenus.Add(menu);
+      EMenusText.Add(new string('+', eMenuIndent)+menu.name);
+      if(EMenus.Find(m => m==control.subMenu)) {
+       string text = $"Loop detected in Menu[{menu.name}] Sub Menu[{control.name}].\n"
+        +"If this was not intentional, consider removing.\n\n";
+       foreach(string lMenu in EMenusText) {
+        text+=$"{lMenu}\n";
+       }
+       EditorUtility.DisplayDialog("Expressions Menu Loop", text, "Continue");
+      } else {
+       eMenuIndent++;
+       ValidateExpressionsMenu(avatar, control.subMenu);
+       eMenuIndent--;
+      }
+     }
     }
    }
   }
