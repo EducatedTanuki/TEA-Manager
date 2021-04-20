@@ -17,6 +17,8 @@ If you think I deserve a :cookie:
 To use `Tea Manager` you are ***required*** to enter play mode using the `TEA Play` buttons in the `Play Tab`.  
 `TEA Manager` has to compile your avatars playable layers before entering play mode.  
 
+![play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-tab.PNG)
+
 Here are options for getting `Play Tab` into your workspace.
 1. Load Supplied Layout
     - Go to *Window/Layouts/More/Load from disk...*  
