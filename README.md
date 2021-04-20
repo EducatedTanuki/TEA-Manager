@@ -11,7 +11,10 @@ If you think I deserve a :cookie:
 - import the `TEA-Manager-<version>.unitypackage` from [releases](https://github.com/EducatedTanuki/TEA-Manager/releases)
 
 # Using `Tea Manager`
-To use `Tea Manager` you are ***required*** to enter play mode using the `TEA Play` buttons in the `Play Tab`  
+
+> !!!Remove all cameras from your your Scene.  
+
+To use `Tea Manager` you are ***required*** to enter play mode using the `TEA Play` buttons in the `Play Tab`.  
 `TEA Manager` has to compile your avatars playable layers before entering play mode.  
 
 Here are options for getting `Play Tab` into your workspace.
