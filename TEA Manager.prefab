@@ -6783,7 +6783,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6473900171552075049}
   m_HandleRect: {fileID: 6473900171552075050}
   m_Direction: 3
-  m_Value: 0
+  m_Value: 1
   m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -10525,7 +10525,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b06328a05bdf0d14c9a51bdd10be5dde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed: 0.15
+  MoveSpeed: 0.04
   RigCamera: {fileID: 6473900170904740277}
   ClosestCameraZoom: 0.2
   newZoom: {x: 0, y: 0, z: 0}
@@ -10547,8 +10547,10 @@ MonoBehaviour:
   mouseIn: 0
   mouseStartRotation: {x: 0, y: 0, z: 0}
   mouseStopRotation: {x: 0, y: 0, z: 0}
-  VerticalMoveSpeed: 1
-  VerticalMoveThreshold: 5
+  VerticalMoveSpeed: 0.25
+  VerticalMoveThreshold: 75
+  LeftMouseVerticalMultiplier: 0.01
+  VerticalSpringTrigger: 0.5
 --- !u!1 &6473900171526799674
 GameObject:
   m_ObjectHideFlags: 0
@@ -11383,7 +11385,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.0000043908644}
+  m_AnchoredPosition: {x: 0, y: -0.000056610497}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6473900171661637592

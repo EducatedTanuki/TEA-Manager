@@ -199,9 +199,18 @@ namespace TEA {
    if(null==settings)
     return;
 
-   ManagerControls();
-   //AvatarUtilities();
-  }
+	 try {
+		ManagerControls();
+		//AvatarUtilities();
+	 } catch(TEA_Exception e) {
+		_play = false;
+		_compile = false;
+		_compiled = false;
+		if(null != manager)
+		 manager.gameObject.SetActive(true);
+		Debug.LogError(e);
+	 }
+}
 
   Dictionary<string, VRCAvatarDescriptor> newAvatars;
   private void ManagerControls() {

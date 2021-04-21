@@ -89,11 +89,13 @@ Controls are context sensative, but in general this is the Input mapping
 |        Input       |          Action          |
 |:------------------:|:------------------------:|
 |     Left Mouse     |      Camera Rotation     |
+|  Shift+Left Mouse (Free Camera Only)  | Camera Vertical Position |
 |     Right Mouse    |  Reset Position or State |
 |    Middle Mouse    | Camera Vertical Position |
+| Shift+Middle Mouse |       Faster Action      |
 |     Mouse Wheel    |        Camera Zoom       |
+| Shift+Mouse Wheel  |       Faster Action      |
 |     Ctrl+Mouse     |       Slower Action      |
-|    Shift+Mouse     |       Faster Action      |
 | W, A, S, D, Arrows |  Camera/Avatar Movement  |
 |       Shift        |    Scroll Move Speeds    |
 |        Q, E        |  Camera/Avatar Rotation  |
@@ -106,15 +108,14 @@ There are two hand poses and an assortment of full body animations.
 You can toggle TEA Animations by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui)  
 TEA Animaiton layers are placed after **Base** and before **Additive** in the compiled animator.  
 
-# Utilities
-`Tea Manager` provides some functions to make your development easier.
+# `TEA Functions`
 
-### GameObject Context Menu `TEA Functions`
-
-> This menu can be reached by right clicking a GameObject in the heirarchy
+`Tea Manager` provides some functions to make your development easier.  
+`TEA Functions` can be reached by right clicking a GameObject in the heirarchy.  
 
 ##### Make Avatar 3.0
 This sets up a GameObject as an Avatar with some defaults I defined.  
+You can change these defaults through the `TEA Settings`.  
 What it does:  
 - Add VRCAvatarDescriptor with default values
   - Eye look positions
@@ -142,9 +143,15 @@ What it does:
   - Expression Parameters
     - Contains VRCEmote
 
+##### Set Eye Look as Default
+
+Sets an Avatars eye look as the default for [Make Avatar 3.0](#make-avatar-30).  
+
 ##### Create Toggle
+
 Create ON-OFF animations for a GameObject  
-The toggle(s) are added to `Assets/<Scene Folder>/<Avatar Name>/Toggles`
+The toggle(s) are added to `Assets/<Scene Folder>/<Avatar Name>/Toggles`.  
+You can change the final folder name through the `TEA Settings`.  
 
 # Notes
 
