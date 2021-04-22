@@ -73,7 +73,7 @@ namespace TEA {
 		 issues.AvatarName = avatarComp.name;
 		 string avatarKey = avatarComp.gameObject.name;
 
-		 Debug.Log($"----- Creating animator controllers for [{avatarKey}]");
+		 //Debug.Log($"----- Creating animator controllers for [{avatarKey}]");
 
 		 // avatar folder
 		 string folderPath = GetPath(false, sceneFolder, avatarKey);
@@ -185,7 +185,7 @@ namespace TEA {
 
 		 //Debug.Log($"HEAD[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).position.ToString("F4")}] ViewPort:[{avatarComp.ViewPosition.ToString("F4")}] Transform[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.ViewPosition).ToString("F4")}]");
 		 manager.ViewPorts.Add(AvatarController.GetBone(avatarComp, HumanBodyBones.Head).InverseTransformPoint(avatarComp.transform.TransformPoint(avatarComp.ViewPosition)));
-		 Debug.Log($"----- Created animator controllers for [{avatarKey}]");
+		 //Debug.Log($"----- Created animator controllers for [{avatarKey}]");
 
 		 // Validation
 		 if(validate) {

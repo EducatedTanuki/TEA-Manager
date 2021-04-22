@@ -458,7 +458,7 @@ namespace TEA {
 
   private void DrawNoAvatars() {
    GUILayout.Box(EditorGUIUtility.IconContent("sv_icon_dot12_pix16_gizmo"), imageStyle, GUILayout.Height(MIN_HEIGHT), GUILayout.Width(MIN_HEIGHT), GUILayout.ExpandWidth(false));
-   EditorGUILayout.LabelField("There are no Avatars in the active Scene", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
+   EditorGUILayout.LabelField("There are no Avatars in the Active Scene", GUILayout.Height(MIN_HEIGHT), GUILayout.MinWidth(SECTION_WIDTH), GUILayout.ExpandWidth(true));
   }
 
   private void DrawWaiting() {

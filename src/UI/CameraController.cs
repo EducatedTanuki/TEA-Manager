@@ -23,7 +23,8 @@ namespace TEA {
 		} else {
 		 newPosition = TEA_Manager.current.Avatar.transform.position;
 		 newPosition.y = TEA_Manager.current.GetAvatarViewPortWorld().y;
-		 offsetId = offsets.Length - 1;
+		 lockPosition = offsets[offsetId];
+		 region = Region.Upper;
 		 CameraRig.enabled = true;
 		}
 	 }
@@ -77,17 +78,22 @@ namespace TEA {
 	//--- --- Middle --- ---
 	[Tooltip("Base speed for vertical camera movement in Free Camera mode")]
 	public float VerticalMoveSpeed = 1f;
-	[Tooltip("Theshold for moving between feet, hips, and viewport when locked to avatar")]
-	public float VerticalMoveThreshold = 5f;
 	private Transform rootBone;
 	private Vector3 middleMouseStart;
 	private Vector3 middleMouseStop;
-	private float middleMousediff = 0;
 	private int middleMousedirection = 0;
 
+	public float VerticalMoveSpeedLocked = .01f;
 	public float LeftMouseVerticalMultiplier = .1f;
-	private Vector3 leftMousediff;
+	public float VerticalLockMultiplier = 8;
+	private Vector3 middleMousediff;
 	private Vector3 leftMouseDragStart;
+
+	enum Region {
+	 Upper, Lower
+	}
+	Region region = Region.Upper;
+	Vector3 lockPosition;
 
 	bool _initialized = false;
 	private void Start() {
@@ -130,10 +136,12 @@ namespace TEA {
 	 MinOffset.x = 0;
 	 MinOffset.z = 0;
 
-	 leftMousediff = Vector3.zero;
+	 middleMousediff = Vector3.zero;
 	 leftMouseDragStart = Vector3.zero;
 	 offsets = new Vector3[] { MinOffset, Vector3.zero, MaxOffset };
 	 offsetId = offsets.Length - 1;
+	 region = Region.Upper;
+	 lockPosition = MaxOffset;
 
 	 newPosition = CameraRig.transform.position;
 
@@ -153,46 +161,16 @@ namespace TEA {
 
 	 HandleCameraMovement();
 
-	 if(!IsLeftVerticalDrag())
-		HandleVerticalPosition();
+	 HandleVerticalPosition();
 
 	 if(FreeCamera)
 		CameraRig.transform.position = Vector3.Lerp(CameraRig.transform.position, newPosition, Time.deltaTime * movementTime);
 
 	 DetectCollision();
 
-	 if(IsLeftVerticalDrag()) {
-		Vector3 pos = CameraRig.transform.position;
-		pos.y += (leftMousediff.y * LeftMouseVerticalMultiplier);
-		if(!FreeCamera) {
-		 pos = pos - rootBone.position;
-		 pos.x = 0;
-		 pos.z = 0;
-		 if(pos.y >= offsets[1].y && Vector3.Distance(offsets[1], pos) >= .5 * Vector3.Distance(offsets[1], offsets[2]))
-			offsetId = 2;
-		 else if(pos.y >= offsets[1].y)
-			offsetId = 1;
-		 else if(Vector3.Distance(offsets[1], pos) >= .5 * Vector3.Distance(offsets[1], offsets[0]))
-			offsetId = 0;
-		 else
-			offsetId = 1;
+	 HandleHorizontalRotationInput();
+	 HandleVerticalRotationInput();
 
-		 if(pos.y >= offsets[offsets.Length - 1].y) {
-			pos = offsets[offsets.Length - 1];
-			offsetId = offsets.Length - 1;
-		 } else if(pos.y <= offsets[0].y) {
-			pos = offsets[0];
-			offsetId = 0;
-		 }
-		 if(leftMousediff.y != 0)
-			CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), pos, Time.deltaTime * movementTime));
-		} else
-		 CameraRig.transform.position = Vector3.Lerp(CameraRig.transform.position, pos, Time.deltaTime * movementTime);
-		leftMousediff = Vector3.zero;
-	 } else {
-		HandleHorizontalRotationInput();
-		HandleVerticalRotationInput();
-	 }
 	 HandleZoom();
 	}
 
@@ -201,6 +179,7 @@ namespace TEA {
 		newPosition = TEA_Manager.current.Avatar.transform.position;
 		newPosition.y = TEA_Manager.current.GetAvatarViewPortWorld().y;
 	 } else if(FreeCamera) {
+		float y = newPosition.y;
 		if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
 		 newPosition += (RigCamera.transform.forward * zoomMultiplier * MoveSpeed);
 		}
@@ -213,7 +192,7 @@ namespace TEA {
 		if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
 		 newPosition += (RigCamera.transform.right * zoomMultiplier * MoveSpeed);
 		}
-		newPosition.y = CameraRig.transform.position.y;
+		newPosition.y = y;
 	 }
 	}
 
@@ -255,18 +234,49 @@ namespace TEA {
 	 return closest;
 	}
 
-	bool verticalSpring = false;
-	int verticalSpringOffsetId = 0;
-	public float VerticalSpringTrigger = .5f;
 	void HandleVerticalPosition() {
 	 if(FreeCamera) {
-		newPosition.y += middleMousedirection * VerticalMoveSpeed * zoomMultiplier;
-	 } else if(verticalSpring) {
-		Vector3 pos = Vector3.Lerp(CameraRig.GetTranslationOffset(0), offsets[verticalSpringOffsetId], (middleMousediff * VerticalSpringTrigger) / VerticalMoveThreshold);
-		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), pos, Time.deltaTime * movementTime));
+		if(IsPanning())
+		 newPosition.y += middleMousedirection * VerticalMoveSpeed * zoomMultiplier;
+		else {
+		 Vector3 pos = Vector3.zero;
+		 pos.y = -1 * middleMousediff.y * LeftMouseVerticalMultiplier;
+		 newPosition += pos;
+		 CameraRig.transform.position += pos;
+		}
+	 } else if(Input.GetMouseButton(1)) {
+		lockPosition = offsets[2];
+		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), lockPosition, Time.deltaTime * movementTime));
+		region = Region.Upper;
 	 } else {
-		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), offsets[offsetId], Time.deltaTime * movementTime));
-	 }
+		float moveAmount = (-1 * middleMousediff.y * LeftMouseVerticalMultiplier);
+
+		if(IsPanning())
+		 moveAmount = middleMousedirection * VerticalMoveSpeedLocked * zoomMultiplier;
+
+		moveAmount*=VerticalLockMultiplier;
+
+		float dist = Vector3.Distance(Vector3.zero, CameraRig.GetTranslationOffset(0));
+		if(Region.Upper == region) {
+		 float totalDist = Vector3.Distance(Vector3.zero, offsets[2]);
+		 float lerpTime = (moveAmount / totalDist) + (dist / totalDist);
+		 lerpTime = lerpTime >= 1 ? 1 : lerpTime;
+		 lockPosition = Vector3.Lerp(Vector3.zero, offsets[2], lerpTime);
+		 //Debug.Log($"r[{region}] lerp[{lerpTime}] move[{moveAmount}] totalDist[{totalDist}] dist[{dist}]");
+		 if(Mathf.Approximately(0, lerpTime) || 0 > lerpTime)
+			region = Region.Lower;
+		} else {
+		 float totalDist = Vector3.Distance(Vector3.zero, offsets[0]);
+		 float lerpTime = -1 * (moveAmount / totalDist) + (dist / totalDist);
+		 lerpTime = lerpTime >= 1 ? 1 : lerpTime;
+		 lockPosition = Vector3.Lerp(Vector3.zero, offsets[0], lerpTime);
+		 //Debug.Log($"r[{region}] lerp[{lerpTime}] move[{moveAmount}] totalDist[{totalDist}] dist[{totalDist}]");
+		 if(Mathf.Approximately(0, lerpTime) || 0 > lerpTime)
+			region = Region.Upper;
+		}
+		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), lockPosition, Time.deltaTime * movementTime));
+	 }//!FreeCamera
+	 middleMousediff = Vector3.zero;
 	}
 
 	void HandleHorizontalRotationInput() {
@@ -281,13 +291,7 @@ namespace TEA {
 	}
 
 	void HandleVerticalRotationInput() {
-	 if(Input.GetKey(KeyCode.UpArrow)) {
-		//VerticalRotation *= Quaternion.Euler(Vector3.right * rotationAmount);
-	 } else if(Input.GetKey(KeyCode.DownArrow)) {
-		//VerticalRotation *= Quaternion.Euler(Vector3.right * -rotationAmount);
-	 }
 	 VerticalRotationRig.transform.localRotation = Quaternion.Lerp(VerticalRotationRig.transform.localRotation, VerticalRotation, Time.deltaTime * movementTime);
-	 //Debug.Log($"vertical rotation ({verticalRotation.x},{verticalRotation.y},{verticalRotation.z})");
 	}
 
 	void HandleAcceleration() {
@@ -327,17 +331,21 @@ namespace TEA {
 	 }
 	}
 
+	private bool IsPanning() {
+	 return Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+	}
+
 	public void OnBeginDrag(PointerEventData eventData) {
 	 // --- middle mouse ---
 	 if(Input.GetMouseButton(2)) {
-		middleMousediff = 0;
 		middleMousedirection = 0;
 		middleMouseStart = Input.mousePosition;
+		middleMouseDirectionStart = Input.mousePosition;
+		middleMousediff = Vector3.zero;
 	 }
 	 // --- left mouse ---
 	 if(Input.GetMouseButton(0)) {
 		mouseStartRotation = Input.mousePosition;
-		leftMousediff = Vector3.zero;
 	 }
 	}
 
@@ -346,22 +354,13 @@ namespace TEA {
 	 // --- middle mouse ---
 	 if(Input.GetMouseButton(2)) {
 		middleMouseStop = Input.mousePosition;
-		middleMousediff = Vector3.Distance(middleMouseStop, middleMouseStart);
 
 		Vector3 diff = middleMouseStop - middleMouseStart;
-		middleMousedirection = (int)Mathf.Sign(diff.y);
-		int newOffset = offsetId + middleMousedirection;
-		if(VerticalMoveThreshold <= middleMousediff) {
-		 //Debug.Log($"offset {offsetId} new offset {newOffset}");
-		 verticalSpring = false;
-		 offsetId = newOffset >= 0 && newOffset < offsets.Length ? newOffset : offsetId;
-		 middleMouseStart = Input.mousePosition;
-		} else if(newOffset >= 0 && newOffset < offsets.Length) {
-		 verticalSpring = true;
-		 verticalSpringOffsetId = newOffset;
-		} else {
-		 verticalSpring = false;
-		}
+		middleMousediff = diff;
+		//Debug.Log($"mouse dragged middle[{leftMousediff}]");
+		middleMousedirection = (int)Mathf.Sign((middleMouseStop - middleMouseDirectionStart).y);
+
+		middleMouseStart = middleMouseStop;
 	 }
 	 // --- left mouse ---
 	 if(Input.GetMouseButton(0)) {
@@ -369,26 +368,19 @@ namespace TEA {
 		Vector3 diff = mouseStartRotation - mouseStopRotation;
 		mouseStartRotation = Input.mousePosition;
 
-		//Debug.Log($"Mouse diff ({diff})");
-		leftMousediff = diff;
+		horizontalRotation *= Quaternion.Euler(Vector3.up * (-diff.x / 5f));
+		VerticalRotation *= Quaternion.Euler(Vector3.right * (-diff.y / 5f));
 
-		if(!(IsLeftVerticalDrag())) {
-		 horizontalRotation *= Quaternion.Euler(Vector3.up * (-diff.x / 5f));
-		 VerticalRotation *= Quaternion.Euler(Vector3.right * (-diff.y / 5f));
-		}
 	 }
 	}
-
-	private bool IsLeftVerticalDrag() {
-	 return (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
-	}
-
+	Vector3 middleMouseDirectionStart;
 	public void OnEndDrag(PointerEventData eventData) {
 	 // --- middle mouse ---
 	 if(Input.GetMouseButtonUp(2)) {
-		middleMousediff = 0;
 		middleMousedirection = 0;
-		verticalSpring = false;
+		middleMouseStop = Vector3.zero;
+		middleMouseDirectionStart = Vector3.zero;
+		middleMousediff = Vector3.zero;
 	 }
 	}
 

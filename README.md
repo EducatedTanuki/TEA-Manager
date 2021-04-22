@@ -89,17 +89,18 @@ Controls are context sensative, but in general this is the Input mapping
 |        Input       |          Action          |
 |:------------------:|:------------------------:|
 |     Left Mouse     |      Camera Rotation     |
-|  Shift+Left Mouse (Free Camera Only)  | Camera Vertical Position |
 |     Right Mouse    |  Reset Position or State |
-|    Middle Mouse    | Camera Vertical Position |
-| Shift+Middle Mouse |       Faster Action      |
+|    Middle Mouse    |   Camera Vertical Pan    |
+|  Alt+Middle Mouse  |  Camera Vertical Scroll  |
 |     Mouse Wheel    |        Camera Zoom       |
 | Shift+Mouse Wheel  |       Faster Action      |
 |     Ctrl+Mouse     |       Slower Action      |
 | W, A, S, D, Arrows |  Camera/Avatar Movement  |
-|       Shift        |    Scroll Move Speeds    |
+|       Shift        |    Faster Camera Move Speeds    |
+|       Ctrl        |    Slower Camera Move Speeds    |
+|     Tap Shift      |    Avatar Move Speeds (Walk, Run, Sprint)    |
 |        Q, E        |  Camera/Avatar Rotation  |
-|          H         |   Un-hide All Controls   |
+|          H         |   Hide/Show Controls   |
 
 <h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
 
