@@ -26,7 +26,7 @@ namespace TEA.UI {
 	protected override void Start() {
 	 base.Start();
 
-	 if(!FoldoutController.current.Toolbars.Contains(this))
+	 if(null != FoldoutController.current && !FoldoutController.current.Toolbars.Contains(this))
 		FoldoutController.current.Toolbars.Add(this);
 
 	 GameObject check = (transform.Find("Checked") ?? transform.Find("checked")).gameObject;

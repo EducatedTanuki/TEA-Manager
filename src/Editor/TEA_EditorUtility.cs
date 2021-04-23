@@ -7,7 +7,7 @@ using VRC.SDK3.Avatars.Components;
 using UnityEditor.Animations;
 
 namespace TEA {
- public class TEA_Utility {
+ public class TEA_EditorUtility {
   public static readonly string ASSETS = "Assets";
   public static readonly string ASSETS_CONTENT = "Assets/";
 
@@ -145,8 +145,25 @@ namespace TEA {
     CopyBlendTrees(controller, folder);
   }
 
-  // ------ ------ Animator ----- -----
-  public static bool HasAnimatorParameter(string name, AnimatorControllerParameter[] parameters) {
+	// ------ ------ Transform ----- -----
+	public static Vector3 TransformPoint(Transform root, Transform child) {
+	 return child.position + root.position;
+	}
+
+	public static Vector3 TransformPoint(Transform root, Vector3 other) {
+	 return other + root.position;
+	}
+
+	public static Vector3 InverseTransformPoint(Transform root, Transform world) {
+	 return world.position - root.position;
+	}
+
+	public static Vector3 InverseTransformPoint(Transform root, Vector3 world) {
+	 return world - root.position;
+	}
+
+	// ------ ------ Animator ----- -----
+	public static bool HasAnimatorParameter(string name, AnimatorControllerParameter[] parameters) {
    foreach(AnimatorControllerParameter parameter in parameters) {
     if(parameter.name==name)
      return true;
