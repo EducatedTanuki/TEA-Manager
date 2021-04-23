@@ -183,11 +183,11 @@ namespace TEA {
 		 AssetDatabase.CreateAsset(layerInfo, layerInfoPath);
 		 manager.LayerInfo.Add(AssetDatabase.LoadAssetAtPath<TEA_PlayableLayerData>(layerInfoPath));
 
-		 Debug.Log($"HEAD[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).position.ToString("F4")}] "
+		 /*Debug.Log($"HEAD[{AvatarController.GetBone(avatarComp, HumanBodyBones.Head).position.ToString("F4")}] "
 			+ $"ViewPort:[{avatarComp.ViewPosition.ToString("F4")}] "
 			+ $"Avatar:[{avatarComp.gameObject.transform.position.ToString("F4")}] "
 			+ $"World from Avatar:[{TEA_EditorUtility.TransformPoint(avatarComp.gameObject.transform, avatarComp.ViewPosition).ToString("F4")}]"
-			+ $"calc[{TEA_EditorUtility.InverseTransformPoint(AvatarController.GetBone(avatarComp, HumanBodyBones.Head), TEA_EditorUtility.TransformPoint(avatarComp.gameObject.transform, avatarComp.ViewPosition)).ToString("F4")}]");
+			+ $"calc[{TEA_EditorUtility.InverseTransformPoint(AvatarController.GetBone(avatarComp, HumanBodyBones.Head), TEA_EditorUtility.TransformPoint(avatarComp.gameObject.transform, avatarComp.ViewPosition)).ToString("F4")}]");*/
 		 manager.ViewPorts.Add(TEA_EditorUtility.InverseTransformPoint(AvatarController.GetBone(avatarComp, HumanBodyBones.Head), TEA_EditorUtility.TransformPoint(avatarComp.gameObject.transform, avatarComp.ViewPosition)));
 		 //Debug.Log($"----- Created animator controllers for [{avatarKey}]");
 

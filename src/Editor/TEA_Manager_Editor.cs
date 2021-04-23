@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
-using static TEA.TEA_Utility;
+using static TEA.TEA_EditorUtility;
 
 namespace TEA {
  [CustomEditor(typeof(TEA_Manager))]
@@ -41,9 +41,7 @@ namespace TEA {
    if(_show)
     base.OnInspectorGUI();
   }
-  // ----- ----- Utility ----- -----
-
-
+	
   // ----- ----- Avatar Setup Methods ----- -----
   private static readonly string TEA_OBJECT_MENU = "TEA Functions";
 

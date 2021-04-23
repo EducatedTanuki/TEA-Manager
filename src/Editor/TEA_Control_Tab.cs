@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 using UnityEditor;
 using VRC.SDK3.Avatars.Components;
-using static TEA.TEA_Utility;
+using static TEA.TEA_EditorUtility;
 using TEA.ScriptableObject;
 using System;
 
