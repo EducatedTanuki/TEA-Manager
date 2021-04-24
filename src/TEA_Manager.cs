@@ -25,6 +25,8 @@ namespace TEA {
 	public static List<VRCAvatarDescriptor> AvatarDescriptor = new List<VRCAvatarDescriptor>();
 	public VRCAvatarDescriptor Avatar { get => INDEX >= AvatarDescriptor.Count ? null : AvatarDescriptor[INDEX]; set { } }
 
+	public TEA_Settings Settings { get; set; }
+
 	public static int AvatarIndex() {
 	 return INDEX;
 	}

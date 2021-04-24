@@ -8,11 +8,9 @@ using UnityEngine.EventSystems;
 namespace TEA {
  [SerializeField]
  public class CameraController : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler {
-	[Header("Camera Movement")]
-	[Tooltip("Movement speed of the camera rig when in Free Camera mode")]
-	public float MoveSpeed = 0.15f;
-	private Vector3 newPosition;
-	private bool _freeCamera = false;
+	public TEA_Settings Locomotion { get; set; }
+
+	bool _freeCamera = false;
 	public bool FreeCamera {
 	 get => _freeCamera; set {
 		_freeCamera = value;
@@ -30,64 +28,47 @@ namespace TEA {
 	 }
 	}
 
-	[Header("Camera Zoom")]
+	private Vector3 newPosition;
+
 	//--- --- Zoom --- ---
-	public Camera RigCamera;
-	public float ClosestCameraZoom = .2f;
-	public Vector3 newZoom;
-	public Vector3 desiredZoom;
-	[Tooltip("Base distance the camera will move when zooming")]
-	public Vector3 zoomAmount = Vector3.forward;
-	[Tooltip("Multiplies base distance the camera will move (see slow and fast zoom)")]
-	public float zoomMultiplier = 1;
-	[Tooltip("Multiplier for fast zooming")]
-	public float zoomQuickly = 3.5f;
-	[Tooltip("Multiplier for slow zooming")]
-	public float zoomSlowly = 0.35f;
-	public float newZoomOrtho;
-	public float zoomAmountOrtho = .1f;
+	Vector3 newZoom;
+	Vector3 desiredZoom;
+	float newZoomOrtho;
 	private bool backingOff = false;
 
 	[Header("Camera Rig")]
 	//--- --- --- Rig --- --- ---
+	public Camera RigCamera;
 	public ParentConstraint CameraRig;
 	public GameObject VerticalRotationRig;
 	public Quaternion VerticalRotation;
-	public float movementTime = 5f;
-	private Transform armature;
 
 	//--- Rig Pos ---
+	[Header("Offsets")]
 	public Vector3 MaxOffset;
 	public Vector3 MinOffset;
 	private int offsetId = 0;
 	private Vector3[] offsets;
 
 	//--- Rotation ---
-	public float rotationAmount = 2f;
-	public Quaternion horizontalRotation;
+	Quaternion horizontalRotation;
 
 	//--- --- --- Mouse --- --- ---
-
-	[Header("Camera Rotation")]
-	//--- --- Left --- ---
+	[Header("Mouse In")]
 	public bool mouseIn = false;
-	public Vector3 mouseStartRotation;
-	public Vector3 mouseStopRotation;
 
-	[Header("Camera Vertical Position")]
+	//--- --- Left --- ---
+	Vector3 mouseStartRotation;
+	Vector3 mouseStopRotation;
+
 	//--- --- Middle --- ---
-	[Tooltip("Base speed for vertical camera movement in Free Camera mode")]
-	public float VerticalMoveSpeed = 1f;
-	private Transform rootBone;
-	private Vector3 middleMouseStart;
-	private Vector3 middleMouseStop;
-	private int middleMousedirection = 0;
-
-	public float VerticalMoveSpeedLocked = .01f;
-	public float LeftMouseVerticalMultiplier = .1f;
-	public float VerticalLockMultiplier = 8;
-	private Vector3 middleMousediff;
-	private Vector3 leftMouseDragStart;
+	Transform rootBone;
+	Vector3 middleMouseStart;
+	Vector3 middleMouseStop;
+	int middleMousedirection = 0;
+	Vector3 middleMousediff;
+	Vector3 leftMouseDragStart;
+	Vector3 middleMouseDirectionStart;
 
 	enum Region {
 	 Upper, Lower
@@ -117,6 +98,11 @@ namespace TEA {
 
 	 if(null == TEA_Manager.current.Avatar)
 		return false;
+
+	 if(null == TEA_Manager.current.Settings)
+		return false;
+
+	 Locomotion = TEA_Manager.current.Settings;
 
 	 newZoom = RigCamera.transform.localPosition;
 	 desiredZoom = RigCamera.transform.localPosition;
@@ -165,7 +151,7 @@ namespace TEA {
 	 HandleVerticalPosition();
 
 	 if(FreeCamera)
-		CameraRig.transform.position = Vector3.Lerp(CameraRig.transform.position, newPosition, Time.deltaTime * movementTime);
+		CameraRig.transform.position = Vector3.Lerp(CameraRig.transform.position, newPosition, Time.deltaTime * Locomotion.movementTime);
 
 	 DetectCollision();
 
@@ -182,16 +168,16 @@ namespace TEA {
 	 } else if(FreeCamera) {
 		float y = newPosition.y;
 		if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
-		 newPosition += (RigCamera.transform.forward * zoomMultiplier * MoveSpeed);
+		 newPosition += (RigCamera.transform.forward * Locomotion.zoomMultiplier * Locomotion.MoveSpeed);
 		}
 		if(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) {
-		 newPosition += (RigCamera.transform.forward * zoomMultiplier * -MoveSpeed);
+		 newPosition += (RigCamera.transform.forward * Locomotion.zoomMultiplier * -Locomotion.MoveSpeed);
 		}
 		if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
-		 newPosition += (RigCamera.transform.right * zoomMultiplier * -MoveSpeed);
+		 newPosition += (RigCamera.transform.right * Locomotion.zoomMultiplier * -Locomotion.MoveSpeed);
 		}
 		if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
-		 newPosition += (RigCamera.transform.right * zoomMultiplier * MoveSpeed);
+		 newPosition += (RigCamera.transform.right * Locomotion.zoomMultiplier * Locomotion.MoveSpeed);
 		}
 		newPosition.y = y;
 	 }
@@ -209,13 +195,13 @@ namespace TEA {
 	 //Debug.Log($"Closest: name[{closest.name}] distance[{closest.cameraDistance}] root distance [{closest.rootDistance}] tranloc[{closest.transform.position}] girloc[{CameraRig.gameObject.transform.position}");
 	 if(!FreeCamera && (closest.rootDistance > desiredZoom.z)) {
 		backingOff = true;
-		newZoom = Vector3.forward * (closest.rootDistance + ClosestCameraZoom);
+		newZoom = Vector3.forward * (closest.rootDistance + Locomotion.ClosestCameraZoom);
 		//Debug.Log($"desired zoom ({desiredZoom}) | new zoom ({newZoom}) \n Closest: name[{closest.name}] distance[{closest.cameraDistance}] root distance [{closest.rootDistance}]\n closest[{ClosestCameraZoom}] ");
 	 } else {
 		backingOff = false;
 		newZoom = desiredZoom;
 	 }
-	 RigCamera.transform.localPosition = Vector3.Lerp(RigCamera.transform.localPosition, newZoom, Time.deltaTime * movementTime);
+	 RigCamera.transform.localPosition = Vector3.Lerp(RigCamera.transform.localPosition, newZoom, Time.deltaTime * Locomotion.movementTime);
 	}
 
 	private CameraObject getClosest(Transform tran) {
@@ -238,24 +224,22 @@ namespace TEA {
 	void HandleVerticalPosition() {
 	 if(FreeCamera) {
 		if(IsPanning())
-		 newPosition.y += middleMousedirection * VerticalMoveSpeed * zoomMultiplier;
+		 newPosition.y += middleMousedirection * Locomotion.VerticalPanSpeed * Locomotion.zoomMultiplier;
 		else {
 		 Vector3 pos = Vector3.zero;
-		 pos.y = -1 * middleMousediff.y * LeftMouseVerticalMultiplier;
+		 pos.y = -1 * middleMousediff.y * Locomotion.VerticalMoveMultiplier;
 		 newPosition += pos;
 		 CameraRig.transform.position += pos;
 		}
 	 } else if(Input.GetMouseButton(1)) {
 		lockPosition = offsets[2];
-		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), lockPosition, Time.deltaTime * movementTime));
+		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), lockPosition, Time.deltaTime * Locomotion.movementTime));
 		region = Region.Upper;
 	 } else {
-		float moveAmount = (-1 * middleMousediff.y * LeftMouseVerticalMultiplier);
+		float moveAmount = (-1 * middleMousediff.y * Locomotion.VerticalLockMoveMultiplier);
 
 		if(IsPanning())
-		 moveAmount = middleMousedirection * VerticalMoveSpeedLocked * zoomMultiplier;
-
-		moveAmount *= VerticalLockMultiplier;
+		 moveAmount = middleMousedirection * Locomotion.VerticalMoveSpeedLocked * Locomotion.zoomMultiplier;
 
 		float dist = Vector3.Distance(Vector3.zero, CameraRig.GetTranslationOffset(0));
 		if(Region.Upper == region) {
@@ -275,7 +259,7 @@ namespace TEA {
 		 if(Mathf.Approximately(0, lerpTime) || 0 > lerpTime)
 			region = Region.Upper;
 		}
-		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), lockPosition, Time.deltaTime * movementTime));
+		CameraRig.SetTranslationOffset(0, Vector3.Lerp(CameraRig.GetTranslationOffset(0), lockPosition, Time.deltaTime * Locomotion.movementTime));
 	 }//!FreeCamera
 	 middleMousediff = Vector3.zero;
 	}
@@ -283,25 +267,25 @@ namespace TEA {
 	void HandleHorizontalRotationInput() {
 	 if(FreeCamera) {
 		if(Input.GetKey(KeyCode.E)) {
-		 horizontalRotation *= Quaternion.Euler(Vector3.up * rotationAmount);
+		 horizontalRotation *= Quaternion.Euler(Vector3.up * Locomotion.rotationAmount);
 		} else if(Input.GetKey(KeyCode.Q)) {
-		 horizontalRotation *= Quaternion.Euler(Vector3.up * -rotationAmount);
+		 horizontalRotation *= Quaternion.Euler(Vector3.up * -Locomotion.rotationAmount);
 		}
 	 }
-	 CameraRig.transform.rotation = Quaternion.Lerp(CameraRig.transform.rotation, horizontalRotation, Time.deltaTime * movementTime);
+	 CameraRig.transform.rotation = Quaternion.Lerp(CameraRig.transform.rotation, horizontalRotation, Time.deltaTime * Locomotion.movementTime);
 	}
 
 	void HandleVerticalRotationInput() {
-	 VerticalRotationRig.transform.localRotation = Quaternion.Lerp(VerticalRotationRig.transform.localRotation, VerticalRotation, Time.deltaTime * movementTime);
+	 VerticalRotationRig.transform.localRotation = Quaternion.Lerp(VerticalRotationRig.transform.localRotation, VerticalRotation, Time.deltaTime * Locomotion.movementTime);
 	}
 
 	void HandleAcceleration() {
 	 if(Input.GetKey(KeyCode.LeftShift)) {
-		zoomMultiplier = zoomQuickly;
+		Locomotion.zoomMultiplier = Locomotion.zoomQuickly;
 	 } else if(Input.GetKey(KeyCode.LeftControl)) {
-		zoomMultiplier = zoomSlowly;
+		Locomotion.zoomMultiplier = Locomotion.zoomSlowly;
 	 } else {
-		zoomMultiplier = 1;
+		Locomotion.zoomMultiplier = 1;
 	 }
 	}
 
@@ -311,24 +295,24 @@ namespace TEA {
 
 	 if(RigCamera.GetComponent<Camera>().orthographic) {
 		if(Input.mouseScrollDelta.y != 0) {
-		 newZoomOrtho -= Input.mouseScrollDelta.y * zoomAmountOrtho;
+		 newZoomOrtho -= Input.mouseScrollDelta.y * Locomotion.zoomAmountOrtho;
 		} else if(Input.GetKey(KeyCode.R)) {
-		 newZoomOrtho += zoomAmountOrtho;
+		 newZoomOrtho += Locomotion.zoomAmountOrtho;
 		} else if(Input.GetKey(KeyCode.F)) {
-		 newZoomOrtho -= zoomAmountOrtho;
+		 newZoomOrtho -= Locomotion.zoomAmountOrtho;
 		}
-		newZoomOrtho = newZoomOrtho < ClosestCameraZoom ? ClosestCameraZoom : newZoomOrtho;
-		RigCamera.orthographicSize = Mathf.Lerp(RigCamera.orthographicSize, newZoomOrtho, Time.deltaTime * movementTime);
+		newZoomOrtho = newZoomOrtho < Locomotion.ClosestCameraZoom ? Locomotion.ClosestCameraZoom : newZoomOrtho;
+		RigCamera.orthographicSize = Mathf.Lerp(RigCamera.orthographicSize, newZoomOrtho, Time.deltaTime * Locomotion.movementTime);
 	 } else {
 		if(Input.mouseScrollDelta.y != 0 && !(Input.mouseScrollDelta.y > 0 && backingOff == true)) {
-		 desiredZoom -= Input.mouseScrollDelta.y * zoomAmount * zoomMultiplier;
+		 desiredZoom -= Input.mouseScrollDelta.y * Locomotion.zoomAmount * Locomotion.zoomMultiplier;
 		} else if(Input.GetKey(KeyCode.R)) {
-		 desiredZoom += zoomAmount * zoomMultiplier;
+		 desiredZoom += Locomotion.zoomAmount * Locomotion.zoomMultiplier;
 		} else if(Input.GetKey(KeyCode.F)) {
-		 desiredZoom -= zoomAmount * zoomMultiplier;
+		 desiredZoom -= Locomotion.zoomAmount * Locomotion.zoomMultiplier;
 		}
-		if(desiredZoom.z < ClosestCameraZoom)
-		 desiredZoom.z = ClosestCameraZoom;
+		if(desiredZoom.z < Locomotion.ClosestCameraZoom)
+		 desiredZoom.z = Locomotion.ClosestCameraZoom;
 	 }
 	}
 
@@ -374,7 +358,6 @@ namespace TEA {
 
 	 }
 	}
-	Vector3 middleMouseDirectionStart;
 	public void OnEndDrag(PointerEventData eventData) {
 	 // --- middle mouse ---
 	 if(Input.GetMouseButtonUp(2)) {

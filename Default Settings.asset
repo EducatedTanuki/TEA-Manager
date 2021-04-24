@@ -12,6 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5b841fee1b64784aa2c220cc093625e, type: 3}
   m_Name: Default Settings
   m_EditorClassIdentifier: 
+  zoomAmount: {x: 0, y: 0, z: 0.2}
+  zoomQuickly: 3.5
+  zoomSlowly: 0.35
+  zoomMultiplier: 1
+  ClosestCameraZoom: 0.2
+  zoomAmountOrtho: 0.1
+  rotationAmount: 2
+  movementTime: 10
+  MoveSpeed: 0.03
+  VerticalPanSpeed: 0.05
+  VerticalLockMultiplier: 8
+  VerticalMoveSpeedLocked: 0.1
+  VerticalMoveMultiplier: 0.003
+  VerticalLockMoveMultiplier: 0.01
   ExpressionsFolder: Expressions
   ExpressionsMenu: {fileID: 11400000, guid: 6f476f9f40816fc40ad126363f6839b0, type: 2}
   ExpressionParameters: {fileID: 11400000, guid: 61d0ed765afbb9e47ab2a833933b1928,

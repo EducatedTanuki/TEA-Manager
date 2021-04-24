@@ -239,6 +239,7 @@ namespace TEA {
 		TEA_Manager.AvatarDescriptor = newAvatars.Values.ToList<VRCAvatarDescriptor>();
 		if(manager.Avatar == null)
 		 manager.Initialize(0);
+		manager.Settings = settings;
 		manager.GetComponent<AvatarController>().Locomotion = settings;
 		_patched = true;
 	 }
