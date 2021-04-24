@@ -378,7 +378,7 @@ namespace TEA {
 				td.state = copyState.state.name;
 				//--- validation ---
 			 }
-			 ValidateParameterDriver((VRCAvatarParameterDriver)beh, type, copyLayer, copyState.state);
+			 ValidateParameterDriver((VRCAvatarParameterDriver)beh, type, layer, state.state);
 			}
 			behC++;
 		 }//for behavior

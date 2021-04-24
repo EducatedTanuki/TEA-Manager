@@ -23,7 +23,7 @@ namespace TEA {
 		} else {
 		 newPosition = TEA_Manager.current.Avatar.transform.position;
 		 newPosition.y = TEA_Manager.current.GetAvatarViewPortWorld().y;
-		 lockPosition = offsets[offsetId];
+		 lockPosition = offsets[2];
 		 region = Region.Upper;
 		 CameraRig.enabled = true;
 		}
@@ -143,6 +143,7 @@ namespace TEA {
 	 region = Region.Upper;
 	 lockPosition = MaxOffset;
 
+	 CameraRig.SetTranslationOffset(0, lockPosition);
 	 newPosition = CameraRig.transform.position;
 
 	 // --- avoid parent constrait lock on switch
@@ -254,7 +255,7 @@ namespace TEA {
 		if(IsPanning())
 		 moveAmount = middleMousedirection * VerticalMoveSpeedLocked * zoomMultiplier;
 
-		moveAmount*=VerticalLockMultiplier;
+		moveAmount *= VerticalLockMultiplier;
 
 		float dist = Vector3.Distance(Vector3.zero, CameraRig.GetTranslationOffset(0));
 		if(Region.Upper == region) {
