@@ -7,36 +7,6 @@ namespace TEA {
  [System.Serializable]
  [CreateAssetMenu(fileName = "Default Settings", menuName = "ScriptableObjects/TEA_Settings", order = 1)]
  public class TEA_Settings : UnityEngine.ScriptableObject {
-	[Header("Camera Controls")]
-	[Tooltip("Distance the camera will move when zooming")]
-	public Vector3 zoomAmount = Vector3.forward * .5f;
-	[Tooltip("Multiplier for fast zooming")]
-	public float zoomQuickly = 3.5f;
-	[Tooltip("Multiplier for slow zooming")]
-	public float zoomSlowly = 0.35f;
-	[Tooltip("Multiplies base distance the camera will move (see slow and fast zoom)")]
-	public float zoomMultiplier = 1;
-	[Tooltip("Closest distance the camera will be from the armature")]
-	public float ClosestCameraZoom = .2f;
-	[Tooltip("(Orthographic) Distance the camera will move when zooming")]	
-	public float zoomAmountOrtho = .1f;
-	[Tooltip("Rotation amount in FreeCamera mode")]
-	public float rotationAmount = 2f;
-	[Tooltip("Time multiplier for camera transforms")]
-	public float movementTime = 5f;
-	[Tooltip("Movement speed of the camera rig when in Free camera mode")]
-	public float MoveSpeed = 0.15f;
-	[Tooltip("Vertical move speed when panning")]
-	public float VerticalPanSpeed = 1f;
-	[Tooltip("Vertical move speed multiplier when not in FreeCamera")]
-	public float VerticalLockMultiplier = 8;
-	[Tooltip("Vertical move speed of when panning and not in FreeCamera")]
-	public float VerticalMoveSpeedLocked = .01f;
-	[Tooltip("Multiplier for vertical movement")]
-	public float VerticalMoveMultiplier = .1f;
-	[Tooltip("Multiplier for vertical movement when not in FreeCamera")]
-	public float VerticalLockMoveMultiplier = .1f;
-
 	[Header("Make Avatar 3.0")]
 	[Tooltip("Setting empty will place assets in the Avatars root folder")]
 	[SerializeField] public string ExpressionsFolder = "Expressions";
@@ -85,6 +55,36 @@ namespace TEA {
 	[Header("Create Toggle")]
 	[Tooltip("Setting empty will place assets in the Avatars root folder")]
 	[SerializeField] public string ToggleFolder = "Toggles";
+
+	[Header("Camera Controls")]
+	[Tooltip("Distance the camera will move when zooming")]
+	public Vector3 zoomAmount = Vector3.forward * .2f;
+	[Tooltip("Multiplier for fast zooming")]
+	public float zoomQuickly = 3.5f;
+	[Tooltip("Multiplier for slow zooming")]
+	public float zoomSlowly = 0.35f;
+	[Tooltip("Multiplies base distance the camera will move (see slow and fast zoom)")]
+	public float zoomMultiplier = 1;
+	[Tooltip("Closest distance the camera will be from the armature")]
+	public float ClosestCameraZoom = .2f;
+	[Tooltip("(Orthographic) Distance the camera will move when zooming")]	
+	public float zoomAmountOrtho = .1f;
+	[Tooltip("Rotation amount in FreeCamera mode")]
+	public float rotationAmount = 2f;
+	[Tooltip("Time multiplier for camera transforms")]
+	public float movementTime = 10f;
+	[Tooltip("Movement speed of the camera rig when in Free camera mode")]
+	public float MoveSpeed = 0.03f;
+	[Tooltip("Vertical move speed when panning")]
+	public float VerticalPanSpeed = .05f;
+	[Tooltip("Vertical move speed multiplier when not in FreeCamera")]
+	public float VerticalLockMultiplier = 8;
+	[Tooltip("Vertical move speed of when panning and not in FreeCamera")]
+	public float VerticalMoveSpeedLocked = .1f;
+	[Tooltip("Multiplier for vertical movement")]
+	public float VerticalMoveMultiplier = .003f;
+	[Tooltip("Multiplier for vertical movement when not in FreeCamera")]
+	public float VerticalLockMoveMultiplier = .01f;
 
 	[System.Serializable]
 	public enum MoveTypes {
