@@ -68,7 +68,8 @@ namespace TEA {
   [SerializeField] public float WalkVelocity = 1.56f;
   [SerializeField] public float RunVelocity = 3.4f;
   [SerializeField] public float SprintVelocity = 5.96f;
-  [SerializeField] public float RotationAmount = 3;
+  [Tooltip("Degrees/Second")]
+  [SerializeField] public float RotationAmount = 100;
 
   [Header("Compiler Settings")]
   public string WorkingDirectory = "TEA_Temp";

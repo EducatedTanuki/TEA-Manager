@@ -30,7 +30,10 @@ MonoBehaviour:
   Sitting: {fileID: 0}
   TPose: {fileID: 0}
   IKPose: {fileID: 0}
+  SetCameraPosition: 1
   PortraitCameraPositionOffset: {x: 0, y: 0, z: 0}
+  SetCameraRotation: 1
+  PortraitCameraRotationOffset: {x: 0, y: 180, z: 0}
   EyeLookDownLeft: {x: 0.3, y: 0, z: 0, w: 1}
   EyeLookDownRight: {x: 0.3, y: 0, z: 0, w: 1}
   EyeLookUpLeft: {x: -0.2, y: 0, z: 0, w: 1}
@@ -40,6 +43,12 @@ MonoBehaviour:
   EyeLookLeftLeft: {x: 0, y: -0.2, z: 0, w: 1}
   EyeLookLeftRight: {x: 0, y: -0.2, z: 0, w: 1}
   ToggleFolder: Toggles
+  MoveType: 0
+  WalkVelocity: 1.56
+  RunVelocity: 3.4
+  SprintVelocity: 5.96
+  RotationAmount: 100
+  WorkingDirectory: TEA_Temp
   keepInSceneTooltip: Keep the TEA Manager prefab in your Scene while not in play
     mode
   keepInScene: 1
@@ -62,9 +71,3 @@ MonoBehaviour:
   AfterButtons: 1
   BeforeInfo: 1
   AfterInfo: 1
-  MoveType: 0
-  WalkVelocity: 1.56
-  RunVelocity: 3.4
-  SprintVelocity: 5.96
-  RotationAmount: 3
-  WorkingDirectory: TEA_Temp

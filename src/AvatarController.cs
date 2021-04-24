@@ -123,11 +123,12 @@ namespace TEA {
 		VelocityZ = 0;
 	 } else if(null != Locomotion && CameraController.mouseIn && !CameraController.FreeCamera) {
 		//Rotate
+		float turnAmount = Mathf.Ceil(Locomotion.RotationAmount * Time.deltaTime);
 		if(Input.GetKey(KeyCode.E)) {
-		 horizontalRotation *= Quaternion.Euler(Vector3.up * Locomotion.RotationAmount);
+		 horizontalRotation *= Quaternion.Euler(Vector3.up * turnAmount);
 		}
 		if(Input.GetKey(KeyCode.Q)) {
-		 horizontalRotation *= Quaternion.Euler(Vector3.up * -Locomotion.RotationAmount);
+		 horizontalRotation *= Quaternion.Euler(Vector3.up * -turnAmount);
 		}
 		Avatar.transform.rotation = horizontalRotation;
 
