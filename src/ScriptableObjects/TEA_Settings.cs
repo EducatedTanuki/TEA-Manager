@@ -15,20 +15,32 @@ namespace TEA {
 	[Space]
 	[Tooltip("Setting empty will place assets in the Avatars root folder")]
 	[SerializeField] public string PlayableLayersFolder = "Playable Layers";
-	[Tooltip("Copy Layer to Avatar Folder (turn off if you want all avatars to point to the same asset)")]
+	[Tooltip("Setting empty will place assets in the Avatars root folder")]
+	[SerializeField] public string AnimationsFolder = "Animations";
+	[Tooltip("Copy Layer to the Playable Layers Folder (turn off if you want all avatars to point to the same asset)")]
 	[SerializeField] public bool BaseCopy = true;
+	[Tooltip("Copy Animations to Animations Folder (turn off if you want all avatars to point to the same animations)")]
+	[SerializeField] public bool BaseCopyAnimations = false;
 	[SerializeField] public RuntimeAnimatorController Base;
-	[Tooltip("Copy Layer to Avatar Folder (turn off if you want all avatars to point to the same asset)")]
+	[Tooltip("Copy Layer to the Playable Layers Folder (turn off if you want all avatars to point to the same asset)")]
 	[SerializeField] public bool AdditiveCopy = true;
+	[Tooltip("Copy Animations to Animations Folder (turn off if you want all avatars to point to the same animations)")]
+	[SerializeField] public bool AdditiveCopyAnimations = false;
 	[SerializeField] public RuntimeAnimatorController Additive;
-	[Tooltip("Copy Layer to Avatar Folder (turn off if you want all avatars to point to the same asset)")]
+	[Tooltip("Copy Layer to the Playable Layers Folder (turn off if you want all avatars to point to the same asset)")]
 	[SerializeField] public bool GestureCopy = true;
+	[Tooltip("Copy Animations to Animations Folder (turn off if you want all avatars to point to the same animations)")]
+	[SerializeField] public bool GestureCopyAnimations = false;
 	[SerializeField] public RuntimeAnimatorController Gesture;
-	[Tooltip("Copy Layer to Avatar Folder (turn off if you want all avatars to point to the same asset)")]
+	[Tooltip("Copy Layer to the Playable Layers Folder (turn off if you want all avatars to point to the same asset)")]
 	[SerializeField] public bool ActionCopy = true;
+	[Tooltip("Copy Animations to Animations Folder (turn off if you want all avatars to point to the same animations)")]
+	[SerializeField] public bool ActionCopyAnimations = false;
 	[SerializeField] public RuntimeAnimatorController Action;
-	[Tooltip("Copy Layer to Avatar Folder (not recommended to turn off)")]
+	[Tooltip("Copy Layer to the Playable Layers Folder (not recommended to turn off)")]
 	[SerializeField] public bool FXCopy = true;
+	[Tooltip("Copy Animations to Animations Folder (not recommended to turn off)")]
+	[SerializeField] public bool FXCopyAnimations = true;
 	[SerializeField] public RuntimeAnimatorController FX;
 	[Space]
 	[SerializeField] public RuntimeAnimatorController Sitting;

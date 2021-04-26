@@ -139,16 +139,16 @@ namespace TEA {
 	 return null;
 	}
 
-	public static void CopyPlayableLayer(VRCAvatarDescriptor vrcd, TEA_Settings settings, string folder) {
-	 CopyPlayableLayer(vrcd, 0, folder, AssetDatabase.GetAssetPath(settings.Base), settings.BaseCopy);
-	 CopyPlayableLayer(vrcd, 1, folder, AssetDatabase.GetAssetPath(settings.Additive), settings.AdditiveCopy);
-	 CopyPlayableLayer(vrcd, 2, folder, AssetDatabase.GetAssetPath(settings.Gesture), settings.GestureCopy);
-	 CopyPlayableLayer(vrcd, 3, folder, AssetDatabase.GetAssetPath(settings.Action), settings.Action);
-	 CopyPlayableLayer(vrcd, 4, folder, AssetDatabase.GetAssetPath(settings.FX), settings.FXCopy);
+	public static void CopyPlayableLayer(VRCAvatarDescriptor vrcd, TEA_Settings settings, string controller_folder, string animation_folder) {
+	 CopyPlayableLayer(vrcd, 0, controller_folder, animation_folder, AssetDatabase.GetAssetPath(settings.Base), settings.BaseCopy, settings.BaseCopyAnimations);
+	 CopyPlayableLayer(vrcd, 1, controller_folder, animation_folder, AssetDatabase.GetAssetPath(settings.Additive), settings.AdditiveCopy, settings.AdditiveCopyAnimations);
+	 CopyPlayableLayer(vrcd, 2, controller_folder, animation_folder, AssetDatabase.GetAssetPath(settings.Gesture), settings.GestureCopy, settings.GestureCopyAnimations);
+	 CopyPlayableLayer(vrcd, 3, controller_folder, animation_folder, AssetDatabase.GetAssetPath(settings.Action), settings.ActionCopy, settings.ActionCopyAnimations);
+	 CopyPlayableLayer(vrcd, 4, controller_folder, animation_folder, AssetDatabase.GetAssetPath(settings.FX), settings.FXCopy, settings.FXCopyAnimations);
 	}
 
-	public static void CopyPlayableLayer(VRCAvatarDescriptor vrcd, int layer, string folder, string sourceController, bool copy) {
-	 string controllerPath = GetPath(false, folder, vrcd.baseAnimationLayers[layer].type + ".controller");
+	public static void CopyPlayableLayer(VRCAvatarDescriptor vrcd, int layer, string controller_folder, string animation_folder, string sourceController, bool copy, bool copyAnim) {
+	 string controllerPath = GetPath(false, controller_folder, vrcd.baseAnimationLayers[layer].type + ".controller");
 	 AnimatorController controller;
 	 if(copy) {
 		AssetDatabase.CopyAsset(sourceController, controllerPath);
@@ -160,8 +160,9 @@ namespace TEA {
 	 vrcd.baseAnimationLayers[layer].isEnabled = true;
 	 vrcd.baseAnimationLayers[layer].animatorController = controller;
 
-	 if(copy)
-		CopyBlendTrees(controller, folder);
+	 if(copy) {
+		CopyMotions(controller, animation_folder, copyAnim);
+	 }
 	}
 
 	// ------ ------ Transform ----- -----
@@ -190,26 +191,38 @@ namespace TEA {
 	 return false;
 	}
 
-	public static void CopyBlendTrees(AnimatorController controller, string path) {
+	public static void CopyMotions(AnimatorController controller, string path, bool copyAnim) {
 	 foreach(AnimatorControllerLayer layer in controller.layers) {
-		CopyBlendTrees(layer.stateMachine, path);
+		CopyMotions(layer.stateMachine, path, copyAnim);
 		foreach(ChildAnimatorStateMachine cSM in layer.stateMachine.stateMachines) {
-		 CopyBlendTrees(cSM.stateMachine, path);
+		 CopyMotions(cSM.stateMachine, path, copyAnim);
 		}
 	 }
 	 UnityEditor.EditorUtility.SetDirty(controller);
 	 AssetDatabase.SaveAssets();
 	}
 
-	public static void CopyBlendTrees(AnimatorStateMachine stateMachine, string path) {
+	public static void CopyMotions(AnimatorStateMachine stateMachine, string path, bool copyAnim) {
 	 foreach(ChildAnimatorState state in stateMachine.states) {
 		if(null == state.state.motion)
 		 continue;
 		//Debug.Log($"BlendTree[{state.state.motion is BlendTree}] isSubAsset[{!AssetDatabase.IsSubAsset(state.state.motion)}]");
-		if(state.state.motion is BlendTree && !AssetDatabase.IsSubAsset(state.state.motion)) {
+		if(copyAnim && state.state.motion is AnimationClip && !AssetDatabase.IsSubAsset(state.state.motion)) {
+		 string newAnimPath = GetPath(false, path, state.state.motion.name + ".anim");
+		 AnimationClip animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(newAnimPath);
+		 if(null == animClip) {
+			AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(state.state.motion), newAnimPath);
+			animClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(newAnimPath);
+		 }
+		 state.state.motion = animClip;
+		} else if(state.state.motion is BlendTree && !AssetDatabase.IsSubAsset(state.state.motion)) {
 		 string newTreePath = GetAssetPath(path, state.state.motion.name);
-		 AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(state.state.motion), newTreePath);
-		 state.state.motion = AssetDatabase.LoadAssetAtPath<BlendTree>(newTreePath);
+		 BlendTree blendTree = AssetDatabase.LoadAssetAtPath<BlendTree>(newTreePath);
+		 if(null == blendTree) {
+			AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(state.state.motion), newTreePath);
+			blendTree = AssetDatabase.LoadAssetAtPath<BlendTree>(newTreePath);
+		 }
+		 state.state.motion = blendTree;
 		}
 	 }
 	}

@@ -97,7 +97,8 @@ namespace TEA {
 	 // Folders
 	 string scenePath = GetParentPath(newAvatar.gameObject.scene.path, false);
 	 string parentFolder = GetPath(false, scenePath, newAvatar.gameObject.name);
-	 string animation_folder = GetPath(false, parentFolder, settings.PlayableLayersFolder);
+	 string controller_folder = GetPath(false, parentFolder, settings.PlayableLayersFolder);
+	 string animation_folder = GetPath(false, parentFolder, settings.AnimationsFolder);
 	 string expression_folder = GetPath(false, parentFolder, settings.ExpressionsFolder);
 
 	 if(!EditorUtility.DisplayDialog(MAKE_AVATAR,
@@ -105,7 +106,8 @@ namespace TEA {
 		+ "\n"
 		+ "\nThis operation may overridden files!"
 		+ $"\nExpression assets at [{expression_folder}]"
-		+ $"\nPlayable Layer assets at [{animation_folder}]"
+		+ $"\nPlayable Layer assets at [{controller_folder}]"
+		+ $"\nAnimation assets at [{animation_folder}]"
 		, "Continue", "Cancel"))
 		return;
 
@@ -114,8 +116,10 @@ namespace TEA {
 	 // Folders
 	 if(!AssetDatabase.IsValidFolder(parentFolder))
 		AssetDatabase.CreateFolder(scenePath, newAvatar.gameObject.name);
-	 if(!AssetDatabase.IsValidFolder(animation_folder))
+	 if(!AssetDatabase.IsValidFolder(controller_folder))
 		AssetDatabase.CreateFolder(parentFolder, settings.PlayableLayersFolder);
+	 if(!AssetDatabase.IsValidFolder(animation_folder))
+		AssetDatabase.CreateFolder(parentFolder, settings.AnimationsFolder);
 	 if(!AssetDatabase.IsValidFolder(expression_folder))
 		AssetDatabase.CreateFolder(parentFolder, settings.ExpressionsFolder);
 
@@ -177,7 +181,7 @@ namespace TEA {
 
 	 // Playable Layers
 	 //Debug.Log($"[{vrcd.baseAnimationLayers[0]}]");
-	 CopyPlayableLayer(vrcd, settings, animation_folder);
+	 CopyPlayableLayer(vrcd, settings, controller_folder, animation_folder);
 	 vrcd.customizeAnimationLayers = true;
 
 	 // Custome Layers
