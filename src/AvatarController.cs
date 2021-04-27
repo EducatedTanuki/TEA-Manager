@@ -164,7 +164,7 @@ namespace TEA {
 		 float distanceZ = Mathf.Sin(theta) * (distance);
 		 Vector3 cameraDirection = CameraController.RigCamera.transform.forward;
 
-		 // animator velocities
+		 // Animator Velocities
 		 if(TEA_Manager.current.ViewPort.gameObject.activeSelf) {
 			newPosition = TEA_Utility.TransformPoint(Avatar.transform, new Vector3(distanceX, 0, distanceZ));
 			VelocityZ = distanceZ / Time.deltaTime;

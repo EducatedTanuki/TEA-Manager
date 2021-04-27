@@ -42,9 +42,7 @@ namespace TEA {
 		base.OnInspectorGUI();
 	}
 
-	// ----- ----- Avatar Setup Methods ----- -----
-	private static readonly string TEA_OBJECT_MENU = "TEA Functions";
-
+	// ----- ----- Avatar Setup Methods ----- 
 	private static readonly string SET_EYE_LOOK = "Set Eye Look as default";
 
 	[MenuItem("GameObject/TEA Functions/Set Eye Look as default", false, 10)]

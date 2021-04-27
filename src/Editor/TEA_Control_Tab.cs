@@ -20,7 +20,6 @@ namespace TEA {
 	private static readonly int SECTION_WIDTH = 180;
 	private static readonly int TOGGLE_WIDTH = 35;
 	private static readonly int BUTTON_WIDTH = 35;
-	private static readonly int VALIDATE_BUTTON_WIDTH = 60;
 	private static readonly int LABEL_WIDTH = 70;
 
 	[MenuItem("TEA Manager/Play Tab", false, 0)]
@@ -48,8 +47,6 @@ namespace TEA {
 	bool _compile = false;
 	bool _compiled = false;
 	bool _managerOverload = false;
-	bool _startedPlaying = false;
-	bool _stoppedPlaying = false;
 
 	// --- Compiler
 	private TEA_Compiler compiler = new TEA_Compiler();
