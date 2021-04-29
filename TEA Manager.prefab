@@ -30,45 +30,6 @@ Transform:
   m_Father: {fileID: 6473900171445381198}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!1 &2118616302510010326
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7986102636405708183}
-  - component: {fileID: 783465614778356829}
-  m_Layer: 0
-  m_Name: Audio Listener
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7986102636405708183
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2118616302510010326}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 6473900170782321183}
-  m_RootOrder: 9
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &783465614778356829
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2118616302510010326}
-  m_Enabled: 1
 --- !u!1 &2184470446679829946
 GameObject:
   m_ObjectHideFlags: 0
@@ -2674,10 +2635,10 @@ RectTransform:
   m_Father: {fileID: 6473900170373193310}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 130.13, y: -108.3}
-  m_SizeDelta: {x: 0, y: 136.6}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 130.13, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6473900169933245958
 MonoBehaviour:
@@ -6686,10 +6647,10 @@ RectTransform:
   m_Father: {fileID: 6473900170373193310}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 634.15, y: -108.3}
-  m_SizeDelta: {x: 0, y: 136.6}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 634.15, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6473900170660330745
 MonoBehaviour:
@@ -7099,7 +7060,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 6473900171552075050}
   m_Direction: 3
   m_Value: 0
-  m_Size: 0.9999999
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7342,7 +7303,6 @@ Transform:
   - {fileID: 6473900171376384761}
   - {fileID: 2550288026346981574}
   - {fileID: 2550288026542745516}
-  - {fileID: 7986102636405708183}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7381,7 +7341,7 @@ MonoBehaviour:
   Canvas: {fileID: 6473900169874242027}
   Stage: {fileID: 2550288027075650078}
   WorldCenter: {fileID: 6473900171376384762}
-  AudioListener: {fileID: 2118616302510010326}
+  AudioListener: {fileID: 4211394550263435060}
   Light: {fileID: 2550288026542745518}
   TEA_AnimationClips: {fileID: 2550288027074782628}
 --- !u!114 &6473900170782321177
@@ -8044,10 +8004,10 @@ RectTransform:
   m_Father: {fileID: 6473900170373193310}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1069.17, y: -108.3}
-  m_SizeDelta: {x: 0, y: 136.6}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 1069.17, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6473900170870752120
 MonoBehaviour:
@@ -10346,10 +10306,10 @@ RectTransform:
   m_Father: {fileID: 6473900170373193310}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 364.89, y: -108.3}
-  m_SizeDelta: {x: 0, y: 136.6}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 364.89, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6473900171402326968
 MonoBehaviour:
@@ -10613,6 +10573,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6473900171445381198}
   - component: {fileID: 6473900171445381197}
+  - component: {fileID: 4211394550263435060}
   m_Layer: 0
   m_Name: Camera Rig Hip
   m_TagString: Untagged
@@ -10662,6 +10623,14 @@ ParentConstraint:
   m_Sources:
   - sourceTransform: {fileID: 0}
     weight: 1
+--- !u!81 &4211394550263435060
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6473900171445381199}
+  m_Enabled: 1
 --- !u!1 &6473900171457907717
 GameObject:
   m_ObjectHideFlags: 0
@@ -10840,32 +10809,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b06328a05bdf0d14c9a51bdd10be5dde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed: 0.04
   RigCamera: {fileID: 6473900170904740277}
-  ClosestCameraZoom: 0.2
-  newZoom: {x: 0, y: 0, z: 0}
-  desiredZoom: {x: 0, y: 0, z: 0}
-  zoomAmount: {x: 0, y: 0, z: 0.5}
-  zoomMultiplier: 1
-  zoomQuickly: 3.5
-  zoomSlowly: 0.35
-  newZoomOrtho: 0
-  zoomAmountOrtho: 0.1
   CameraRig: {fileID: 6473900171445381197}
   VerticalRotationRig: {fileID: 6473900171311578758}
   VerticalRotation: {x: 0, y: 0, z: 0, w: 0}
-  movementTime: 5
   MaxOffset: {x: 0, y: 0, z: 0}
   MinOffset: {x: 0, y: 0, z: 0}
-  rotationAmount: 2
-  horizontalRotation: {x: 0, y: 0, z: 0, w: 0}
   mouseIn: 0
-  mouseStartRotation: {x: 0, y: 0, z: 0}
-  mouseStopRotation: {x: 0, y: 0, z: 0}
-  VerticalMoveSpeed: 0.0375
-  VerticalMoveSpeedLocked: 0.01
-  LeftMouseVerticalMultiplier: 0.001
-  VerticalLockMultiplier: 8
 --- !u!1 &6473900171526799674
 GameObject:
   m_ObjectHideFlags: 0
@@ -13190,10 +13140,10 @@ RectTransform:
   m_Father: {fileID: 6473900171765511281}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 267.5, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &6473900171943653053
 CanvasRenderer:

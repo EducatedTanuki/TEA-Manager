@@ -59,6 +59,12 @@ namespace TEA {
 	 Grounded = true;
 	 avatarAnim.SetBool("Grounded", Grounded);
 
+	 TEA_PlayableLayerData layerData = TEA_Manager.current.LayerInfo[TEA_Manager.AvatarIndex()];
+	 TEA_PlayableLayerData.PlayableLayerData data = layerData.FindPlayableLayerData(VRCAvatarDescriptor.AnimLayerType.Base);
+	 for(int i = data.start; i < data.end; i++) {
+		avatarAnim.SetLayerWeight(i, 1);
+	 }
+
 	 //--- events ---
 	 controlEvents = new Dictionary<VRC.SDKBase.VRC_PlayableLayerControl.BlendableLayer, TEA_PlayableLayerControl>();
 	 if(null == TEA_PlayableLayerControl.ApplySettings)

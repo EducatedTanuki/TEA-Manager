@@ -66,7 +66,7 @@ namespace TEA {
 	GameObject canvasObj;
 	GameObject stageObj;
 	GameObject worldCenterObj;
-	GameObject audioListenerObj;
+	Behaviour audioListenerObj;
 	GameObject lightObj;
 
 	// --- styles
@@ -424,7 +424,7 @@ namespace TEA {
 
 	 settings.StageActive = DrawObjectToggle(settings.StageActive, stageObj, stage, settings.StageTooltip);
 	 settings.WorldCenterActive = DrawObjectToggle(settings.WorldCenterActive, worldCenterObj, center, settings.worldCenterTooltip);
-	 settings.AudioListenerActive = DrawObjectToggle(settings.AudioListenerActive, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, settings.AudioListenerTooltip);
+	 settings.AudioListenerActive = DrawToggle(settings.AudioListenerActive, audioListenerObj, EditorGUIUtility.IconContent("AudioListener Icon").image, settings.AudioListenerTooltip);
 	 settings.LightActive = DrawObjectToggle(settings.LightActive, lightObj, EditorGUIUtility.IconContent("DirectionalLight Gizmo").image, settings.LighTooltipt);
 	 settings.ValidateActive = DrawToggle(settings.ValidateActive, validation, settings.ValidateTooltip);
 	 compiler.validate = settings.ValidateActive;
@@ -436,6 +436,13 @@ namespace TEA {
 	 val = GUILayout.Toggle(val, new GUIContent(tex, toolTip), GUILayout.Height(MIN_HEIGHT), GUILayout.MaxWidth(TOGGLE_WIDTH), GUILayout.ExpandWidth(false));
 	 if(null != obj)
 		obj.SetActive(val);
+	 return val;
+	}
+
+	private bool DrawToggle(bool val, Behaviour comp, Texture tex, string toolTip) {
+	 val = GUILayout.Toggle(val, new GUIContent(tex, toolTip), GUILayout.Height(MIN_HEIGHT), GUILayout.MaxWidth(TOGGLE_WIDTH), GUILayout.ExpandWidth(false));
+	 if(null != comp)
+		comp.enabled = val;
 	 return val;
 	}
 

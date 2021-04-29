@@ -83,7 +83,7 @@ namespace TEA {
 	public GameObject Canvas;
 	public GameObject Stage;
 	public GameObject WorldCenter;
-	public GameObject AudioListener;
+	public AudioListener AudioListener;
 	public GameObject Light;
 	public Dropdown TEA_AnimationClips;
 

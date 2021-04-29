@@ -99,8 +99,8 @@ namespace TEA {
 		 AnimatorController baseAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(baseControllerPath);
 		 GetBehaviours(baseRunContr, baseAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.Base);
 		 CombineAnimator(superAnimator, baseAnimContr, null);
-		 layerInfo.data[0].start = 0;
-		 layerInfo.data[0].end = baseAnimContr.layers.Length;
+		 layerInfo.data[0].start = 1;
+		 layerInfo.data[0].end = layerInfo.data[0].start + baseAnimContr.layers.Length;
 
 		 // Additive
 		 AnimatorController additiveAnimContr = null;
@@ -163,7 +163,6 @@ namespace TEA {
 			AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(fxRunContr), fxControllerPath);
 			fxAnimContr = AssetDatabase.LoadAssetAtPath<AnimatorController>(fxControllerPath);
 
-			SetFXDefault(superAnimator, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
 			GetBehaviours(fxRunContr, fxAnimContr, layerInfo, VRCAvatarDescriptor.AnimLayerType.FX);
 			CombineAnimator(superAnimator, fxAnimContr, manager.AvatarMaskNone);
 			//SetFXDefault(action, fxAnimContr, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
@@ -174,6 +173,7 @@ namespace TEA {
 			layerInfo.data[4].start = layerInfo.data[3].end;
 			layerInfo.data[4].end = layerInfo.data[3].end;
 		 }
+		 SetAnimationDefault(superAnimator, avatarComp.gameObject, manager.AvatarMaskNone, folderPath);
 
 		 string superAnimatorPath = GetPath(false, folderPath, superAnimator.name + ".controller");
 		 AssetDatabase.CreateAsset(superAnimator, superAnimatorPath);
@@ -457,57 +457,61 @@ namespace TEA {
 	 //Debug.Log("-----------");
 	}
 
-	private static AnimationClip SetFXDefault(AnimatorController superAnimator, AnimatorController fxAnimator, GameObject gameObject, AvatarMask mask, string folder) {
-	 if(null == fxAnimator)
-		return null;
-
-	 AnimatorControllerLayer fxDefault = new AnimatorControllerLayer {
-		name = "FX Default",
+	// ----- ------ Default Clips ----- ------
+	private static AnimationClip SetAnimationDefault(AnimatorController superAnimator, GameObject gameObject, AvatarMask mask, string folder) {
+	 AnimatorControllerLayer animDefault = new AnimatorControllerLayer {
+		name = "TEA Defaults",
 		defaultWeight = 1,
 		avatarMask = mask,
 		stateMachine = new AnimatorStateMachine()
 	 };
 
-	 AnimatorStateMachine stateMachine = fxDefault.stateMachine;
+	 AnimatorStateMachine stateMachine = animDefault.stateMachine;
 	 AnimationClip def_clip = new AnimationClip {
-		name = "TEA FX Default"
+		name = "TEA Defaults"
 	 };
-	 AnimatorState defaultState = stateMachine.AddState("FX Default");
 
-	 foreach(AnimatorControllerLayer layer in fxAnimator.layers) {
-		SetFXDefault(def_clip, layer.stateMachine.states, gameObject);
+	 AnimatorState defaultState = stateMachine.AddState("TEA Defaults");
+
+	 foreach(AnimatorControllerLayer layer in superAnimator.layers) {
+		SetAnimationDefault(def_clip, layer.stateMachine.states, gameObject);
 		foreach(ChildAnimatorStateMachine childMachine in layer.stateMachine.stateMachines) {
-		 SetFXDefault(def_clip, childMachine.stateMachine.states, gameObject);
+		 SetAnimationDefault(def_clip, childMachine.stateMachine.states, gameObject);
 		}
 	 }
+
 	 string actionPath = folder + "/" + superAnimator.name + "-def_clip.anim";
 	 AssetDatabase.CreateAsset(def_clip, actionPath);
 	 AnimationClip retClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(actionPath);
 	 defaultState.writeDefaultValues = true;
 	 defaultState.motion = retClip;
-	 superAnimator.AddLayer(fxDefault);
+
+	 AnimatorControllerLayer[] layers = superAnimator.layers;
+	 ArrayUtility.Insert<AnimatorControllerLayer>(ref layers, 0, animDefault);
+	 superAnimator.layers = layers;
+
 	 return retClip;
 	}
 
-	private static void SetFXDefault(AnimationClip def_clip, ChildAnimatorState[] states, GameObject gameObject) {
+	private static void SetAnimationDefault(AnimationClip def_clip, ChildAnimatorState[] states, GameObject gameObject) {
 	 foreach(ChildAnimatorState state in states) {
 		state.state.writeDefaultValues = true;
-		SetFXDefaultMotion(state.state.motion, def_clip, gameObject);
+		SetAnimationDefaultMotion(state.state.motion, def_clip, gameObject);
 	 }
 	}
 
-	private static void SetFXDefaultMotion(Motion motion, AnimationClip def_clip, GameObject gameObject) {
+	private static void SetAnimationDefaultMotion(Motion motion, AnimationClip def_clip, GameObject gameObject) {
 	 if(null != motion) {
 		if(motion is BlendTree) {
 		 BlendTree bTree = (BlendTree)motion;
 		 foreach(ChildMotion child in bTree.children) {
-			SetFXDefaultMotion(child.motion, def_clip, gameObject);
+			SetAnimationDefaultMotion(child.motion, def_clip, gameObject);
 		 }
 		} else if(motion is AnimationClip) {
 		 AnimationClip clip = (AnimationClip)motion;
 
 		 foreach(EditorCurveBinding binding in AnimationUtility.GetCurveBindings(clip)) {
-			if(null == binding)
+			if(null == binding || binding.type == typeof(Animator))
 			 continue;
 
 			//Debug.Log($"clip[{clip.name}] \n binding [{binding.path},{binding.type},{binding.propertyName}]");
