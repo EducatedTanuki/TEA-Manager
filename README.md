@@ -37,6 +37,8 @@ Here are options for getting `Control Tab` into your workspace.
 In play mode `Tea Manager` emulates VRChat's avatar system.  
 Use the `TEA UI` in the Game tab to test your avatar.  
 
+> Select your avatar in the heirarchy to see their active animator in the Animator tab.
+
 ![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
 
 ### Inputs
