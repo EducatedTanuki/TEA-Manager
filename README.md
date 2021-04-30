@@ -100,18 +100,31 @@ Turn validation on or off using the <img src="https://github.com/EducatedTanuki/
 
 # Things to Note
 
-###### Multiple Avatars  
+#### Multiple Avatars  
+
 - You can switch between avatars using the avatar dropdown in **play mode**  
 - `TEA UI` controls do not currently sync when switching avatars. Re-toggling them will sync them with the avatar's animator state.  
 - ***Avatars added during play will not work***  
 
-###### Multi-Scene setups  
+#### Multi-Scene setups  
+
 - `Control Tab` will recognize avatars in every loaded Scene  
 - There must be avatars in the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) for `TEA Manager` to be added  
 
 - There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
 - `Control Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)
 and will remove `TEA Manager Prefab` from all other loaded scenes.  
+
+#### Default Expressions
+
+`TEA Manager` does not add default Expressions like VRC does.
+If your avatar does not have Expressions definded your radial menu will be blank.
+
+#### Proxy Animations
+
+Proxy animations in the SDK are all single frames. They are replaced by full animations when your avatar is uploaded.  
+Do not expect your avatar to have full walking, running, or action animations in play mode unless you replace the appropriate layers and proxy animations.  
+If you use [Make Avatar 3.0](#make-avatar-30) your **Action** layer will have full animations.  
 
 <h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
 
@@ -169,19 +182,6 @@ Sets an avatar's eye look as the default for [Make Avatar 3.0](#make-avatar-30).
 Create ON-OFF animations for a GameObject  
 The toggle(s) are added to `Assets/<Scene Folder>/<Avatar Name>/Toggles`.  
 You can change the final folder name through the `TEA Settings`.  
-
-# Notes
-
-### Default Expressions
-
-`TEA Manager` does not add default Expressions like VRC does.
-If your avatar does not have Expressions definded your radial menu will be blank.
-
-### Proxy Animations
-
-Proxy animations in the SDK are all single frames. They are replaced by full animations when your avatar is uploaded.  
-Do not expect your avatar to have full walking, running, or action animations in play mode unless you replace the appropriate layers and proxy animations.  
-If you use [Make Avatar 3.0](#make-avatar-30) your **Action** layer will have full animations.  
 
 # TEA Tools
 
