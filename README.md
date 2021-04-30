@@ -9,76 +9,32 @@ If you think I deserve a :cookie:
 - import [VRC Avatar SDK 3.0](https://vrchat.com/home/download)
 - import [Lean Tween](https://assetstore.unity.com/packages/tools/animation/leantween-3595)
 - import the `TEA-Manager-<version>.unitypackage` from [releases](https://github.com/EducatedTanuki/TEA-Manager/releases)
+- Remove all cameras from your Scene. Additional cameras can interfere with `TEA Manager`.  
 
-# Using `Tea Manager`
+# Using Tea Manager
 
-> !!!Remove all cameras from your your Scene.  
-
-To use `Tea Manager` you are ***required*** to enter play mode using the `TEA Play` buttons in the `Play Tab`.  
+To use `Tea Manager` you are ***required*** to enter play mode using the play/validation buttons in the `Control Tab`.  
 `TEA Manager` has to compile your avatars playable layers before entering play mode.  
 
 ![play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-tab.PNG)
 
-Here are options for getting `Play Tab` into your workspace.
+Here are options for getting `Control Tab` into your workspace.
 1. Load Supplied Layout
-    - Go to *Window/Layouts/More/Load from disk...*  
-    - Select *Assets/TEA Manager/TEA_Layout.wlt*  
-2. Put `Play Tab` in your layout
-    - Go to the `Tea Manager` menu and select `Play Tab` 
-    - Dock `Play Tab` wherever makes sense for you
-      - I recommend docking `Play Tab` below the Unity Toolbar  
+    - Go to `Window/Layouts/More/Load from disk`  
+    - Select `Assets/TEA Manager/TEA_Layout.wlt`  
+2. Put `Control Tab` in your layout
+    - Go to the `Tea Manager` menu and select `Control Tab` 
+    - Dock `Control Tab` wherever makes sense for you
+      - I recommend docking `Control Tab` below the [Unity Toolbar](https://docs.unity3d.com/Manual/Toolbar.html#:~:text=You%20can%20find%20the%20Toolbar%20at%20the%20top,interactive%20view%20into%20the%20world%20you%20are%20creating.)  
 
 ![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif)
 
-- Use the checkboxes at the bottom to control the spacing of the main controls.  
+- Use the layout checkboxes at the bottom to control the spacing of the main controls.  
 - There are tooltips for most controls.  
 
-### `TEA Settings`
+# TEA UI
 
-`TEA Settings` is a file that saves the state of the `Play Tab` toggles and locomotion settings.  
-`Play Tab` will use the first `TEA Settings` found in your project.  
-If a `TEA Settings` file does not exist one is created at `Assets/TEA Settings.asset`.  
-
-### Things to Note
-
-###### Validation
-
-Turn validation on or off using the last checkbox.  
-
-`TEA Manager` can run validation on your avatar to check:  
-- Avatar is compliant with SDK 3.0.  
-- All Expression Parameters are used
-- Expression Menu Controls are valid
-  - Button parameter is set
-  - Toggle parameter is set
-  - SubMenus are set
-  - Radial Puppet has at least 1 sub parameter
-  - Two Axis Puppet has at least 1 sub parameter
-  - Four Axis Puppet has all 4 sub parameters
-- Parameter Drivers are valid
-
-###### TEA Manager Prefab
-
-- The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate in play mode.
-`Play Tab` will automatically load the `TEA Manager Prefab` into the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) when there is at least one avatar.  
-- If you toggle the "*Keep Prefab While Working*" option OFF, `Play Tab` will only load `TEA Manager Prefab` when it is needed for play or validation.
-
-###### Multiple Avatars  
-- You can switch between avatars using the avatar dropdown in **play mode**  
-- `TEA UI` controls do not currently sync when switching avatars. Re-toggling them will sync them with the animator state.  
-- ***Avatars added during play will not work***  
-
-###### Multi-Scene setups  
-- `Play Tab` will recognize avatars in every loaded Scene  
-- There must be avatars in the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) for `TEA Manager` to be added  
-
-- There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
-- `Play Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)
-and will remove `TEA Manager Prefab` from all other loaded scenes.  
-
-# `TEA UI`
-
-In play mode `Tea Manager` emulates VRChat's Avatar system.  
+In play mode `Tea Manager` emulates VRChat's avatar system.  
 Use the `TEA UI` in the Game tab to test your avatar.  
 
 ![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
@@ -103,21 +59,73 @@ Controls are context sensative, but in general this is the Input mapping
 |        Q, E        |  Camera/Avatar Rotation  |
 |          H         |   Hide/Show Controls   |
 
+# TEA Settings
+
+`TEA Settings` is a file that saves the state of:
+- `Control Tab` toggles
+- Avatar locomotion settings  
+- [TEA Functions](#tea-functions) settings
+
+`Control Tab` will use the first `TEA Settings` found in Assets.  
+If a `TEA Settings` file does not exist one is created at `Assets/TEA Settings.asset`.  
+
+# Validation
+
+Turn validation on or off using the <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/validation.png" alt="validation.png" width="16" height="16" style="max-width:100%;"> checkbox.  
+
+`TEA Manager` can run validation on your avatar to check:  
+- Avatar is compliant with SDK 3.0.  
+  - Base, Additive, Gesture, and Action contains only Transform animations.
+  - FX contains no Transform animations.
+- All Expression Parameters are being used
+- Expression Menu Controls are valid
+  - Button parameter is set
+  - Toggle parameter is set
+  - SubMenus are set
+  - Radial Puppet has at least 1 sub parameter
+  - Two Axis Puppet has at least 1 sub parameter
+  - Four Axis Puppet has all 4 sub parameters
+- Parameter Drivers are valid
+  - Parameters are in ExpressionParameters
+
+# TEA Manager Prefab
+
+- The `TEA Manager Prefab` contains everything needed for `TEA Manager` to operate in play mode.
+- "*Keep Prefab While Working*" toggle
+  - When OFF: `Control Tab` will only load the `TEA Manager Prefab` into the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) when it is needed for play or validation.
+  - When ON: `Control Tab` will automatically load the `TEA Manager Prefab` into the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) when there is at least one avatar.  
+  - OFF by default
+
+# Things to Note
+
+###### Multiple Avatars  
+- You can switch between avatars using the avatar dropdown in **play mode**  
+- `TEA UI` controls do not currently sync when switching avatars. Re-toggling them will sync them with the avatar's animator state.  
+- ***Avatars added during play will not work***  
+
+###### Multi-Scene setups  
+- `Control Tab` will recognize avatars in every loaded Scene  
+- There must be avatars in the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes) for `TEA Manager` to be added  
+
+- There can only be one `TEA Manager Prefab` active at a time, accross all **loaded** Scenes.  
+- `Control Tab` will add `TEA Manager Prefab` to the [Active Scene](https://docs.unity3d.com/Manual/MultiSceneEditing.html#:~:text=The%20Scene%20divider%20menu%20for%20loaded%20Scenes)
+and will remove `TEA Manager Prefab` from all other loaded scenes.  
+
 <h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
 
-- TEA Animations are utility animations added to the runtime animation controller.  
+- `TEA Animations` are utility animations added to the runtime animation controller.  
 - ***This is why your avatars hands are held up.***  
-- You can toggle TEA Animations by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui).  
+- You can toggle `TEA Animations` by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui).  
 - There are two hand poses and an assortment of full body animations.  
 - TEA Animaiton layers are placed after **Base** and before **Additive** in the compiled animator.  
 
-# `TEA Functions`
+# TEA Functions
 
 `Tea Manager` provides some functions to make your development easier.  
 `TEA Functions` can be reached by right clicking a GameObject in the heirarchy.  
 
 ### Make Avatar 3.0
-This sets up a GameObject as an Avatar with defaults I defined.  
+This sets up a GameObject as an avatar with defaults I defined.  
 You can change these defaults through the `TEA Settings`.  
 
 ##### VRCAvatarDescriptor Setup
@@ -135,11 +143,11 @@ You can change these defaults through the `TEA Settings`.
     - Default vrc action layer with replaced emote animations
   - FX
     - Variation of default VRC gesture controller with empty animation clips
-      - Layer "Right Hand"
+      - Layer `Right Hand`
         - weight 1 by default
-      - Layer "Left Hand Unique" has separate animations from "Right Hand"
+      - Layer `Left Hand Unique` has separate animations from "Right Hand"
         - weight 1 by default
-      - Layer "Left Hand" has the same animations as "Right Hand"
+      - Layer `Left Hand` has the same animations as "Right Hand"
         - weight 0 by default
 - Expressions
   - Copies default Expression Menus and Parameters to `Assets/<Scene Folder>/<Avatar Name>/Expressions`
@@ -152,7 +160,7 @@ You can change these defaults through the `TEA Settings`.
 
 ### Set Eye Look as Default
 
-Sets an Avatar's eye look as the default for [Make Avatar 3.0](#make-avatar-30).  
+Sets an avatar's eye look as the default for [Make Avatar 3.0](#make-avatar-30).  
 
 ### Create Toggle
 

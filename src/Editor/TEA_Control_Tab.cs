@@ -22,15 +22,16 @@ namespace TEA {
 	private static readonly int BUTTON_WIDTH = 35;
 	private static readonly int LABEL_WIDTH = 70;
 
-	[MenuItem("TEA Manager/Play Tab", false, 0)]
+	[MenuItem("TEA Manager/Control Tab", false, 0)]
 	static void OpenWindow() {
-	 EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Control_Tab), false, "TEA Manager", true);
+	 EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Control_Tab), false, "TEA Control Tab", true);
 	 window.minSize = new Vector2(500, MIN_HEIGHT + 5);
+	 window.name = "TEA Control Tab";
 	}
 
-	[MenuItem("Window/TEA Manager/Play Tab")]
+	[MenuItem("Window/TEA Manager/Control Tab")]
 	static void AddTab() {
-	 EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Control_Tab), false, "TEA Manager", true);
+	 EditorWindow window = EditorWindow.GetWindow(typeof(TEA_Control_Tab), false, "TEA Control Tab", true);
 	 window.minSize = new Vector2(500, MIN_HEIGHT);
 	}
 
