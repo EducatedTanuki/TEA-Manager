@@ -254,9 +254,7 @@ namespace TEA {
 	 }
 
 	 for(int i = 0; i < control.subParameters.Length; i++) {
-		if(i >= values.Length) {
-		 //TEA_Manager.SDKError($"{control.name}\n the number of sub paramets does not match");
-		} else if(!string.IsNullOrEmpty(control.subParameters[i].name)) {
+		if(i < values.Length && !string.IsNullOrEmpty(control.subParameters[i].name)) {
 		 SetExpressionParameter(control.subParameters[i].name, values[i]);
 		}
 	 }
@@ -297,6 +295,9 @@ namespace TEA {
 	}
 
 	internal float GetParameterValue(Animator animator, string name) {
+	 if(string.IsNullOrEmpty(name))
+		return 0;
+
 	 AnimatorControllerParameterType type = GetParameterType(name);
 	 if(AnimatorControllerParameterType.Float == type)
 		return animator.GetFloat(name);
@@ -364,7 +365,6 @@ namespace TEA {
 	 get => avatarAnim.GetBool("AFK");
 	 set {
 		if(value) {
-		 //PlayAction();
 		 avatarAnim.SetBool("AFK", value);
 		} else {
 		 avatarAnim.SetBool("AFK", value);

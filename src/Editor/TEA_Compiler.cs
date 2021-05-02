@@ -604,6 +604,9 @@ namespace TEA {
 		 foreach(VRCExpressionsMenu.Control.Parameter param in control.subParameters) {
 			if(!string.IsNullOrEmpty(param.name))
 			 count++;
+			else
+			 continue;
+
 			if(null == avatar.expressionParameters.FindParameter(param.name))
 			 issues.ExpressionsMenu.Add(new Issue($"Four Axis Puppet[{control.name}] parameter[{param.name}] not in ExpressionParameters", menu));
 		 }
@@ -617,6 +620,9 @@ namespace TEA {
 		 foreach(VRCExpressionsMenu.Control.Parameter param in control.subParameters) {
 			if(!string.IsNullOrEmpty(param.name))
 			 count++;
+			else
+			 continue;
+
 			if(null == avatar.expressionParameters.FindParameter(param.name))
 			 issues.ExpressionsMenu.Add(new Issue($"Two Axis Puppet[{control.name}] parameter[{param.name}] not in ExpressionParameters", menu));
 		 }

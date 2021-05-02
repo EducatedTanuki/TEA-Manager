@@ -59,7 +59,6 @@ namespace TEA.UI {
     parameters=avatar.expressionParameters;
 
     if(null==mainMenu||null==parameters) {
-     //TODO warn of no menu or use default
      TEA_Manager.SDKError($"Expression Menu [{null!=mainMenu}] or Parameters [{null!=parameters}]");
      return true;
     }
@@ -67,7 +66,6 @@ namespace TEA.UI {
     root.gameObject.SetActive(true);
     RadialPuppet.transform.SetAsLastSibling();
     MultiAxisPuppet.transform.SetAsLastSibling();
-    RadialButtonEvent+=OnRadialButtonEvent;
 
    _initialized=true;
    return true;
@@ -157,8 +155,6 @@ namespace TEA.UI {
     pressedButtons.Remove(bw);
    }
   }
-
-  public event System.Action<RadialButton> RadialButtonEvent;
 
   internal void OnRadialButtonEvent(RadialButton radialButton) {
    //toggle the root parameter
