@@ -80,6 +80,8 @@ namespace TEA {
 	[HideInInspector]
 	public delegate void TEA_ParameterSetDelegate(Parameter parameter);
 
+
+
 	private Dictionary<VRCPlayableLayerControl.BlendableLayer, TEA_PlayableLayerControl> controlEvents = new Dictionary<VRC.SDKBase.VRC_PlayableLayerControl.BlendableLayer, TEA_PlayableLayerControl>();
 	public void TEA_PlayableLayerEvent(TEA_PlayableLayerControl control, Animator animator) {
 	 control.duration = 0;
@@ -109,11 +111,11 @@ namespace TEA {
 		float normalized = item.Value.duration / item.Value.blendDuration;
 		for(int i = data.start; i < data.end; i++) {
 		 if(normalized >= 1) {
-			avatarAnim.SetLayerWeight(i, item.Value.goalWeight);
+			item.Value.animator.SetLayerWeight(i, item.Value.goalWeight);
 			remove.Add(item.Value.layer);
 		 } else {
-			float newWeight = Mathf.Lerp(avatarAnim.GetLayerWeight(i), item.Value.goalWeight, (item.Value.duration - prevDur) / (item.Value.blendDuration - prevDur));
-			avatarAnim.SetLayerWeight(i, newWeight);
+			float newWeight = Mathf.Lerp(item.Value.animator.GetLayerWeight(i), item.Value.goalWeight, (item.Value.duration - prevDur) / (item.Value.blendDuration - prevDur));
+			item.Value.animator.SetLayerWeight(i, newWeight);
 		 }
 		}
 	 }
@@ -212,31 +214,36 @@ namespace TEA {
 	}
 
 	public void SetAnimatorParameter(Parameter param) {
+	 SetAnimatorParameter(avatarAnim, param);
+	}
+
+	public void SetAnimatorParameter(Animator animator, Parameter param) {
 	 //Debug.Log($"setting param {param.name}:{param.type} [{param.fVal}] [{param.iVal}] [{param.boolean}]");
 	 switch(param.type) {
 		case AnimatorControllerParameterType.Bool: {
-		 avatarAnim.SetBool(param.name, param.boolean);
+		 animator.SetBool(param.name, param.boolean);
 		 break;
 		}
 		case AnimatorControllerParameterType.Float: {
-		 avatarAnim.SetFloat(param.name, param.fVal);
+		 animator.SetFloat(param.name, param.fVal);
 		 break;
 		}
 		case AnimatorControllerParameterType.Int: {
-		 avatarAnim.SetInteger(param.name, param.iVal);
+		 animator.SetInteger(param.name, param.iVal);
 		 break;
 		}
 		case AnimatorControllerParameterType.Trigger: {
 		 if(param.boolean)
-			avatarAnim.SetTrigger(param.name);
+			animator.SetTrigger(param.name);
 		 else
-			avatarAnim.ResetTrigger(param.name);
+			animator.ResetTrigger(param.name);
 		 break;
 		}
 		default:
 		 break;
 	 }
-	 TEA_ParameterSet(param);
+	 if(avatarAnim == animator)
+		TEA_ParameterSet(param);
 	}
 
 	internal void ExpressionParameterSet(VRCExpressionsMenu.Control control, params float[] values) {
@@ -274,7 +281,11 @@ namespace TEA {
 
 	//--- --- Parameters Methods --- ---
 	internal AnimatorControllerParameterType GetParameterType(string name) {
-	 foreach(AnimatorControllerParameter param in avatarAnim.parameters) {
+	 return GetParameterType(avatarAnim, name);
+	}
+
+	internal AnimatorControllerParameterType GetParameterType(Animator animator, string name) {
+	 foreach(AnimatorControllerParameter param in animator.parameters) {
 		if(name == param.name)
 		 return param.type;
 	 }
@@ -282,16 +293,24 @@ namespace TEA {
 	}
 
 	internal float GetParameterValue(string name) {
+	 return GetParameterValue(avatarAnim, name);
+	}
+
+	internal float GetParameterValue(Animator animator, string name) {
 	 AnimatorControllerParameterType type = GetParameterType(name);
 	 if(AnimatorControllerParameterType.Float == type)
-		return avatarAnim.GetFloat(name);
+		return animator.GetFloat(name);
 	 if(AnimatorControllerParameterType.Int == type)
-		return avatarAnim.GetInteger(name);
+		return animator.GetInteger(name);
 	 throw new System.Exception($"The parameter [{name}] is not a float or int");
 	}
 
 	internal bool GetBool(string name) {
-	 return avatarAnim.GetBool(name);
+	 return GetBool(avatarAnim, name);
+	}
+
+	internal bool GetBool(Animator animator, string name) {
+	 return animator.GetBool(name);
 	}
 
 	// --- --- --- standing --- --- ---

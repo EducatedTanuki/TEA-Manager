@@ -26,8 +26,11 @@ namespace TEA.ScriptableObject {
   [HideInInspector]
   public delegate void ApplySettingsDelegate(TEA_PlayableLayerControl control, Animator animator);
 
+	public Animator animator;
+
   public override void OnStateEnter(Animator animator, AnimatorStateInfo animatorStateInfo, int layerIndex) {
-   if(!string.IsNullOrEmpty(debugString))
+	 this.animator = animator;
+	 if(!string.IsNullOrEmpty(debugString))
     Debug.Log($"VRCPlayableLayerControl[{state}] {debugString}");
    ApplySettings(this, animator);
   }

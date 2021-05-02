@@ -20,16 +20,16 @@ namespace TEA.ScriptableObject {
    if(!string.IsNullOrEmpty(debugString))
     Debug.Log($"VRCPlayableLayerControl[{state}] {debugString}");
    foreach(VRC_AvatarParameterDriver.Parameter param in parameters) {
-    AnimatorControllerParameterType paramType = AvatarController.current.GetParameterType(param.name);
+    AnimatorControllerParameterType paramType = AvatarController.current.GetParameterType(animator, param.name);
     float value = param.value;
     bool bValue = param.value>0;
     if(VRC_AvatarParameterDriver.ChangeType.Add==param.type) {
-     value += AvatarController.current.GetParameterValue(param.name);
+     value += AvatarController.current.GetParameterValue(animator, param.name);
     }else if(VRC_AvatarParameterDriver.ChangeType.Random==param.type) {
      System.Random random = new System.Random();
      //NOTE my best guess at what chance means
      if(AnimatorControllerParameterType.Bool==paramType) { 
-      bool currentBool = AvatarController.current.GetBool(param.name);
+      bool currentBool = AvatarController.current.GetBool(animator, param.name);
        bValue = random.NextDouble()>=param.chance ? !currentBool : currentBool;
      }
      else
@@ -43,7 +43,7 @@ namespace TEA.ScriptableObject {
      fVal=value,
      iVal=Mathf.RoundToInt(value)
     };
-    AvatarController.current.SetAnimatorParameter(aParam);
+    AvatarController.current.SetAnimatorParameter(animator, aParam);
    }//for
   }
  }

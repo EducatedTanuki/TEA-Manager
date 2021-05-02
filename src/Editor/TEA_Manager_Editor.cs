@@ -7,6 +7,8 @@ using UnityEditor.Animations;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 using static TEA.TEA_EditorUtility;
+using System;
+using VRC.SDKBase;
 
 namespace TEA {
  [CustomEditor(typeof(TEA_Manager))]
@@ -160,8 +162,7 @@ namespace TEA {
 	 }
 
 	 // Lip Sync
-	 //AvatarDescriptorEditor3 editor = (AvatarDescriptorEditor3)Editor.CreateEditor(vrcd, typeof(AvatarDescriptorEditor3));
-	 //AutoDetectVisemes(vrcd);
+	 AutoDetectLipSync(vrcd);
 
 	 //portraitCameraPositionOffset
 	 if(settings.SetCameraPosition) {
@@ -240,64 +241,131 @@ namespace TEA {
 	 return accept;
 	}
 
-	private static List<string> DetermineBlendShapeNames(VRCAvatarDescriptor avatarDescriptor) {
-	 List<string> blendShapeNames = new List<string>();
-	 avatarDescriptor.VisemeSkinnedMesh = avatarDescriptor.GetComponentInChildren<SkinnedMeshRenderer>();
-	 if(avatarDescriptor.VisemeSkinnedMesh != null) {
-		blendShapeNames.Add("-none-");
-		for(int i = 0; i < avatarDescriptor.VisemeSkinnedMesh.sharedMesh.blendShapeCount; ++i)
-		 blendShapeNames.Add(avatarDescriptor.VisemeSkinnedMesh.sharedMesh.GetBlendShapeName(i));
+	private static void AutoDetectLipSync(VRCAvatarDescriptor avatarDescriptor) {
+	 SkinnedMeshRenderer[] renderers = avatarDescriptor.GetComponentsInChildren<SkinnedMeshRenderer>();
+
+	 string[] baseVisemeNames = Enum.GetNames(typeof(VRC_AvatarDescriptor.Viseme));
+	 int visemeCount = baseVisemeNames.Length - 1;
+	 string[] reversedVisemeNames = new string[visemeCount];
+	 string[] reversedVVisemeNames = new string[visemeCount];
+	 for(int i = 0; i < visemeCount; i++) {
+		string visemeName = baseVisemeNames[i];
+		char[] tmpArray = visemeName.ToLowerInvariant().ToCharArray();
+		Array.Reverse(tmpArray);
+		reversedVisemeNames[i] = new string(tmpArray);
+		reversedVVisemeNames[i] = $"{reversedVisemeNames[i]}_v";
 	 }
-	 return blendShapeNames;
-	}
 
-	private static void AutoDetectVisemes(VRCAvatarDescriptor avatarDescriptor) {
-	 // prioritize strict - but fallback to looser - naming and don't touch user-overrides
+	 foreach(SkinnedMeshRenderer renderer in renderers) {
+		if(renderer.sharedMesh.blendShapeCount <= 0)
+		 continue;
 
-	 List<string> blendShapes = DetermineBlendShapeNames(avatarDescriptor);
-	 blendShapes.Remove("-none-");
+		if(renderer.sharedMesh.blendShapeCount >= visemeCount) {
+		 string[] rendererBlendShapeNames = new string[renderer.sharedMesh.blendShapeCount];
+		 for(int i = 0; i < renderer.sharedMesh.blendShapeCount; i++) {
+			rendererBlendShapeNames[i] = renderer.sharedMesh.GetBlendShapeName(i);
+		 }
 
-	 for(int v = 0; v < avatarDescriptor.VisemeBlendShapes.Length; v++) {
-		if(string.IsNullOrEmpty(avatarDescriptor.VisemeBlendShapes[v])) {
-		 string viseme = ((VRC.SDKBase.VRC_AvatarDescriptor.Viseme)v).ToString().ToLowerInvariant();
+		 string[] visemeStrings = new string[visemeCount];
+		 int foundVisemes = 0;
 
-		 foreach(string s in blendShapes) {
-			if(s.ToLowerInvariant() == "vrc.v_" + viseme) {
-			 avatarDescriptor.VisemeBlendShapes[v] = s;
-			 goto next;
+		 string[] reversedRendererNames = new string[rendererBlendShapeNames.Length];
+		 Dictionary<string, string> reverseMap = new Dictionary<string, string>();
+
+		 for(int i = 0; i < rendererBlendShapeNames.Length; i++) {
+			string rendererBlendShapeName = rendererBlendShapeNames[i];
+			char[] tmpArray = rendererBlendShapeName.ToLowerInvariant().ToCharArray();
+			Array.Reverse(tmpArray);
+			reversedRendererNames[i] = new string(tmpArray);
+			if(reverseMap.ContainsKey(reversedRendererNames[i])) {
+			 continue;
 			}
+			reverseMap.Add(reversedRendererNames[i], rendererBlendShapeName);
 		 }
-		 foreach(string s in blendShapes) {
-			if(s.ToLowerInvariant() == "v_" + viseme) {
-			 avatarDescriptor.VisemeBlendShapes[v] = s;
-			 goto next;
+
+		 for(int i = 0; i < reversedVisemeNames.Length; i++) {
+			string visemeName = reversedVisemeNames[i];
+			string vVisemeName = reversedVVisemeNames[i];
+
+			List<string> matchingStrings = new List<string>();
+			foreach(string reversedRendererName in reversedRendererNames) {
+			 if(reversedRendererName.Contains(vVisemeName)) {
+				matchingStrings.Add(reversedRendererName);
+			 }
 			}
-		 }
-		 foreach(string s in blendShapes) {
-			if(s.ToLowerInvariant().EndsWith(viseme)) {
-			 avatarDescriptor.VisemeBlendShapes[v] = s;
-			 goto next;
+			if(matchingStrings.Count == 0) {
+			 foreach(string reversedRendererName in reversedRendererNames) {
+				if(reversedRendererName.Contains(visemeName)) {
+				 matchingStrings.Add(reversedRendererName);
+				}
+			 }
 			}
+
+			matchingStrings.Sort(new SearchComparer(visemeName));
+
+			if(matchingStrings.Count <= 0)
+			 continue;
+
+			visemeStrings[i] = reverseMap[matchingStrings[0]];
+			foundVisemes++;
 		 }
-		 foreach(string s in blendShapes) {
-			if(s.ToLowerInvariant() == viseme) {
-			 avatarDescriptor.VisemeBlendShapes[v] = s;
-			 goto next;
-			}
+
+		 //Threshold to see if we did a good enough job to bother showing the user
+		 if(foundVisemes > 2) {
+			avatarDescriptor.lipSync = VRC_AvatarDescriptor.LipSyncStyle.VisemeBlendShape;
+			avatarDescriptor.VisemeSkinnedMesh = renderer;
+			avatarDescriptor.VisemeBlendShapes = visemeStrings;
+			avatarDescriptor.lipSyncJawBone = null;
+			return;
 		 }
-		 foreach(string s in blendShapes) {
-			if(s.ToLowerInvariant().Contains(viseme)) {
-			 avatarDescriptor.VisemeBlendShapes[v] = s;
-			 goto next;
-			}
-		 }
-		next:
-		 { }
 		}
 
+		avatarDescriptor.lipSync = VRC_AvatarDescriptor.LipSyncStyle.JawFlapBlendShape;
+		avatarDescriptor.VisemeSkinnedMesh = renderer;
+		avatarDescriptor.lipSyncJawBone = null;
+		return;
 	 }
-	 avatarDescriptor.lipSync = VRC.SDKBase.VRC_AvatarDescriptor.LipSyncStyle.VisemeBlendShape;
-	 //shouldRefreshVisemes = false;
+
+
+	 if(avatarDescriptor.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Jaw) == null)
+		return;
+	 avatarDescriptor.lipSync = VRC_AvatarDescriptor.LipSyncStyle.JawFlapBone;
+	 avatarDescriptor.lipSyncJawBone = avatarDescriptor.GetComponent<Animator>().GetBoneTransform(HumanBodyBones.Jaw);
+	 avatarDescriptor.VisemeSkinnedMesh = null;
+	}
+
+	class SearchComparer : IComparer<string> {
+	 string ReplaceFirst(string text, string search, string replace) {
+		int pos = text.IndexOf(search, StringComparison.Ordinal);
+		if(pos < 0) {
+		 return text;
+		}
+		return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+	 }
+
+	 public SearchComparer(string searchString) {
+		_searchString = searchString;
+	 }
+	 private readonly string _searchString;
+	 public int Compare(string x, string y) {
+		if(x == null || y == null) {
+		 return 0;
+		}
+		//-1 is they're out of order, 0 is order doesn't matter, 1 is they're in order
+
+		x = ReplaceFirst(x, "const ", "");
+		y = ReplaceFirst(y, "const ", "");
+
+		int xIndex = x.IndexOf(_searchString, StringComparison.InvariantCultureIgnoreCase);
+		int yIndex = y.IndexOf(_searchString, StringComparison.InvariantCultureIgnoreCase);
+		int compareIndex = xIndex.CompareTo(yIndex);
+		if(compareIndex != 0)
+		 return compareIndex;
+
+		string xDiff = ReplaceFirst(x, _searchString, "");
+		string yDiff = ReplaceFirst(y, _searchString, "");
+		return string.Compare(xDiff, yDiff, StringComparison.InvariantCultureIgnoreCase);
+	 }
 	}
 	#endregion
 

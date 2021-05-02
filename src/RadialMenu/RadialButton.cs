@@ -186,9 +186,6 @@ namespace TEA.UI
     AvatarController.current.ExpressionParameterSet(Control);
    else 
     AvatarController.current.ExpressionParameterReset(Control);
-
-   //TODO add this to the prefab
-   transform.Find("Toggle").gameObject.SetActive(isActive);
   }
 
   protected override void OnEnable()
