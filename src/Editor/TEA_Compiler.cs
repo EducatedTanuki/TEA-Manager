@@ -201,11 +201,14 @@ namespace TEA {
 				Issue issue = new TEA_ValidationIssues.Issue(nullLayer, currentAvatar);
 				issues.GetLayer(layer.type).Add(issue);
 			 }
-			 ValidateOnlyTransforms(layer.type, AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(layer.animatorController)));
+
+			 if(settings.LayerRestrictions)
+				ValidateOnlyTransforms(layer.type, AssetDatabase.LoadAssetAtPath<AnimatorController>(AssetDatabase.GetAssetPath(layer.animatorController)));
 			}
 
 			// missing Expression Parameters
-			ValidateCustomExpressions(avatarComp, superAnimator);
+			if(settings.AllParametersUsed)
+			 ValidateCustomExpressions(avatarComp, superAnimator);
 
 			// drivers
 			if(null == avatar.expressionParameters) {

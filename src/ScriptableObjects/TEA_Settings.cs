@@ -7,6 +7,12 @@ namespace TEA {
  [System.Serializable]
  [CreateAssetMenu(fileName = "Default Settings", menuName = "ScriptableObjects/TEA_Settings", order = 1)]
  public class TEA_Settings : UnityEngine.ScriptableObject {
+	[Header("Validation")]
+	[Tooltip("Validate that FX layer only has non-transforms and other layers have only transforms")]
+	[SerializeField] public bool LayerRestrictions = true;
+	[Tooltip("Validate that all parameters in ExpressionParameters are used in the Playable Layers")]
+	[SerializeField] public bool AllParametersUsed = true;
+
 	[Header("Make Avatar 3.0")]
 	[Tooltip("Setting empty will place assets in the Avatars root folder")]
 	[SerializeField] public string ExpressionsFolder = "Expressions";
