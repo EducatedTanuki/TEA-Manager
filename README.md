@@ -79,7 +79,9 @@ Turn validation on or off using the <img src="https://github.com/EducatedTanuki/
 - Avatar is compliant with SDK 3.0.  
   - Base, Additive, Gesture, and Action contains only Transform animations.
   - FX contains no Transform animations.
+  - Toggle in [TEA Settings](#tea-settings) (Layer Restrictions)
 - All Expression Parameters are being used
+  - Toggle in [TEA Settings](#tea-settings)
 - Expression Menu Controls are valid
   - Button parameter is set
   - Toggle parameter is set
