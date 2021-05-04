@@ -1,4 +1,4 @@
-<h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="64" height="64" style="max-width:100%;"> Tanuki's Educated Avatar Manager</h1>
+<h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/main/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="64" height="64" style="max-width:100%;"> Tanuki's Educated Avatar Manager</h1>
 
 Build and Test VRChat 3.0 Avatars in play mode  
 
@@ -6,9 +6,9 @@ If you think I deserve a :cookie:
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=YYCSYXEYPMQK2&currency_code=USD)
 
 # Setup
-- import [VRC Avatar SDK 3.0](https://vrchat.com/home/download)
-- import [Lean Tween](https://assetstore.unity.com/packages/tools/animation/leantween-3595)
-- import the `TEA-Manager-<version>.unitypackage` from [releases](https://github.com/EducatedTanuki/TEA-Manager/releases)
+- Import [VRC Avatar SDK 3.0](https://vrchat.com/home/download)
+- Import [Lean Tween](https://assetstore.unity.com/packages/tools/animation/leantween-3595)
+- Import the `TEA-Manager-<version>.unitypackage` from [releases](https://github.com/EducatedTanuki/TEA-Manager/releases)
 - Remove all cameras from your Scene. Additional cameras can interfere with `TEA Manager`.  
 
 # Using Tea Manager
@@ -16,18 +16,18 @@ If you think I deserve a :cookie:
 To use `Tea Manager` you are ***required*** to enter play mode using the play/validation buttons in the `Control Tab`.  
 `TEA Manager` has to compile your avatars playable layers before entering play mode.  
 
-![play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-tab.PNG)
+![play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/main/tutorial/assets/play-tab.PNG)
 
 Here are options for getting `Control Tab` into your workspace.
 1. Load Supplied Layout
-    - Go to `Window/Layouts/More/Load from disk`  
+    - Go to `Window/Layouts/More/Load from disk...`  
     - Select `Assets/TEA Manager/TEA_Layout.wlt`  
 2. Put `Control Tab` in your layout
     - Go to the `Tea Manager` menu and select `Control Tab` 
     - Dock `Control Tab` wherever makes sense for you
       - I recommend docking `Control Tab` below the [Unity Toolbar](https://docs.unity3d.com/Manual/Toolbar.html#:~:text=You%20can%20find%20the%20Toolbar%20at%20the%20top,interactive%20view%20into%20the%20world%20you%20are%20creating.)  
 
-![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/add-play-tab.gif)
+![add-play-tab](https://github.com/EducatedTanuki/TEA-Manager/blob/main/tutorial/assets/add-play-tab.gif)
 
 - Use the layout checkboxes at the bottom to control the spacing of the main controls.  
 - There are tooltips for most controls.  
@@ -39,11 +39,9 @@ Use the `TEA UI` in the Game tab to test your avatar.
 
 > Select your avatar in the heirarchy to see their active animator in the Animator tab.
 
-![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/assets/play-example.png)
+![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/main/tutorial/assets/play-example.png)
 
 ### Inputs
-
-Controls are context sensative, but in general this is the Input mapping  
 
 |        Input       |          Action          |
 |:------------------:|:------------------------:|
@@ -66,14 +64,14 @@ Controls are context sensative, but in general this is the Input mapping
 `TEA Settings` is a file that saves the state of:
 - `Control Tab` toggles
 - Avatar locomotion settings  
-- [TEA Functions](#tea-functions) settings
+- [TEA Functions](#tea-functions) settings  
 
 `Control Tab` will use the first `TEA Settings` found in Assets.  
 If a `TEA Settings` file does not exist one is created at `Assets/TEA Settings.asset`.  
 
 # Validation
 
-Turn validation on or off using the <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/validation.png" alt="validation.png" width="16" height="16" style="max-width:100%;"> checkbox.  
+Turn validation on or off using the <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/main/Resources/UI/Icons/validation.png" alt="validation.png" width="16" height="16" style="max-width:100%;"> checkbox.  
 
 `TEA Manager` can run validation on your avatar to check:  
 - Avatar is compliant with SDK 3.0.  
@@ -128,11 +126,11 @@ Proxy animations in the SDK are all single frames. They are replaced by full ani
 Do not expect your avatar to have full walking, running, or action animations in play mode unless you replace the appropriate layers and proxy animations.  
 If you use [Make Avatar 3.0](#make-avatar-30) your **Action** layer will have full animations.  
 
-<h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
+<h1><img src="https://github.com/EducatedTanuki/TEA-Manager/raw/main/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="48" height="48" style="max-width:100%;"> TEA Animations</h1>  
 
 - `TEA Animations` are utility animations added to the runtime animation controller.  
 - ***This is why your avatars hands are held up.***  
-- You can toggle `TEA Animations` by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/1.0.0/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui).  
+- You can toggle `TEA Animations` by clicking the TEA Icon <img src="https://github.com/EducatedTanuki/TEA-Manager/raw/main/Resources/UI/Icons/TEA.png" alt="TEA-icon.png" width="16" height="16" style="max-width:100%;"> in the [TEA UI](#tea-ui).  
 - There are two hand poses and an assortment of full body animations.  
 - TEA Animaiton layers are placed after **Base** and before **Additive** in the compiled animator.  
 
@@ -181,7 +179,7 @@ Sets an avatar's eye look as the default for [Make Avatar 3.0](#make-avatar-30).
 
 ### Create Toggle
 
-Create ON-OFF animations for a GameObject  
+Create ON-OFF animations for a GameObject.  
 The toggle(s) are added to `Assets/<Scene Folder>/<Avatar Name>/Toggles`.  
 You can change the final folder name through the `TEA Settings`.  
 
@@ -196,7 +194,7 @@ Set default control icons using `Assets/TEA Manager/TEA Tools/Avatar 8Tracks/Ava
 
 > You can bulk change the Audio Source settings by selecting all of the `Track` objects created.  
 
-![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/1.0.0/tutorial/8Tracks/example.png)  
+![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/main/tutorial/8Tracks/example.png)  
 
 # Resources
 [Game Dev Guide](https://www.youtube.com/channel/UCR35rzd4LLomtQout93gi0w)  
