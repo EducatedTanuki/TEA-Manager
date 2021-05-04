@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5b841fee1b64784aa2c220cc093625e, type: 3}
+  m_Name: Default Settings
+  m_EditorClassIdentifier: 
+  ExpressionsFolder: Expressions
+  ExpressionsMenu: {fileID: 11400000, guid: 6f476f9f40816fc40ad126363f6839b0, type: 2}
+  ExpressionParameters: {fileID: 11400000, guid: 61d0ed765afbb9e47ab2a833933b1928,
+    type: 2}
+  PlayableLayersFolder: Playable Layers
+  AnimationsFolder: Animations
+  BaseCopy: 1
+  BaseCopyAnimations: 0
+  Base: {fileID: 9100000, guid: 9a8d02585ab2a5b4292c177ef5db0c54, type: 2}
+  AdditiveCopy: 1
+  AdditiveCopyAnimations: 0
+  Additive: {fileID: 9100000, guid: e934e893dc619254eb102ea0fbe96b2a, type: 2}
+  GestureCopy: 1
+  GestureCopyAnimations: 0
+  Gesture: {fileID: 9100000, guid: 5ecf8b95a27552840aef66909bdf588f, type: 2}
+  ActionCopy: 1
+  ActionCopyAnimations: 0
+  Action: {fileID: 9100000, guid: ab8ec91d7d2c4114cab767d3d10d3d15, type: 2}
+  FXCopy: 1
+  FXCopyAnimations: 1
+  FX: {fileID: 9100000, guid: d88df32c37ee4124aba1c305f39f539c, type: 2}
+  Sitting: {fileID: 0}
+  TPose: {fileID: 0}
+  IKPose: {fileID: 0}
+  SetCameraPosition: 1
+  PortraitCameraPositionOffset: {x: 0, y: 0, z: 0}
+  SetCameraRotation: 1
+  PortraitCameraRotationOffset: {x: 0, y: 180, z: 0}
+  EyeLookDownLeft: {x: 0.3, y: 0, z: 0, w: 1}
+  EyeLookDownRight: {x: 0.3, y: 0, z: 0, w: 1}
+  EyeLookUpLeft: {x: -0.2, y: 0, z: 0, w: 1}
+  EyeLookUpRight: {x: -0.2, y: 0, z: 0, w: 1}
+  EyeLookRightLeft: {x: 0, y: 0.2, z: 0, w: 1}
+  EyeLookRightRight: {x: 0, y: 0.2, z: 0, w: 1}
+  EyeLookLeftLeft: {x: 0, y: -0.2, z: 0, w: 1}
+  EyeLookLeftRight: {x: 0, y: -0.2, z: 0, w: 1}
+  ToggleFolder: Toggles
+  zoomAmount: {x: 0, y: 0, z: 0.2}
+  zoomQuickly: 3.5
+  zoomSlowly: 0.35
+  zoomMultiplier: 1
+  ClosestCameraZoom: 0.2
+  zoomAmountOrtho: 0.1
+  rotationAmount: 2
+  movementTime: 10
+  MoveSpeed: 0.03
+  VerticalPanSpeed: 0.05
+  VerticalLockMultiplier: 8
+  VerticalMoveSpeedLocked: 0.1
+  VerticalMoveMultiplier: 0.003
+  VerticalLockMoveMultiplier: 0.01
+  MoveType: 0
+  WalkVelocity: 1.56
+  RunVelocity: 3.4
+  SprintVelocity: 5.96
+  RotationAmount: 100
+  WorkingDirectory: TEA_Temp
+  keepInSceneTooltip: Keep the TEA Manager prefab in your Scene while not in play
+    mode
+  keepInScene: 0
+  CanvasTooltip: TEA Canvas ON-OFF, will activate when you play
+  CanvasActive: 0
+  worldCenterTooltip: World Center ON-OFF
+  WorldCenterActive: 1
+  AudioListenerTooltip: Audio Listener ON-OFF
+  AudioListenerActive: 1
+  LighTooltipt: Directional Light ON-OFF
+  LightActive: 1
+  StageTooltip: Stage ON-OFF
+  StageActive: 1
+  ValidateTooltip: Validate SDK Compliance and All Parameters used
+  ValidateActive: 1
+  AllLayout: 1
+  BeforeToggles: 1
+  AfterToggles: 1
+  BeforeButtons: 1
+  AfterButtons: 1
+  BeforeInfo: 1
+  AfterInfo: 1
