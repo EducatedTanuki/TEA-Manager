@@ -58,3 +58,9 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+
+README.md.meta
+LICENSE.meta
+tutorial.meta
+/tutorial/*.meta
+/tutorial/assets/*.meta
