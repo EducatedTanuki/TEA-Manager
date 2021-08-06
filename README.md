@@ -2,14 +2,14 @@
 
 Build and Test VRChat 3.0 Avatars in play mode  
 
-This version is built for Unity ***2019.4.29f1***
+This version is built for Unity `2019.4.29f1`
 
 If you think I deserve a :cookie:  
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=YYCSYXEYPMQK2&currency_code=USD)
 
 # Setup
 - Import [VRC Avatar SDK 3.0](https://vrchat.com/home/download)
-- Import [Lean Tween](https://assetstore.unity.com/packages/tools/animation/leantween-3595)
+- [Lean Tween](https://assetstore.unity.com/packages/tools/animation/leantween-3595) is now included
 - Import the `TEA-Manager-<version>.unitypackage` from [releases](https://github.com/EducatedTanuki/TEA-Manager/releases)
 - Remove all cameras from your Scene. Additional cameras can interfere with `TEA Manager`.  
 
@@ -197,6 +197,14 @@ Set default control icons using `Assets/TEA Manager/TEA Tools/Avatar 8Tracks/Ava
 > You can bulk change the Audio Source settings by selecting all of the `Track` objects created.  
 
 ![play-example](https://github.com/EducatedTanuki/TEA-Manager/blob/main/tutorial/8Tracks/example.png)  
+
+### Dynamic Bone/Collider Copy
+
+Copies Dynamic Bones and Colliders between avatars without breaking Root, Colliders, and Exclusion references.  
+
+In same menu as [TEA Functions](#tea-functions)  
+
+> If you do not have [Dynamic Bones](https://assetstore.unity.com/packages/tools/animation/dynamic-bone-16743), exclude the folder `Tools/Dynamic Bone Copy` when importing to prevent errors.  
 
 # Resources
 [Game Dev Guide](https://www.youtube.com/channel/UCR35rzd4LLomtQout93gi0w)  
