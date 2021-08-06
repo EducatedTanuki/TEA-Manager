@@ -59,6 +59,11 @@ namespace TEA {
 	 Grounded = true;
 	 avatarAnim.SetBool("Grounded", Grounded);
 
+	 //Write Expression Parameter defaults to animator
+	 foreach(VRCExpressionParameters.Parameter param in parameters.parameters) {
+		SetExpressionParameter(param.name, param.defaultValue);
+	 }
+
 	 TEA_PlayableLayerData layerData = TEA_Manager.current.LayerInfo[TEA_Manager.AvatarIndex()];
 	 TEA_PlayableLayerData.PlayableLayerData data = layerData.FindPlayableLayerData(VRCAvatarDescriptor.AnimLayerType.Base);
 	 for(int i = data.start; i < data.end; i++) {
