@@ -44,11 +44,19 @@ namespace TEA {
 		base.OnInspectorGUI();
 	}
 
+	[MenuItem("GameObject/TEA Functions", false, 0)]
+	public static void TeaFunctions() {
+
+	}
+
 	// ----- ----- Avatar Setup Methods ----- 
 	private static readonly string SET_EYE_LOOK = "Set Eye Look as default";
 
-	[MenuItem("GameObject/TEA Functions/Set Eye Look as default", false, 10)]
+	[MenuItem("GameObject/TEA Functions/Set Eye Look as default", false, 2)]
 	public static void SetEyeLook() {
+	 if(!SetEyeLookCheck())
+		return;
+
 	 GameObject newAvatar = Selection.activeGameObject;
 	 VRCAvatarDescriptor descriptor = newAvatar.GetComponent<VRCAvatarDescriptor>();
 	 TEA_Settings settings = GetTEA_Settings();
@@ -64,7 +72,6 @@ namespace TEA {
 	 AssetDatabase.SaveAssets();
 	}
 
-	[MenuItem("GameObject/TEA Functions/Set Eye Look as default", true, 10)]
 	public static bool SetEyeLookCheck() {
 	 GameObject newAvatar = Selection.activeGameObject;
 	 if(null == newAvatar) {
@@ -91,6 +98,9 @@ namespace TEA {
 	#region
 	[MenuItem("GameObject/TEA Functions/Make Avatar 3.0", false, 1)]
 	public static void MakeAvatar() {
+	 if(!MakeAvatarCheck())
+		return;
+
 	 GameObject newAvatar = Selection.activeGameObject;
 	 TEA_Settings settings = GetTEA_Settings();
 
@@ -211,7 +221,7 @@ namespace TEA {
 	 vrcd.expressionParameters = AssetDatabase.LoadAssetAtPath<VRCExpressionParameters>(ep);
 	}
 
-	[MenuItem("GameObject/TEA Functions/Make Avatar 3.0", true, 1)]
+	//[MenuItem("GameObject/TEA Functions/Make Avatar 3.0", true, 1)]
 	public static bool MakeAvatarCheck() {
 	 GameObject newAvatar = Selection.activeGameObject;
 	 if(null == newAvatar) {
@@ -372,6 +382,9 @@ namespace TEA {
 	// ----- ----- Utility Methods ----- -----
 	[MenuItem("GameObject/TEA Functions/Create Toggle", false, 0)]
 	public static void CreateToggle() {
+	 if(!CreateToggleCheck())
+		return;
+
 	 GameObject selected = Selection.activeGameObject;
 	 VRCAvatarDescriptor avatar = (VRCAvatarDescriptor)selected.GetComponentsInParent(typeof(VRCAvatarDescriptor), true)[0];
 
@@ -421,7 +434,7 @@ namespace TEA {
 	 return subFolderPath;
 	}
 
-	[MenuItem("GameObject/TEA Functions/Create Toggle", true, 0)]
+	//[MenuItem("GameObject/TEA Functions/Create Toggle", true, 0)]
 	public static bool CreateToggleCheck() {
 	 GameObject selected = Selection.activeGameObject;
 	 Component[] avatars = selected.GetComponentsInParent(typeof(VRCAvatarDescriptor), true);

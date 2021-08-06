@@ -2,6 +2,8 @@
 
 Build and Test VRChat 3.0 Avatars in play mode  
 
+This version is built for Unity ***2019.4.29f1***
+
 If you think I deserve a :cookie:  
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=YYCSYXEYPMQK2&currency_code=USD)
 
