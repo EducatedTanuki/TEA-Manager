@@ -116,7 +116,7 @@ namespace TEA {
 	 foreach(GameObject root in rootObjects) {
 		VRCAvatarDescriptor avatar = root.GetComponent<VRCAvatarDescriptor>();
 		if(null != avatar) {
-		 avatars.Add(avatar.gameObject.name, avatar);
+		 avatars.Add(TEA_Manager.GetSceneAvatarKey(scene, avatar), avatar);
 		}
 	 }
 

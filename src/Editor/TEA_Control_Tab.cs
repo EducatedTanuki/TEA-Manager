@@ -100,16 +100,73 @@ namespace TEA {
 	}
 
 	private void OnInspectorUpdate() {
+	 if(null == settings)
+		return;
+
+	 try {
+		ManagerControls();
+		//AvatarUtilities();
+	 } catch(TEA_Exception e) {
+		_play = false;
+		_compile = false;
+		_compiled = false;
+		if(null != manager)
+		 manager.gameObject.SetActive(true);
+		Debug.LogError(e);
+	 }
+	}
+
+	private void OnGUI() {
 	 try {
 		settings = GetTEA_Settings();
 	 } catch(TEA_Exception) {
 		this.Close();
 	 }
-	}
 
-	private void OnGUI() {
 	 if(null == settings)
 		return;
+
+	 try {
+		// --- button presses
+		if(!EditorApplication.isPlaying && (_play || _compile)) {
+		 newAvatars = GetAvatars(SceneManager.GetActiveScene());
+		 _avatars = 0 != newAvatars.Count;
+
+		 ManagerControls();
+		 Update();
+
+		 //compile and validate
+		 bool valid = true;
+		 if(_play || _compile) {
+			manager.gameObject.SetActive(false);
+			valid = compiler.CompileAnimators(manager, settings);
+			if(!_play && valid)
+			 _play = EditorUtility.DisplayDialog($"Compilation", "Avatars Compiled", "Play", "Continue");
+			manager.gameObject.SetActive(!(!settings.keepInScene && !_play));
+			_compile = false;
+		 }
+
+		 //play
+		 if(_play) {
+			if(!compiler.validate || valid) {
+			 manager.Canvas.SetActive(true);
+			 _compiled = true;
+			 CheckAdditionalCamera();
+			 EditorApplication.isPlaying = true;
+			}
+			_play = false;
+		 } else
+			_compiled = false;
+		}
+	 } catch(TEA_Exception e) {
+		_play = false;
+		_compile = false;
+		_compiled = false;
+		if(null != manager)
+		 manager.gameObject.SetActive(true);
+		Debug.LogError(e);
+	 }
+
 
 	 try {
 		if(null == imageStyle) {
@@ -193,33 +250,6 @@ namespace TEA {
 	// --- --- --- Update --- --- ---
 	bool _patched = false;
 	private void Update() {
-	 Init();
-	 if(null == settings)
-		return;
-
-	 try {
-		ManagerControls();
-		//AvatarUtilities();
-	 } catch(TEA_Exception e) {
-		_play = false;
-		_compile = false;
-		_compiled = false;
-		if(null != manager)
-		 manager.gameObject.SetActive(true);
-		Debug.LogError(e);
-	 }
-	}
-
-	Dictionary<string, VRCAvatarDescriptor> newAvatars;
-	private void ManagerControls() {
-	 _avatars = null != HasAvatars(SceneManager.GetActiveScene());
-
-	 // --- managers
-	 _managerOverload = ManagerSetup(EditorApplication.isPlaying, _play, _compile);
-
-	 // --- Avatar
-	 if(!EditorApplication.isPlaying)
-		newAvatars = GetAvatars(out bool crossScene);
 	 if(null != manager && !EditorApplication.isPlaying && _avatars && (_play || _compile)) {
 		avatarIndex = 0;
 
@@ -241,29 +271,12 @@ namespace TEA {
 		manager.GetComponent<AvatarController>().Locomotion = settings;
 		_patched = true;
 	 }
+	}
 
-	 // --- button presses
-	 if(!EditorApplication.isPlaying) {
-		bool valid = true;
-		if(_play || _compile) {
-		 manager.gameObject.SetActive(false);
-		 valid = compiler.CompileAnimators(manager, settings);
-		 if(!_play && valid)
-			_play = EditorUtility.DisplayDialog($"Compilation", "Avatars Compiled", "Play", "Continue");
-		 manager.gameObject.SetActive(!(!settings.keepInScene && !_play));
-		 _compile = false;
-		}
-		if(_play) {
-		 if(!compiler.validate || valid) {
-			manager.Canvas.SetActive(true);
-			_compiled = true;
-			CheckAdditionalCamera();
-			EditorApplication.isPlaying = true;
-		 }
-		 _play = false;
-		} else
-		 _compiled = false;
-	 }
+	Dictionary<string, VRCAvatarDescriptor> newAvatars = new Dictionary<string, VRCAvatarDescriptor>();
+	private void ManagerControls() {
+	 // --- managers
+	 _managerOverload = ManagerSetup(EditorApplication.isPlaying, _play, _compile);
 	}
 
 	private void CheckAdditionalCamera() {
@@ -527,7 +540,7 @@ namespace TEA {
 
 	public bool ManagerSetup(bool play, bool _play, bool _compile) {
 	 List<TEA_Manager> managers = new List<TEA_Manager>();
-	 manager = null;
+	 this.manager = null;
 	 int activeCount = 0;
 	 bool destroy = (!play || !_play || !_compile) && !settings.keepInScene;
 	 for(int i = 0; i < SceneManager.sceneCount; i++) {
@@ -554,7 +567,7 @@ namespace TEA {
 	 }// for scene
 
 	 // add managers
-	 if(null == manager && _avatars && (_compile || _play || play || settings.keepInScene)) {
+	 if(null == this.manager && _avatars && (_compile || _play || play || settings.keepInScene)) {
 		TEA_Manager newManager = Instantiate(prefabObject).GetComponent<TEA_Manager>();
 		this.manager = newManager;
 	 }
